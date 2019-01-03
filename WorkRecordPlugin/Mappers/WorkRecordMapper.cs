@@ -11,14 +11,15 @@
 using System;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
-namespace WorkRecordPlugin
+namespace WorkRecordPlugin.Mappers
 {
-	public class WorkRecordExporter
+	public class WorkRecordMapper
 	{
 		private InternalJsonSerializer _internalJsonSerializer;
 
-		public WorkRecordExporter(InternalJsonSerializer internalJsonSerializer)
+		public WorkRecordMapper(InternalJsonSerializer internalJsonSerializer)
 		{
 			_internalJsonSerializer = internalJsonSerializer;
 		}
@@ -44,7 +45,17 @@ namespace WorkRecordPlugin
 			foreach (WorkRecord workRecord in dataModel.Documents.WorkRecords)
 			{
 				// Currenlty only export if workRecord contains only reference to one field
+				if (workRecord.FieldIds.Count == 1)
+				{
+					ExportFieldWorkRecord(workRecord, dataModel);
+				}
 			}
+
+		}
+
+		private void ExportFieldWorkRecord(WorkRecord workRecord, ApplicationDataModel dataModel)
+		{
+			FieldWorkRecordDto fieldWorkRecordDto = new FieldWorkRecordDto();
 
 		}
 	}

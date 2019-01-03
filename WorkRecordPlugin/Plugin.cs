@@ -13,13 +13,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using WorkRecordPlugin.Mappers;
 
 namespace WorkRecordPlugin
 {
 	public class Plugin : IPlugin
 	{
 		private readonly InternalJsonSerializer _internalJsonSerializer;
-		private readonly WorkRecordExporter _workRecordExporter;
+		private readonly WorkRecordMapper _workRecordMapper;
 
 		public List<IError> ErrorList1 { get; private set; }
 
@@ -32,7 +33,7 @@ namespace WorkRecordPlugin
 		{
 			_internalJsonSerializer = internalJsonSerializer;
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
-			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
+			_workRecordMapper = new WorkRecordMapper(_internalJsonSerializer);
 
 		}
 
@@ -46,6 +47,7 @@ namespace WorkRecordPlugin
 			}
 		}
 		public string Owner { get { return "CNH Industrial"; } }
+
 
 		public Properties GetProperties(string dataPath)
 		{
@@ -80,7 +82,7 @@ namespace WorkRecordPlugin
 
 			// ToDo: versionFile containing additional data
 
-			_workRecordExporter.ExportWorkRecords(exportPath, dataModel);
+			_workRecordMapper.ExportWorkRecords(exportPath, dataModel);
 		}
 	}
 }
