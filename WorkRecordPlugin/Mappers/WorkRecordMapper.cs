@@ -9,6 +9,7 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
@@ -17,45 +18,38 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class WorkRecordMapper
 	{
-		private InternalJsonSerializer _internalJsonSerializer;
-
-		public WorkRecordMapper(InternalJsonSerializer internalJsonSerializer)
+		public WorkRecordMapper()
 		{
-			_internalJsonSerializer = internalJsonSerializer;
 		}
 
-		public void ExportWorkRecords(string exportPath, ApplicationDataModel dataModel)
+		public List<FieldWorkRecordDto> MapWorkRecords(ApplicationDataModel dataModel)
 		{
-			// ToDo: better null checking?
+			// ToDo: check if better null-checking is needed?
 			if (dataModel == null)
 			{
-				return;
+				return null;
 			}
 			if (dataModel.Documents == null)
 			{
-				return;
+				return null;
 			}
-			if (dataModel.Documents.WorkRecords == null)
-			{
-				// ToDo: is this check Needed?
-				throw new NullReferenceException();
-				return;
-			}
+
+			FieldWorkRecordMapper recordMapper = new FieldWorkRecordMapper(dataModel);
+			List<FieldWorkRecordDto> mappedRecords = new List<FieldWorkRecordDto>();
 
 			foreach (WorkRecord workRecord in dataModel.Documents.WorkRecords)
 			{
 				// Currenlty only export if workRecord contains only reference to one field
 				if (workRecord.FieldIds.Count == 1)
 				{
-					ExportFieldWorkRecord(workRecord, dataModel);
+					var fieldWorkRecordDto = recordMapper.Map(workRecord);
+					if (fieldWorkRecordDto != null)
+					{
+						mappedRecords.Add(fieldWorkRecordDto);
+					}
 				}
 			}
-
-		}
-
-		private void ExportFieldWorkRecord(WorkRecord workRecord, ApplicationDataModel dataModel)
-		{
-			FieldWorkRecordDto fieldWorkRecordDto = new FieldWorkRecordDto();
+			return mappedRecords;
 
 		}
 	}

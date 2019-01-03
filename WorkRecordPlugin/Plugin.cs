@@ -14,13 +14,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using WorkRecordPlugin.Mappers;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
 namespace WorkRecordPlugin
 {
 	public class Plugin : IPlugin
 	{
 		private readonly InternalJsonSerializer _internalJsonSerializer;
-		private readonly WorkRecordMapper _workRecordMapper;
+		private readonly WorkRecordExporter _workRecordExporter;
 
 		public List<IError> ErrorList1 { get; private set; }
 
@@ -33,7 +34,7 @@ namespace WorkRecordPlugin
 		{
 			_internalJsonSerializer = internalJsonSerializer;
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
-			_workRecordMapper = new WorkRecordMapper(_internalJsonSerializer);
+			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
 
 		}
 
@@ -80,9 +81,15 @@ namespace WorkRecordPlugin
 			if (!Directory.Exists(exportPath))
 				Directory.CreateDirectory(exportPath);
 
-			// ToDo: versionFile containing additional data
+			WorkRecordMapper _workRecordMapper = new WorkRecordMapper();
+			// ToDo: check if dataModel contains workrecords
+			List<FieldWorkRecordDto> FieldWorkRecordDtos = _workRecordMapper.MapWorkRecords(dataModel);
 
-			_workRecordMapper.ExportWorkRecords(exportPath, dataModel);
+			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as CN1 folder/catalog/datacard description...)
+			foreach (var fieldWorkRecordDto in FieldWorkRecordDtos)
+			{
+				bool success = _workRecordExporter.Write(exportPath, fieldWorkRecordDto);
+			}
 		}
 	}
 }
