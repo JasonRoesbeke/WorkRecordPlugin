@@ -17,6 +17,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 		[JsonProperty(PropertyName = EntityId)]
 		public Guid Guid { get; set; }
 
+		public string Description { get; set; }
 		// ToDo: public FieldLoggedDataDto LoggedData { get; set; }
 		public FieldSummaryDto Summary { get; set; }
 	}

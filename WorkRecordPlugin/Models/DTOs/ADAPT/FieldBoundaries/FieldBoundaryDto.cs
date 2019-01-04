@@ -23,7 +23,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries
 		public Guid FieldGuid { get; set; }
 
 		[JsonProperty(Required = Required.Always)]
-		public string SpatialDataUrl { get; set; }
+		public string SpatialData { get; set; }
 
 		public bool IsPassible { get; set; }
 

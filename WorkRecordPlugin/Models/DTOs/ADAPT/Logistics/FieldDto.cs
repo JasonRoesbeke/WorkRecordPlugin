@@ -1,17 +1,20 @@
-﻿using Newtonsoft.Json;
+﻿using GeoJSON.Net.Feature;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 {
-	public class FarmDto : BaseDto
+	public class FieldDto : BaseDto
 	{
-		const string Parent = "GrowerId";
+		const string Parent = "FarmId";
 
-		public FarmDto() : base(Parent, "Fields")
+		public FieldDto() : base(Parent, "FieldBoundaries")
 		{
+			FieldBoundaries = new List<Feature>();
 		}
 
 		[JsonProperty(PropertyName = EntityId)]
@@ -21,8 +24,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 		public string Description { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]
-		public Guid GrowerGuid { get; set; }
+		public Guid FarmGuid { get; set; }
 
-		public List<FieldDto> Fields { get; set; }
+		public List<Feature> FieldBoundaries { get; set; }
 	}
 }

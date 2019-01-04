@@ -3,16 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 {
-	public class FieldDto : BaseDto
+	public class FarmDto : BaseDto
 	{
-		const string Parent = "FarmId";
+		const string Parent = "GrowerId";
 
-		public FieldDto() : base(Parent, "FieldBoundaries")
+		public FarmDto() : base(Parent, "Fields")
 		{
+			Fields = new List<FieldDto>();
 		}
 
 		[JsonProperty(PropertyName = EntityId)]
@@ -22,8 +22,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 		public string Description { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]
-		public Guid FarmGuid { get; set; }
+		public Guid GrowerGuid { get; set; }
 
-		public List<FieldBoundaryDto> FieldBoundaries { get; set; }
+		public List<FieldDto> Fields { get; set; }
 	}
 }

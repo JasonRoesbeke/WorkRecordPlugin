@@ -12,6 +12,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 
 		public GrowerDto() : base(Parent, "Farms")
 		{
+			Farms = new List<FarmDto>();
 		}
 
 		[JsonProperty(PropertyName = EntityId)]
