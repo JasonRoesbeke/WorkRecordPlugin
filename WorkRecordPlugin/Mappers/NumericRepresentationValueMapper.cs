@@ -35,18 +35,9 @@ namespace WorkRecordPlugin.Mappers
 				if (item.Value is NumericRepresentationValue)
 				{
 					numericRepresentationValueDtos.Add(mapper.Map<NumericRepresentationValueDto>((NumericRepresentationValue)item.Value));
-					numericRepresentationValueDtos.Add(MapNumericRepresentationValue((NumericRepresentationValue)item.Value));
 				}
 			}
 			return numericRepresentationValueDtos;
-		}
-
-		public NumericRepresentationValueDto MapNumericRepresentationValue(NumericRepresentationValue value)
-		{
-			NumericRepresentationValueDto numericRepresentationValueDto = new NumericRepresentationValueDto();
-			numericRepresentationValueDto.Representation = NumericRepresentationMapper.Map(value.Representation);
-			numericRepresentationValueDto.Value = NumericValueMapper.Map(value.Value);
-			return numericRepresentationValueDto;
 		}
 	}
 }
