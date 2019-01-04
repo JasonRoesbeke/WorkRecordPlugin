@@ -9,7 +9,9 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using System;
+using System.IO;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin
 {
@@ -24,7 +26,36 @@ namespace WorkRecordPlugin
 
 		public bool Write(string path, FieldWorkRecordDto fieldWorkRecordDto)
 		{
-			return false;
+			var jsonFormat = Path.GetTempFileName();
+			try
+			{
+				_internalJsonSerializer.Serialize(fieldWorkRecordDto, jsonFormat);
+				var fileName = GetSafeFilename(fieldWorkRecordDto.Description);
+				// ToDo: add option to zip, using ZipUtil => +-8% of original size
+				//ZipUtil.Zip(Path.Combine(path, fileName + ".zip"), jsonFormat);
+				var exportFileName = Path.Combine(path, fileName + ".json");
+				File.Copy(jsonFormat, exportFileName, true);
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+			finally
+			{
+				try
+				{
+					File.Delete(jsonFormat);
+				}
+				catch
+				{
+				}
+			}			
+			return true;
+		}
+
+		public string GetSafeFilename(string filename)
+		{
+			return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
 		}
 	}
 }

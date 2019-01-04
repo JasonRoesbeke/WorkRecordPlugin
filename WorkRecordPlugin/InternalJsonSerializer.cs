@@ -24,7 +24,7 @@ namespace WorkRecordPlugin
 		{
 			NullValueHandling = NullValueHandling.Ignore,
 			DefaultValueHandling = DefaultValueHandling.Ignore,
-			TypeNameHandling = TypeNameHandling.All,
+			TypeNameHandling = TypeNameHandling.None,
 			//ContractResolver = new AdaptContractResolver(),
 			//SerializationBinder = new InternalSerializationBinder()
 		})
