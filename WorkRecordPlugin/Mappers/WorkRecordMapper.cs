@@ -39,14 +39,12 @@ namespace WorkRecordPlugin.Mappers
 
 			foreach (WorkRecord workRecord in dataModel.Documents.WorkRecords)
 			{
-				// Currenlty only export if workRecord contains only reference to one field
-				if (workRecord.FieldIds.Count == 1)
+				var fieldWorkRecordDto = recordMapper.Map(workRecord);
+				if (fieldWorkRecordDto != null)
 				{
-					var fieldWorkRecordDto = recordMapper.Map(workRecord);
-					if (fieldWorkRecordDto != null)
-					{
-						mappedRecords.Add(fieldWorkRecordDto);
-					}
+					fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueId(workRecord.Id);
+					fieldWorkRecordDto.Description = workRecord.Description;
+					mappedRecords.Add(fieldWorkRecordDto);
 				}
 			}
 			return mappedRecords;

@@ -5,7 +5,6 @@ using System.Text;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
-using WorkRecordPlugin.Mapping.UniqueIds;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
 namespace WorkRecordPlugin.Mappers
@@ -21,11 +20,6 @@ namespace WorkRecordPlugin.Mappers
 
 		public FieldWorkRecordDto Map(WorkRecord workRecord)
 		{
-			if (workRecord.FieldIds.Count != 1)
-			{
-				return null;
-			}
-
 			FieldWorkRecordDto fieldWorkRecordDto = new FieldWorkRecordDto();
 
 			Guid? recordId = UniqueIdMapper.GetUniqueId(workRecord.Id);
