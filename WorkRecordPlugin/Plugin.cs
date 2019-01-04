@@ -57,6 +57,7 @@ namespace WorkRecordPlugin
 
 		public void Initialize(string args = null)
 		{
+			// ToDo: add "Data anonymization" option in the plugin!
 		}
 
 		public bool IsDataCardSupported(string dataPath, Properties properties = null)

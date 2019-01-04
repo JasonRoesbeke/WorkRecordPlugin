@@ -120,6 +120,26 @@ namespace WorkRecordPlugin.Mappers
 				fieldDto.FieldBoundaries = fieldBoundaryMapper.Map(fieldBoundaries, fieldDto);
 			}
 
+			IEnumerable<Summary> summaries = DataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
+			SummaryDataMapper summaryDataMapper = new SummaryDataMapper(DataModel);
+			OperationSummaryMapper operationSummaryMapper = new OperationSummaryMapper(DataModel);
+			foreach (var summary in summaries)
+			{
+				// StampedMeteredValues
+				//var stampedMeteredValues = summaryDataMapper.Map(summary);
+				//if (stampedMeteredValues != null)
+				//{
+				//	fieldSummaryDto.SummaryData.Add(stampedMeteredValues);
+				//}
+
+				// OperationData
+				var operationSummaries = operationSummaryMapper.Map(summary);
+				if (operationSummaries != null)
+				{
+					fieldSummaryDto.OperationSummaries.AddRange(operationSummaries);
+				}
+			}
+
 			return fieldSummaryDto;
 		}
 	}

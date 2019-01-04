@@ -53,7 +53,7 @@ namespace WorkRecordPlugin.Mappers
 			properties.Add("GpsSource", null);
 			if (gpsSource != null)
 			{
-				properties["GpsSource"] = fieldBoundary.GpsSource.ToString());
+				properties["GpsSource"] = fieldBoundary.GpsSource.ToString();
 			}
 
 			// Created time
