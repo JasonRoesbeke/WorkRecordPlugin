@@ -10,11 +10,11 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 {
-	public class FieldSummaryDto : BaseDto
+	public class SummaryDto : BaseDto
 	{
 		const string Parent = "FieldWorkRecordId";
 
-		public FieldSummaryDto() : base(Parent)
+		public SummaryDto() : base(Parent)
 		{
 			SummaryData = new List<StampedMeteredValuesDto>();
 			OperationSummaries = new List<OperationSummaryDto>();
@@ -30,12 +30,10 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 		[JsonIgnore]
 		public Guid FieldWorkRecordId { get; set; }
 
-		// Company/Grower/Farm/Field/FieldBoundary
+		// Company
 		public CompanyDto Company { get; set; }
+		// Grower/Farm/Field/FieldBoundary
 		public GrowerDto Grower { get; set; }
-		//public FarmDto Farm { get; set; }
-		//public FieldDto Field { get; set; }
-		// ToDo: Is a CropZoneDto needed?
 
 		[JsonProperty(PropertyName = "Operators")]
 		public List<UserDto> Users { get; set; }

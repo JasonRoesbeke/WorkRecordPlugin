@@ -41,7 +41,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 				;
 
 			// WorkRecordAdapt -> Dto
-			CreateMap<WorkRecord, FieldSummaryDto>()
+			CreateMap<WorkRecord, SummaryDto>()
 				;
 
 			// OperationSummary -> Dto
@@ -66,7 +66,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			CreateMap<UnitOfMeasure, UnitOfMeasureDto>()
 				.ForMember(dest => dest.Dimension, opt => opt.MapFrom(src => src.Dimension.ToString()))
 				;
-
 		}
 	}
 }

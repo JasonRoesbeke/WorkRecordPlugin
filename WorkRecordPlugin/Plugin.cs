@@ -82,9 +82,9 @@ namespace WorkRecordPlugin
 			if (!Directory.Exists(exportPath))
 				Directory.CreateDirectory(exportPath);
 
-			WorkRecordMapper _workRecordMapper = new WorkRecordMapper();
+			WorkRecordsMapper _workRecordsMapper = new WorkRecordsMapper();
 			// ToDo: check if dataModel contains workrecords
-			List<FieldWorkRecordDto> FieldWorkRecordDtos = _workRecordMapper.MapWorkRecords(dataModel);
+			List<WorkRecordDto> FieldWorkRecordDtos = _workRecordsMapper.MapWorkRecords(dataModel);
 
 			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as CN1 folder/catalog/datacard description...)
 			foreach (var fieldWorkRecordDto in FieldWorkRecordDtos)

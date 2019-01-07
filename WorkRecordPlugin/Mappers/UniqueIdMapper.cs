@@ -41,7 +41,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// 4rd: if idType is LongInt
-			// ToDo: Ask AgGateway if IdTypeEnum.LongInt is int32
+			// ToDo: [AgGateway] Ask AgGateway if IdTypeEnum.LongInt is int32
 			if (GetUniqueIdFromLong(id.UniqueIds, out guid))
 			{
 				return guid;

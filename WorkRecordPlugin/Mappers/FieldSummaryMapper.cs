@@ -30,9 +30,9 @@ namespace WorkRecordPlugin.Mappers
 		}
 
 
-		public FieldSummaryDto Map(WorkRecord workRecord)
+		public SummaryDto Map(WorkRecord workRecord)
 		{
-			FieldSummaryDto fieldSummaryDto = SetGFFFB(workRecord);
+			SummaryDto fieldSummaryDto = SetGFFFB(workRecord);
 
 			if (fieldSummaryDto == null)
 			{
@@ -54,9 +54,9 @@ namespace WorkRecordPlugin.Mappers
 			return fieldSummaryDto;
 		}
 
-		private FieldSummaryDto SetGFFFB(WorkRecord workRecord)
+		private SummaryDto SetGFFFB(WorkRecord workRecord)
 		{
-			FieldSummaryDto fieldSummaryDto = new FieldSummaryDto();
+			SummaryDto fieldSummaryDto = new SummaryDto();
 
 			if (workRecord.FieldIds.Count == 0)
 			{
@@ -134,7 +134,7 @@ namespace WorkRecordPlugin.Mappers
 
 				// OperationData
 				var operationSummaries = operationSummaryMapper.Map(summary);
-				if (operationSummaries != null)
+				if (operationSummaries != null || operationSummaries.Any())
 				{
 					fieldSummaryDto.OperationSummaries.AddRange(operationSummaries);
 				}

@@ -18,9 +18,9 @@ namespace WorkRecordPlugin.Mappers
 			DataModel = dataModel;
 		}
 
-		public FieldWorkRecordDto Map(WorkRecord workRecord)
+		public WorkRecordDto Map(WorkRecord workRecord)
 		{
-			FieldWorkRecordDto fieldWorkRecordDto = new FieldWorkRecordDto();
+			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
 
 			Guid? recordId = UniqueIdMapper.GetUniqueId(workRecord.Id);
 			if (recordId == null)
@@ -39,6 +39,9 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			fieldWorkRecordDto.Summary = summary;
+
+			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel);
+			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord);
 
 			return fieldWorkRecordDto;
 		}

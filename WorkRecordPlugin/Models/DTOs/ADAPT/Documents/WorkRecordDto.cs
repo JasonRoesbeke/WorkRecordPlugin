@@ -3,14 +3,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 {
-	public class FieldWorkRecordDto : BaseDto
+	public class WorkRecordDto : BaseDto
 	{
 		const string Parent = "Documents";
 
-		public FieldWorkRecordDto() : base(Parent)
+		public WorkRecordDto() : base(Parent)
 		{
 		}
 
@@ -18,7 +19,9 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 		public Guid Guid { get; set; }
 
 		public string Description { get; set; }
-		// ToDo: public FieldLoggedDataDto LoggedData { get; set; }
-		public FieldSummaryDto Summary { get; set; }
+
+		public SummaryDto Summary { get; set; }
+		public LoggedDataDto LoggedData { get; set; }
+
 	}
 }

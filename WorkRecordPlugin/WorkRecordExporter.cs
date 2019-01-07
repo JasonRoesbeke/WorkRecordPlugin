@@ -24,7 +24,7 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 		}
 
-		public bool Write(string path, FieldWorkRecordDto fieldWorkRecordDto)
+		public bool Write(string path, WorkRecordDto fieldWorkRecordDto)
 		{
 			var jsonFormat = Path.GetTempFileName();
 			try

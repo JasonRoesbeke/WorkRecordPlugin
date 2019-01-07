@@ -16,13 +16,13 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
 namespace WorkRecordPlugin.Mappers
 {
-	public class WorkRecordMapper
+	public class WorkRecordsMapper
 	{
-		public WorkRecordMapper()
+		public WorkRecordsMapper()
 		{
 		}
 
-		public List<FieldWorkRecordDto> MapWorkRecords(ApplicationDataModel dataModel)
+		public List<WorkRecordDto> MapWorkRecords(ApplicationDataModel dataModel)
 		{
 			// ToDo: check if better null-checking is needed?
 			if (dataModel == null)
@@ -35,7 +35,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			FieldWorkRecordMapper recordMapper = new FieldWorkRecordMapper(dataModel);
-			List<FieldWorkRecordDto> mappedRecords = new List<FieldWorkRecordDto>();
+			List<WorkRecordDto> mappedRecords = new List<WorkRecordDto>();
 
 			foreach (WorkRecord workRecord in dataModel.Documents.WorkRecords)
 			{
