@@ -34,7 +34,7 @@ namespace WorkRecordPlugin.Mappers
 				return null;
 			}
 
-			FieldWorkRecordMapper recordMapper = new FieldWorkRecordMapper(dataModel);
+			WorkRecordMapper recordMapper = new WorkRecordMapper(dataModel);
 			List<WorkRecordDto> mappedRecords = new List<WorkRecordDto>();
 
 			foreach (WorkRecord workRecord in dataModel.Documents.WorkRecords)

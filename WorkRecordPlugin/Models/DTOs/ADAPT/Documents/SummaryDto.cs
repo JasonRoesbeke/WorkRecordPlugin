@@ -19,7 +19,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 			SummaryData = new List<StampedMeteredValuesDto>();
 			OperationSummaries = new List<OperationSummaryDto>();
 			Users = new List<UserDto>();
-			Vehicles = new List<VehicleDto>();
+			Vehicles = new List<DeviceElementDto>();
 			Notes = new List<string>();
 		}
 
@@ -39,7 +39,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 		public List<UserDto> Users { get; set; }
 
 		[JsonProperty(PropertyName = "Machines")]
-		public List<VehicleDto> Vehicles { get; set; }
+		public List<DeviceElementDto> Vehicles { get; set; }
 
 		public DateTime? EventDate { get; set; }
 		public DateTime? EventEndDate { get; set; }

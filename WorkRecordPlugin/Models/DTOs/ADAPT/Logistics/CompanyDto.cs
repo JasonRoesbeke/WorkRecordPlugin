@@ -26,7 +26,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 
 		public List<GrowerDto> Growers { get; set; }
 
-		public List<VehicleDto> Vehicles { get; set; }
+		public List<DeviceElementDto> Vehicles { get; set; }
 
 	}
 }
