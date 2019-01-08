@@ -15,7 +15,7 @@ using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin
 {
-	class WorkRecordExporter
+	public class WorkRecordExporter
 	{
 		private InternalJsonSerializer _internalJsonSerializer;
 
@@ -24,15 +24,19 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 		}
 
-		public bool Write(string path, WorkRecordDto fieldWorkRecordDto)
+		public bool Write(string path, WorkRecordDto workRecordDto)
 		{
 			var jsonFormat = Path.GetTempFileName();
 			try
 			{
-				_internalJsonSerializer.Serialize(fieldWorkRecordDto, jsonFormat);
-				var fileName = GetSafeFilename(fieldWorkRecordDto.Description);
+				// Ensure path exists
+				Directory.CreateDirectory(path);
+
+				_internalJsonSerializer.Serialize(workRecordDto, jsonFormat);
+				var fileName = ZipUtils.GetSafeName(workRecordDto.Description);
 				// ToDo: add option to zip, using ZipUtil => +-8% of original size
 				//ZipUtil.Zip(Path.Combine(path, fileName + ".zip"), jsonFormat);
+				
 				var exportFileName = Path.Combine(path, fileName + ".json");
 				File.Copy(jsonFormat, exportFileName, true);
 			}
@@ -53,9 +57,6 @@ namespace WorkRecordPlugin
 			return true;
 		}
 
-		public string GetSafeFilename(string filename)
-		{
-			return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
-		}
+		
 	}
 }
