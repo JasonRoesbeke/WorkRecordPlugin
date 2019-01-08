@@ -15,6 +15,7 @@ using System.IO;
 using System.Reflection;
 using WorkRecordPlugin.Mappers;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin
 {
@@ -23,6 +24,9 @@ namespace WorkRecordPlugin
 		private readonly InternalJsonSerializer _internalJsonSerializer;
 		private readonly WorkRecordExporter _workRecordExporter;
 
+		// ToDo: "context": "url...",
+		// ToDo: "version plugin": "x.x.x-pre-alpha"
+		// ToDo: "Modified": "DateTime"
 		public List<IError> ErrorList1 { get; private set; }
 
 		public Plugin() : this(new InternalJsonSerializer())
@@ -87,9 +91,10 @@ namespace WorkRecordPlugin
 			List<WorkRecordDto> FieldWorkRecordDtos = _workRecordsMapper.MapWorkRecords(dataModel);
 
 			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as CN1 folder/catalog/datacard description...)
+			var newPath = Path.Combine(exportPath, ZipUtils.GetSafeName(dataModel.Catalog.Description));
 			foreach (var fieldWorkRecordDto in FieldWorkRecordDtos)
 			{
-				bool success = _workRecordExporter.Write(exportPath, fieldWorkRecordDto);
+				bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
 			}
 		}
 	}

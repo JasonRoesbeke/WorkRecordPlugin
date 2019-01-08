@@ -13,7 +13,6 @@ using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
 using AgGateway.ADAPT.Representation.UnitSystem;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using WorkRecordPlugin.JsonConverters;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Mappers
@@ -179,9 +178,9 @@ namespace WorkRecordPlugin.Mappers
 		{
 			if (uom != null)
 			{
-				return String.Format("{0};{1};{2};{3}", representation.Code, representation.CodeSource.ToString(), depth, uom.Code);
+				return $"{representation.Code};{representation.CodeSource.ToString()};{depth};{uom.Code}";
 			}
-			return String.Format("{0};{1};{2}", representation.Code, representation.CodeSource.ToString(), depth);
+			return $"{representation.Code};{representation.CodeSource.ToString()};{depth}";
 		}
 
 	}

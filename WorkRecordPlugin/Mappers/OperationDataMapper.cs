@@ -12,7 +12,7 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Mappers
 {
-	internal class OperationDataMapper
+	public class OperationDataMapper
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
@@ -27,7 +27,7 @@ namespace WorkRecordPlugin.Mappers
 			DataModel = dataModel;
 		}
 
-		internal OperationDataDto Map(OperationData operationData)
+		public OperationDataDto Map(OperationData operationData)
 		{
 			OperationDataDto operationDataDto = new OperationDataDto();
 			operationDataDto.OperationType = operationData.OperationType.ToString();
