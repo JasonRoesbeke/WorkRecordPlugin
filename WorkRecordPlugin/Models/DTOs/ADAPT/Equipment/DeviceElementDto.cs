@@ -6,19 +6,20 @@ using System.Threading.Tasks;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
-	public class VehicleDto : BaseDto
+	public class DeviceElementDto : BaseDto
 	{
 		const string Parent = "CompanyId";
 
-		public VehicleDto() : base(Parent, "Type", "Brand", "Model" )
+		public DeviceElementDto() : base(Parent, "Brand", "Series")
 		{
+			DeviceElementUses = new List<DeviceElementUseDto>();
 		}
 
 		[JsonProperty(PropertyName = EntityId)]
 		public Guid Guid { get; set; }
 
 		[JsonProperty(Required = Required.Always)]
-		public string Name { get; set; }
+		public string Description { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]
 		public Guid CompanyGuid { get; set; }
@@ -26,10 +27,14 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonProperty(Required = Required.Always)]
 		public string Type { get; set; }
 
-		[JsonProperty(Required = Required.Always)]
 		public string Brand { get; set; }
 
-		[JsonProperty(Required = Required.Always)]
-		public string Model { get; set; }
+		public string Series { get; set; }
+
+		public Guid ParentDeviceElementGuid { get; set; }
+
+		public List<DeviceElementUseDto> DeviceElementUses { get; set; }
+
+		public DeviceElementConfigurationDto DeviceElementConfiguration { get; set; }
 	}
 }

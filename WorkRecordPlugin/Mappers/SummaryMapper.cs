@@ -14,12 +14,12 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
 namespace WorkRecordPlugin.Mappers
 {
-	class FieldSummaryMapper
+	class SummaryMapper
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
 
-		public FieldSummaryMapper(ApplicationDataModel dataModel)
+		public SummaryMapper(ApplicationDataModel dataModel)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<FieldSummaryProfile>();

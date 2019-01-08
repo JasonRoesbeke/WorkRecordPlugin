@@ -9,11 +9,11 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
 namespace WorkRecordPlugin.Mappers
 {
-	class FieldWorkRecordMapper
+	class WorkRecordMapper
 	{
 		public ApplicationDataModel DataModel { get; }
 
-		public FieldWorkRecordMapper(ApplicationDataModel dataModel)
+		public WorkRecordMapper(ApplicationDataModel dataModel)
 		{
 			DataModel = dataModel;
 		}
@@ -30,7 +30,7 @@ namespace WorkRecordPlugin.Mappers
 
 			fieldWorkRecordDto.Guid = (Guid)recordId;
 
-			FieldSummaryMapper fieldSummaryMapper = new FieldSummaryMapper(DataModel);
+			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel);
 			var summary = fieldSummaryMapper.Map(workRecord);
 			if (summary == null)
 			{

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace WorkRecordPlugin.Utils
 {
-	public static class ZipUtil
+	public static class ZipUtils
 	{
 		public static void Zip(string file, string tempFile)
 		{
@@ -26,6 +26,11 @@ namespace WorkRecordPlugin.Utils
 			{
 				gzipStream.CopyTo(admStream);
 			}
+		}
+
+		public static string GetSafeName(string filename)
+		{
+			return string.Join("_", filename.Split(Path.GetInvalidFileNameChars()));
 		}
 	}
 }
