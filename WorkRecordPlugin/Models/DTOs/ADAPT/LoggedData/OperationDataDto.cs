@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
@@ -15,8 +16,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 
 		public OperationDataDto() : base(Parent)
 		{
-			//SpatialRecords = new List<SpatialRecordDto>();
 			SpatialRecords = new DataTable();
+			DeviceElementUses = new List<DeviceElementUseDto>();
 		}
 
 		[JsonProperty(PropertyName = Parent)]
@@ -27,10 +28,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		public string OperationType { get; set; }
 		public string Product { get; set; }
 
-		// ToDo: setting the order of fields so that RepresentationsHeader is always the first
-		//public RepresentationsHeaderDto RepresentationsHeader { get; set;}
-		//public List<SpatialRecordDto> SpatialRecords { get; set; }
-
 		public DataTable SpatialRecords { get; set; }
+
+		public List<DeviceElementUseDto> DeviceElementUses { get; set; }
 	}
 }

@@ -10,9 +10,11 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 	{
 		const string Parent = "CompanyId";
 
+		// ToDo: invstigate add jsonResolver.IgnoreProperty(typeof(Person), "Title");
 		public DeviceElementDto() : base(Parent, "Brand", "Series")
 		{
-			DeviceElementUses = new List<DeviceElementUseDto>();
+			ChilderenDeviceElements = new List<DeviceElementDto>();
+			DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
 		}
 
 		[JsonProperty(PropertyName = EntityId)]
@@ -31,10 +33,14 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public string Series { get; set; }
 
-		public Guid ParentDeviceElementGuid { get; set; }
+		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+		public Guid? ParentDeviceElementGuid { get; set; }
 
-		public List<DeviceElementUseDto> DeviceElementUses { get; set; }
+		public List<DeviceElementDto> ChilderenDeviceElements { get; set; }
 
-		public DeviceElementConfigurationDto DeviceElementConfiguration { get; set; }
+		public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
+
+		[JsonIgnore]
+		public int ReferenceId { get; set; }
 	}
 }

@@ -5,30 +5,43 @@ using System.Globalization;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Common;
+using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using AgGateway.ADAPT.Representation.RepresentationSystem;
 using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
 using AgGateway.ADAPT.Representation.UnitSystem;
+using AutoMapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
+using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Mappers
 {
 	public class OperationDataProcessor
 	{
+		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
 		private DataTable _dataTable;
 
 		public OperationDataProcessor(ApplicationDataModel dataModel)
 		{
+			var config = new MapperConfiguration(cfg => {
+				cfg.AddProfile<FieldSummaryProfile>();
+			});
+
+			mapper = config.CreateMapper();
 			DataModel = dataModel;
 		}
 
-		public DataTable ProcessOperationData(OperationData operationData)
+		public DataTable ProcessOperationData(OperationData operationData, out List<DeviceElementDto> deviceElementDtosForThisOperationData)
 		{
+			deviceElementDtosForThisOperationData = new List<DeviceElementDto>();
+
 			_dataTable = new DataTable();
 
 			//Add extra columns
@@ -41,7 +54,7 @@ namespace WorkRecordPlugin.Mappers
 
 			if (spatialRecords.Any())
 			{
-				var meters = GetWorkingData(operationData);
+				var meters = GetWorkingDataDictionaryWithDepth(operationData, DataModel.Catalog, out deviceElementDtosForThisOperationData);
 
 				CreateColumns(meters);
 
@@ -68,7 +81,88 @@ namespace WorkRecordPlugin.Mappers
 			}
 			return workingDataWithDepth;
 		}
-		
+
+		private Dictionary<int, IEnumerable<WorkingData>> GetWorkingDataDictionaryWithDepth(OperationData operationData, Catalog catalog, out List<DeviceElementDto> deviceElementDtos)
+		{
+			Dictionary<int, IEnumerable<WorkingData>> workingDataWithDepth = new Dictionary<int, IEnumerable<WorkingData>>();
+
+			deviceElementDtos = new List<DeviceElementDto>();
+
+			for (int i = 0; i <= operationData.MaxDepth; i++)
+			{
+				IEnumerable<DeviceElementUse> deviceElementUses = operationData.GetDeviceElementUses(i);
+
+				// Create the list of meters to fill the dataSet.Column
+				var meters = deviceElementUses
+					.SelectMany(x => x.GetWorkingDatas())
+					.Where(x => x.Representation != null);
+
+				workingDataWithDepth.Add(i, meters);
+
+				// Create the list of deviceElements to be added to the WorkRecordDto.SummaryDto
+				foreach (DeviceElementUse deviceElementUse in deviceElementUses)
+				{
+					DeviceElementConfiguration config = catalog.DeviceElementConfigurations.FirstOrDefault(c => c.Id.ReferenceId == deviceElementUse.DeviceConfigurationId);
+					if (config == null)
+					{
+						// ToDo: when this happens
+						throw new NullReferenceException();
+					}
+
+					DeviceElement deviceElement = catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == config.DeviceElementId);
+					if (deviceElement == null)
+					{
+						// ToDo: when this happens
+						throw new NullReferenceException();
+					}
+
+					DeviceElementDto deviceElementDto = deviceElementDtos.FirstOrDefault(de => de.ReferenceId == deviceElement.Id.ReferenceId);
+					if (deviceElementDto == null)
+					{
+						deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
+						deviceElementDtos.Add(deviceElementDto);
+					}
+
+					DeviceElementUseDto deviceElementUseDto = mapper.Map<DeviceElementUse, DeviceElementUseDto>(deviceElementUse);
+					var workingDatas = deviceElementUse.GetWorkingDatas();
+					foreach (var workingData in workingDatas)
+					{
+						WorkingDataDto workingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
+						deviceElementUseDto.WorkingDatas.Add(workingDataDto);
+					}
+
+					// Add DeviceElementUseDto 
+					deviceElementDto.DeviceElementUses.Add();
+
+					// Add DeviceElementConfigurationDto
+					if (config is ImplementConfiguration)
+					{
+						deviceElementDto.DeviceElementConfiguration = mapper.Map<ImplementConfiguration, ImplementConfigurationDto>((ImplementConfiguration)config);
+					}
+					else if (config is SectionConfiguration)
+					{
+						deviceElementDto.DeviceElementConfiguration = mapper.Map<SectionConfiguration, SectionConfigurationDto>((SectionConfiguration)config);
+					}
+					else if (config is MachineConfiguration)
+					{
+						deviceElementDto.DeviceElementConfiguration = mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
+					}
+					else
+					{
+						throw new InvalidCastException();
+					}
+
+
+					string deviceName = deviceElementUse.Id.ReferenceId.ToString();
+					if (config != null)
+					{
+						deviceName = config.Id.ReferenceId + "_" + config.Description;
+					}
+				}
+			}
+			return workingDataWithDepth;
+		}
+
 		private void CreateColumns(Dictionary<int, IEnumerable<WorkingData>> workingDataDictionary)
 		{
 			foreach (var kvp in workingDataDictionary)

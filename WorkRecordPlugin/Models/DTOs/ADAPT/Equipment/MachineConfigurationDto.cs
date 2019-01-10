@@ -5,7 +5,7 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
-	public class MachineConfigurationDto
+	public class MachineConfigurationDto : DeviceElementConfigurationDto
 	{
 		public NumericRepresentationValueDto GpsReceiverXOffset { get; set; }
 

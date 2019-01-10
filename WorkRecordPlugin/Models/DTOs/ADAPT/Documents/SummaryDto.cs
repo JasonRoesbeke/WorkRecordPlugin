@@ -19,7 +19,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 			SummaryData = new List<StampedMeteredValuesDto>();
 			OperationSummaries = new List<OperationSummaryDto>();
 			Users = new List<UserDto>();
-			Vehicles = new List<DeviceElementDto>();
+			DeviceElements = new List<DeviceElementDto>();
 			Notes = new List<string>();
 		}
 
@@ -35,11 +35,12 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 		// Grower/Farm/Field/FieldBoundary
 		public GrowerDto Grower { get; set; }
 
-		[JsonProperty(PropertyName = "Operators")]
+		// ToDo: create UserRoleDto
+		[JsonProperty(PropertyName = "Persons")]
 		public List<UserDto> Users { get; set; }
 
-		[JsonProperty(PropertyName = "Machines")]
-		public List<DeviceElementDto> Vehicles { get; set; }
+		[JsonProperty(PropertyName = "DeviceElements")]
+		public List<DeviceElementDto> DeviceElements { get; set; }
 
 		public DateTime? EventDate { get; set; }
 		public DateTime? EventEndDate { get; set; }

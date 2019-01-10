@@ -5,7 +5,7 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
-	class SectionConfigurationDto
+	class SectionConfigurationDto : DeviceElementConfigurationDto
 	{
 		public NumericRepresentationValueDto SectionWidth { get; set; }
 

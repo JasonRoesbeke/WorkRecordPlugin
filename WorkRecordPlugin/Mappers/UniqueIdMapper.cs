@@ -9,6 +9,11 @@ namespace WorkRecordPlugin.Mappers
 {
 	static class UniqueIdMapper
 	{
+		// ToDo: Create a LinkList file for each workRecord!
+		/* LinkList idea:
+		 * For each GUID: all the uniqueIds + as 'checksum' the ADAPT ReferenceId
+		 * In WebAPI could be an URL to save bytes in file
+		 */ 
 		static public Guid GetUniqueId(CompoundIdentifier id, string preferredSource = null)
 		{
 			if (id.UniqueIds.Count == 0)

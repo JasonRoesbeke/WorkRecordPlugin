@@ -22,8 +22,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 	{
 		public FieldSummaryProfile()
 		{
-			// Not needed https://stackoverflow.com/questions/45478928/how-to-give-default-mapping-of-enum-to-string-using-automapper 
-			//		for: Create general rule mapping enums to string 
+			// test MapFrom.src.enum.ToString() not needed https://stackoverflow.com/questions/45478928/how-to-give-default-mapping-of-enum-to-string-using-automapper 
 			// CompanyAdapt -> Dto
 			CreateMap<Company, CompanyDto>()
 				;
@@ -74,6 +73,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			// DeviceElement -> Dto
 			CreateMap<DeviceElement, DeviceElementDto>()
 				.ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.DeviceElementType.ToString()))
+				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
 				;
 
 			// DeviceElementUse -> Dto

@@ -24,10 +24,14 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonProperty(PropertyName = Parent)]
 		public Guid DeviceElementGuid { get; set; }
 
+		[JsonProperty(Required = Required.Always)]
+		public Guid DeviceElementConfigurationId { get; set; }
+
 		public NumericRepresentationValueDto TotalDistanceTravelled { get; set; }
 
 		public NumericRepresentationValueDto TotalElapsedTime { get; set; }
 
+		[JsonProperty(Required = Required.Always)]
 		public List<WorkingDataDto> WorkingDatas { get; set; }
 	}
 }
