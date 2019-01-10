@@ -18,6 +18,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		{
 			SpatialRecords = new DataTable();
 			DeviceElementUses = new List<DeviceElementUseDto>();
+			EquipmentConfigurations = new List<EquipmentConfigurationDto>();
+			WorkingDatas = new List<WorkingDataDto>();
 		}
 
 		[JsonProperty(PropertyName = Parent)]
@@ -31,5 +33,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		public DataTable SpatialRecords { get; set; }
 
 		public List<DeviceElementUseDto> DeviceElementUses { get; set; }
+		public List<EquipmentConfigurationDto> EquipmentConfigurations { get; set; }
+		public List<WorkingDataDto> WorkingDatas { get; set; }
+
 	}
 }

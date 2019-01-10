@@ -12,7 +12,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public DeviceElementUseDto() : base(Parent, "TotalDistanceTravelled", "TotalElapsedTime")
 		{
-			WorkingDatas = new List<WorkingDataDto>();
 		}
 
 		[JsonProperty(Required = Required.Always)]
@@ -31,7 +30,5 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public NumericRepresentationValueDto TotalElapsedTime { get; set; }
 
-		[JsonProperty(Required = Required.Always)]
-		public List<WorkingDataDto> WorkingDatas { get; set; }
 	}
 }

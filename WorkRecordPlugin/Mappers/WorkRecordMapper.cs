@@ -31,14 +31,14 @@ namespace WorkRecordPlugin.Mappers
 			fieldWorkRecordDto.Guid = (Guid)recordId;
 
 			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel);
-			var summary = fieldSummaryMapper.Map(workRecord);
-			if (summary == null)
+			var summaryDto = fieldSummaryMapper.Map(workRecord);
+			if (summaryDto == null)
 			{
 				// Do not map further because summary is required
 				return null;
 			}
 
-			fieldWorkRecordDto.Summary = summary;
+			fieldWorkRecordDto.Summary = summaryDto;
 
 			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel);
 			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord);

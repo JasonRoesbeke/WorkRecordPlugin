@@ -29,18 +29,25 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonProperty(Required = Required.Always)]
 		public string Type { get; set; }
 
+		public string Manufacturer { get; set; }
+
 		public string Brand { get; set; }
 
+		// ToDo: Voyager2 Plugin is not ADAPT 2.0 so DeviceSeries is not mapped!
+		[JsonIgnore]
 		public string Series { get; set; }
 
-		[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
 		public Guid? ParentDeviceElementGuid { get; set; }
 
 		public List<DeviceElementDto> ChilderenDeviceElements { get; set; }
 
 		public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
 
+		// ToDo: check if ReferenceId prop needs to be moved to BaseDto
 		[JsonIgnore]
 		public int ReferenceId { get; set; }
+
+		[JsonIgnore]
+		public bool IsParent { get; set; }
 	}
 }

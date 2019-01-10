@@ -9,6 +9,7 @@ using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using AutoMapper;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
@@ -39,7 +40,28 @@ namespace WorkRecordPlugin.Mappers
 				return null;
 			}
 
+			// OperationSummaries
+			var operationSummaryDtos = MapOperationSummaries(workRecord);
+			if (operationSummaryDtos.Any())
+			{
+				fieldSummaryDto.OperationSummaries.AddRange(operationSummaryDtos);
+			}
 
+			// SummaryDatas
+			//var summaryDataDtos = MapSummaryDatas(workRecord);
+			//if (summaryDataDtos.Any())
+			//{
+			//	fieldSummaryDto.SummaryData.AddRange(summaryDataDtos);
+			//}
+
+			// DeviceElements
+			List<DeviceElementDto> DeviceElements = MapDeviceElements(DataModel.Catalog);
+			if (DeviceElements.Any())
+			{
+				fieldSummaryDto.DeviceElements.AddRange(DeviceElements);
+			}
+
+			// TimeScopes
 			var startTime = workRecord.TimeScopes.Where(ts => ts.DateContext == DateContextEnum.ActualStart).FirstOrDefault();
 			if (startTime != null)
 			{
@@ -52,6 +74,36 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			return fieldSummaryDto;
+		}
+
+		private List<DeviceElementDto> MapDeviceElements(Catalog catalog)
+		{
+			List<DeviceElementDto> deviceElements = new List<DeviceElementDto>();
+			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
+			deviceElements.AddRange(deviceElementMapper.FindAndMap());
+			return deviceElements;
+		}
+
+		private IEnumerable<OperationSummaryDto> MapSummaryDatas(WorkRecord workRecord)
+		{
+			List<OperationSummaryDto> summaryDatas = new List<OperationSummaryDto>();
+			SummaryDataMapper summaryDataMapper = new SummaryDataMapper(DataModel);
+			IEnumerable<Summary> summaries = DataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
+			//summaryDatas.AddRange(summaryDataMapper.Map(summaries));
+			return summaryDatas;
+		}
+
+		private IEnumerable<OperationSummaryDto> MapOperationSummaries(WorkRecord workRecord)
+		{
+			List<OperationSummaryDto> operationSummaries = new List<OperationSummaryDto>();
+			OperationSummaryMapper operationSummaryMapper = new OperationSummaryMapper(DataModel);
+			IEnumerable<Summary> summaries = DataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
+			foreach (var summary in summaries)
+			{
+				// OperationData
+				operationSummaries.AddRange(operationSummaryMapper.Map(summary));
+			}
+			return operationSummaries;
 		}
 
 		private SummaryDto SetGFFFB(WorkRecord workRecord)
@@ -120,25 +172,7 @@ namespace WorkRecordPlugin.Mappers
 				fieldDto.FieldBoundaries = fieldBoundaryMapper.Map(fieldBoundaries, fieldDto);
 			}
 
-			IEnumerable<Summary> summaries = DataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
-			SummaryDataMapper summaryDataMapper = new SummaryDataMapper(DataModel);
-			OperationSummaryMapper operationSummaryMapper = new OperationSummaryMapper(DataModel);
-			foreach (var summary in summaries)
-			{
-				// StampedMeteredValues
-				//var stampedMeteredValues = summaryDataMapper.Map(summary);
-				//if (stampedMeteredValues != null)
-				//{
-				//	fieldSummaryDto.SummaryData.Add(stampedMeteredValues);
-				//}
-
-				// OperationData
-				var operationSummaries = operationSummaryMapper.Map(summary);
-				if (operationSummaries != null || operationSummaries.Any())
-				{
-					fieldSummaryDto.OperationSummaries.AddRange(operationSummaries);
-				}
-			}
+			
 
 			return fieldSummaryDto;
 		}
