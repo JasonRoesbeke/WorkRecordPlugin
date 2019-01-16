@@ -5,6 +5,7 @@ using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AutoMapper;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 
 namespace WorkRecordPlugin.Mappers
@@ -24,28 +25,23 @@ namespace WorkRecordPlugin.Mappers
 			DataModel = dataModel;
 		}
 
-		public IEnumerable<DeviceElementDto> FindAndMap()
+		/// <summary>
+		/// First try to find the mapped DeviceElement. If not found, then try to map it.
+		/// </summary>
+		/// <param name="deviceElement"></param>
+		/// <param name="alreadyMappedDeviceElementDtos"></param>
+		/// <returns></returns>
+		public DeviceElementDto FindOrMap(DeviceElement deviceElement, List<DeviceElementDto> alreadyMappedDeviceElementDtos)
 		{
-			List<DeviceElementDto> deviceElementDtos = new List<DeviceElementDto>();
-
-			// Find DeviceElements where ParentId == 0
-			var ParentDeviceElements = DataModel.Catalog.DeviceElements.Where(de => de.ParentDeviceId == 0);
-			if (!ParentDeviceElements.Any())
+			// Find the dto based on referenceId
+			DeviceElementDto deviceElementDto = GetAllDeviceElementDtos(alreadyMappedDeviceElementDtos).Where(de => de.ReferenceId == deviceElement.Id.ReferenceId).FirstOrDefault();
+			if (deviceElementDto != null)
 			{
-				return null;
+				return deviceElementDto;
 			}
 
-			foreach (var parentDeviceElement in ParentDeviceElements)
-			{
-				// Map ParentDevice
-				DeviceElementDto parentDeviceElementDto = Map(parentDeviceElement);
-				if (parentDeviceElementDto != null)
-				{
-					parentDeviceElementDto.IsParent = true;
-					deviceElementDtos.Add(parentDeviceElementDto);
-				}
-			}
-			return deviceElementDtos;
+			// Map
+			return Map(deviceElement);
 		}
 
 		private DeviceElementDto Map(DeviceElement deviceElement)
@@ -76,20 +72,44 @@ namespace WorkRecordPlugin.Mappers
 			//	deviceElementDto.Series = series.Description;
 			//}
 
-			// Find all ChildrenDeviceElements, map them and add them to this DeviceElement
-			var children = DataModel.Catalog.DeviceElements.Where(de => de.ParentDeviceId == deviceElement.Id.ReferenceId);
-			if (children.Any())
+			// ToDo: Do we need to map all ChildrenDeviceElements even if they are not referenced in a deviceElementUse in any of the mapped OperationDatas? Currently not.
+			//// Find all ChildrenDeviceElements, map them and add them to this DeviceElement
+			//var children = DataModel.Catalog.DeviceElements.Where(de => de.ParentDeviceId == deviceElement.Id.ReferenceId);
+			//if (children.Any())
+			//{
+			//	foreach (var childDeviceElement in children)
+			//	{
+			//		var childDeviceElementDto = Map(childDeviceElement);
+			//		if (childDeviceElementDto != null)
+			//		{
+			//			deviceElementDto.ChilderenDeviceElements.Add(childDeviceElementDto);
+			//		}
+			//	}
+			//}
+
+			// Parent or not?
+			if (deviceElement.ParentDeviceId == 0 && deviceElementDto.ParentDeviceElementGuid == null)
 			{
-				foreach (var childDeviceElement in children)
-				{
-					var childDeviceElementDto = Map(childDeviceElement);
-					if (childDeviceElementDto != null)
-					{
-						deviceElementDto.ChilderenDeviceElements.Add(childDeviceElementDto);
-					}
-				}
+				deviceElementDto.IsParent = true;
 			}
 			return deviceElementDto;
+		}
+
+		public static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)
+		{
+			List<DeviceElementDto> allDeviceElementDtos = new List<DeviceElementDto>();
+
+			foreach (var deviceElement in deviceElements)
+			{
+				allDeviceElementDtos.Add(deviceElement);
+				var children = GetAllDeviceElementDtos(deviceElement.ChilderenDeviceElements);
+				if (children.Any())
+				{
+					allDeviceElementDtos.AddRange(children);
+				}
+			}
+
+			return allDeviceElementDtos;
 		}
 	}
 }

@@ -54,12 +54,12 @@ namespace WorkRecordPlugin.Mappers
 			//	fieldSummaryDto.SummaryData.AddRange(summaryDataDtos);
 			//}
 
-			// DeviceElements
-			List<DeviceElementDto> DeviceElements = MapDeviceElements(DataModel.Catalog);
-			if (DeviceElements.Any())
-			{
-				fieldSummaryDto.DeviceElements.AddRange(DeviceElements);
-			}
+			// Do not map DeviceElements here, only map the DeviceElements referenced in a DeviceElementUse in an OperationData to make sure the file does not contain unnecessary data.
+			//List<DeviceElementDto> DeviceElements = MapDeviceElements(DataModel.Catalog);
+			//if (DeviceElements.Any())
+			//{
+			//	fieldSummaryDto.DeviceElements.AddRange(DeviceElements);
+			//}
 
 			// TimeScopes
 			var startTime = workRecord.TimeScopes.Where(ts => ts.DateContext == DateContextEnum.ActualStart).FirstOrDefault();
@@ -74,14 +74,6 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			return fieldSummaryDto;
-		}
-
-		private List<DeviceElementDto> MapDeviceElements(Catalog catalog)
-		{
-			List<DeviceElementDto> deviceElements = new List<DeviceElementDto>();
-			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
-			deviceElements.AddRange(deviceElementMapper.FindAndMap());
-			return deviceElements;
 		}
 
 		private IEnumerable<OperationSummaryDto> MapSummaryDatas(WorkRecord workRecord)

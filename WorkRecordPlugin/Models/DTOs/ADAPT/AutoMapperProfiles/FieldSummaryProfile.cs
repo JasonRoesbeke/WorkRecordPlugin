@@ -23,6 +23,11 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 		public FieldSummaryProfile()
 		{
 			// test MapFrom.src.enum.ToString() not needed https://stackoverflow.com/questions/45478928/how-to-give-default-mapping-of-enum-to-string-using-automapper 
+
+			// UniqueId -> Dto
+			CreateMap<UniqueId, UniqueIdDto>()
+				;
+
 			// CompanyAdapt -> Dto
 			CreateMap<Company, CompanyDto>()
 				;
