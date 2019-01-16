@@ -41,7 +41,7 @@ namespace WorkRecordPlugin.Mappers
 			fieldWorkRecordDto.Summary = summaryDto;
 
 			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel);
-			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord);
+			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord, summaryDto);
 
 			return fieldWorkRecordDto;
 		}

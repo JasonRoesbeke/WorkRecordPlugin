@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 
 namespace WorkRecordPlugin.Utils
 {

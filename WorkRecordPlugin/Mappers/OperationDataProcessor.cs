@@ -16,6 +16,7 @@ using AutoMapper;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
@@ -27,255 +28,158 @@ namespace WorkRecordPlugin.Mappers
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
 		private DataTable _dataTable;
+		private Dictionary<int, DataTable> _dataTablesPerDepth;
 
 		public OperationDataProcessor(ApplicationDataModel dataModel)
 		{
 			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<FieldSummaryProfile>();
+				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
 		}
 
-		public DataTable ProcessOperationData(OperationData operationData, out List<DeviceElementDto> deviceElementDtosForThisOperationData)
+		public void ProcessOperationData(OperationData operationData, SummaryDto summaryDto, OperationDataDto operationDataDto, int maximumDepth = -1)
 		{
-			deviceElementDtosForThisOperationData = new List<DeviceElementDto>();
-
-			_dataTable = new DataTable();
-
-			//Add extra columns
-			_dataTable.Columns.Add(new DataColumn(GetColumnName(AdditionalRepresentations.vrTimeStamp, 0))); //time
-			_dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //Y
-			_dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //X
-			_dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("m")))); //Z
-
+			// ToDo: [AgGateway] change to public Func<int,IEnumerable<SpatialRecord>> GetSpatialRecords { get; set; } where int is depth
 			var spatialRecords = operationData.GetSpatialRecords();
 
 			if (spatialRecords.Any())
 			{
-				var meters = GetWorkingDataDictionaryWithDepth(operationData, DataModel.Catalog, out deviceElementDtosForThisOperationData);
+				
 
-				CreateColumns(meters);
-
-				foreach (var spatialRecord in spatialRecords)
+				// Requested depth of mapping, default is the maximum
+				if (maximumDepth <= -1 || maximumDepth > operationData.MaxDepth)
 				{
-					CreateRow(meters, spatialRecord);
+					maximumDepth = operationData.MaxDepth;
 				}
 
-				UpdateColumnNamesWithUom(meters, spatialRecords);
-			}
+				
+				// WorkingData per value of depth
+				var metersPerDepth = GetMetersPerDepth(operationData, maximumDepth, summaryDto);
+				var metersDtoPerDepth = GetWorkingDataDtoPerDepth(metersPerDepth);
+				operationDataDto.WorkingDatas = metersDtoPerDepth;
 
-			return _dataTable;
+				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel);
+				operationDataDto.SpatialRecords = spatialRecordMapper.Map(spatialRecords, metersPerDepth, maximumDepth, summaryDto, out Dictionary<int, List<WorkingDataDto>> meterDtosPerDepth);
+			}
 		}
 
-		private static Dictionary<int, IEnumerable<WorkingData>> GetWorkingData(OperationData operationData)
+		private Dictionary<int, List<WorkingDataDto>> GetWorkingDataDtoPerDepth(Dictionary<int, List<WorkingData>> metersPerDepth)
 		{
-			var workingDataWithDepth = new Dictionary<int, IEnumerable<WorkingData>>();
-
-			for (var i = 0; i <= operationData.MaxDepth; i++)
+			Dictionary<int, List<WorkingDataDto>> metersDtoPerDepth = new Dictionary<int, List<WorkingDataDto>>();
+			foreach (var keyValuePair in metersPerDepth)
 			{
-				var meters = operationData.GetDeviceElementUses(i).SelectMany(x => x.GetWorkingDatas()).Where(x => x.Representation != null);
+				var key = keyValuePair.Key;
+				var meters = keyValuePair.Value;
 
-				workingDataWithDepth.Add(i, meters);
+				var meterDtos = new List<WorkingDataDto>();
+
+				foreach (var workingData in meters)
+				{
+					meterDtos.Add(mapper.Map<WorkingData, WorkingDataDto>(workingData));
+				}
+
+				metersDtoPerDepth.Add(key, meterDtos);
 			}
-			return workingDataWithDepth;
+			return metersDtoPerDepth;
 		}
 
-		private Dictionary<int, IEnumerable<WorkingData>> GetWorkingDataDictionaryWithDepth(OperationData operationData, Catalog catalog, out List<DeviceElementDto> deviceElementDtos)
+		private Dictionary<int, List<WorkingData>> GetMetersPerDepth(OperationData operationData, int depth, SummaryDto summaryDto)
 		{
-			Dictionary<int, IEnumerable<WorkingData>> workingDataWithDepth = new Dictionary<int, IEnumerable<WorkingData>>();
+			Dictionary<int, List<WorkingData>> workingDataWithDepth = new Dictionary<int, List<WorkingData>>();
 
-			deviceElementDtos = new List<DeviceElementDto>();
-
-			for (int i = 0; i <= operationData.MaxDepth; i++)
+			for (int i = 0; i <= depth; i++)
 			{
 				IEnumerable<DeviceElementUse> deviceElementUses = operationData.GetDeviceElementUses(i);
 
 				// Create the list of meters to fill the dataSet.Column
-				var meters = deviceElementUses
-					.SelectMany(x => x.GetWorkingDatas())
-					.Where(x => x.Representation != null);
+				var allMeters = new List<WorkingData>();
 
-				workingDataWithDepth.Add(i, meters);
+				workingDataWithDepth.Add(i, allMeters);
 
-				// Create the list of deviceElements to be added to the WorkRecordDto.SummaryDto
-				foreach (DeviceElementUse deviceElementUse in deviceElementUses)
+				// DeviceElements & DeviceElementConfigurations
+				foreach (var deviceElementUse in deviceElementUses)
 				{
-					DeviceElementConfiguration config = catalog.DeviceElementConfigurations.FirstOrDefault(c => c.Id.ReferenceId == deviceElementUse.DeviceConfigurationId);
-					if (config == null)
+					// ToDo: Check when you use IEnumerable instead of List, provides this then less or more performance when serializing to JSON?
+					foreach (var workingData in deviceElementUse.GetWorkingDatas())
 					{
-						// ToDo: when this happens
-						throw new NullReferenceException();
+						allMeters.Add(workingData);
+						var deviceElementConfigurationDto = MapDeviceElementConfiguration(deviceElementUse, summaryDto);
+						if (deviceElementConfigurationDto == null)
+						{
+							// ToDo: handle deviceElementConfigurationDto == null
+							throw new NullReferenceException();
+						}
+
+						var workdingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
+						workdingDataDto.DeviceElementConfigurationId = deviceElementConfigurationDto.Guid;
+						//ToDo: this needs to be given with the SpatialRecord!
+
 					}
 
-					DeviceElement deviceElement = catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == config.DeviceElementId);
-					if (deviceElement == null)
-					{
-						// ToDo: when this happens
-						throw new NullReferenceException();
-					}
-
-					DeviceElementDto deviceElementDto = deviceElementDtos.FirstOrDefault(de => de.ReferenceId == deviceElement.Id.ReferenceId);
-					if (deviceElementDto == null)
-					{
-						deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
-						deviceElementDtos.Add(deviceElementDto);
-					}
-
-					DeviceElementUseDto deviceElementUseDto = mapper.Map<DeviceElementUse, DeviceElementUseDto>(deviceElementUse);
-					var workingDatas = deviceElementUse.GetWorkingDatas();
-					foreach (var workingData in workingDatas)
-					{
-						WorkingDataDto workingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
-						deviceElementUseDto.WorkingDatas.Add(workingDataDto);
-					}
-
-					// Add DeviceElementUseDto 
-					deviceElementDto.DeviceElementUses.Add();
-
-					// Add DeviceElementConfigurationDto
-					if (config is ImplementConfiguration)
-					{
-						deviceElementDto.DeviceElementConfiguration = mapper.Map<ImplementConfiguration, ImplementConfigurationDto>((ImplementConfiguration)config);
-					}
-					else if (config is SectionConfiguration)
-					{
-						deviceElementDto.DeviceElementConfiguration = mapper.Map<SectionConfiguration, SectionConfigurationDto>((SectionConfiguration)config);
-					}
-					else if (config is MachineConfiguration)
-					{
-						deviceElementDto.DeviceElementConfiguration = mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
-					}
-					else
-					{
-						throw new InvalidCastException();
-					}
-
-
-					string deviceName = deviceElementUse.Id.ReferenceId.ToString();
-					if (config != null)
-					{
-						deviceName = config.Id.ReferenceId + "_" + config.Description;
-					}
+					allMeters.AddRange(deviceElementUse.GetWorkingDatas().Where(x => x.Representation != null).ToList());
 				}
+
 			}
 			return workingDataWithDepth;
 		}
 
-		private void CreateColumns(Dictionary<int, IEnumerable<WorkingData>> workingDataDictionary)
+		public DeviceElementConfigurationDto MapDeviceElementConfiguration(DeviceElementUse deviceElementUse, SummaryDto summaryDto)
 		{
-			foreach (var kvp in workingDataDictionary)
+			DeviceElementConfiguration config = DataModel.Catalog.DeviceElementConfigurations.FirstOrDefault(c => c.Id.ReferenceId == deviceElementUse.DeviceConfigurationId);
+			if (config == null)
 			{
-				foreach (var workingData in kvp.Value)
-				{
-					try
-					{
-						_dataTable.Columns.Add(GetColumnName(workingData, kvp.Key));
-					}
-					catch (DuplicateNameException e)
-					{
-						// ToDo: Handling DuplicateNameException for vrElevation-ADAPT
-						;
-					}
-				}
-			}
-		}
-
-		private void CreateRow(Dictionary<int, IEnumerable<WorkingData>> workingDataDictionary, SpatialRecord spatialRecord)
-		{
-			var dataRow = _dataTable.NewRow();
-
-			foreach (var key in workingDataDictionary.Keys)
-			{
-				var depth = key;
-
-				foreach (var workingData in workingDataDictionary[key])
-				{
-					if (workingData as NumericWorkingData != null)
-						CreateNumericMeterCell(spatialRecord, workingData, depth, dataRow);
-
-					if (workingData as EnumeratedWorkingData != null)
-						CreateEnumeratedMeterCell(spatialRecord, workingData, depth, dataRow);
-				}
+				// ToDo: when DeviceElementConfigurations could not be found in Catalog
+				throw new NullReferenceException();
 			}
 
-			if (spatialRecord.Geometry != null)
+			DeviceElement deviceElement = DataModel.Catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == config.DeviceElementId);
+			if (deviceElement == null)
 			{
-				// ToDo: [AgGateway] add vrLatitude|vrLongitude|vrElevation to the Visualizer on public github
-				//Fill in the other cells
-				if (spatialRecord.Geometry is Point)
-				{
-					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).Y.ToString(); //Y
-					dataRow[GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).X.ToString(); //X
-					dataRow[GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("m"))] = (spatialRecord.Geometry as Point).Z.ToString(); //Z
-				}
-			}
-			if (spatialRecord.Timestamp != null)
-			{
-				dataRow[GetColumnName(AdditionalRepresentations.vrTimeStamp, 0)] = spatialRecord.Timestamp.ToString();
+				// ToDo: when deviceElement could not be found in Catalog
+				throw new NullReferenceException();
 			}
 
-			_dataTable.Rows.Add(dataRow);
-		}
-
-		private static void CreateEnumeratedMeterCell(SpatialRecord spatialRecord, WorkingData workingData, int depth, DataRow dataRow)
-		{
-			var enumeratedValue = spatialRecord.GetMeterValue(workingData) as EnumeratedValue;
-
-			dataRow[GetColumnName(workingData, depth)] = enumeratedValue != null && enumeratedValue.Value != null ? enumeratedValue.Value.Value : "";
-		}
-
-		private static void CreateNumericMeterCell(SpatialRecord spatialRecord, WorkingData workingData, int depth, DataRow dataRow)
-		{
-			var numericRepresentationValue = spatialRecord.GetMeterValue(workingData) as NumericRepresentationValue;
-			var value = numericRepresentationValue != null
-				? numericRepresentationValue.Value.Value.ToString(CultureInfo.InvariantCulture)
-				: "";
-
-			dataRow[GetColumnName(workingData, depth)] = value;
-		}
-
-		private void UpdateColumnNamesWithUom(Dictionary<int, IEnumerable<WorkingData>> workingDatas, IEnumerable<SpatialRecord> spatialRecords)
-		{
-			foreach (var kvp in workingDatas)
+			// Add Or Find already-mapped DeviceElementDto
+			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
+			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMap(deviceElement, summaryDto);
+			if (deviceElementDto == null)
 			{
-				foreach (var data in kvp.Value)
-				{
-					var data1 = data;
-					var workingDataValues = spatialRecords.Select(x => x.GetMeterValue(data1) as NumericRepresentationValue);
-					var numericRepresentationValues = workingDataValues.Where(x => x != null);
-					var uoms = numericRepresentationValues.Select(x => x.Value.UnitOfMeasure).ToList();
-
-					if (uoms.Any())
-					{
-						try
-						{
-							_dataTable.Columns[GetColumnName(data, kvp.Key)].ColumnName += ";" + uoms.First().Code;
-						}
-						catch (DuplicateNameException e)
-						{
-							// ToDo: Handling DuplicateNameException for vrElevation;ADAPT;m
-							;
-						}
-					}
-				}
+				// ToDo: when deviceElementDto could not be found or mapped
+				throw new NullReferenceException();
 			}
-		}
 
-		private static string GetColumnName(WorkingData workingData, int depth, AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure uom = null)
-		{
-			return GetColumnName(workingData.Representation, depth, uom);
-		}
-
-		private static string GetColumnName(AgGateway.ADAPT.ApplicationDataModel.Representations.Representation representation, int depth, AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure uom = null)
-		{
-			if (uom != null)
+			DeviceElementConfigurationDto deviceElementConfigurationDto = MapDeviceElementConfiguration(config);
+			if (deviceElementConfigurationDto == null)
 			{
-				return $"{representation.Code};{representation.CodeSource.ToString()};{depth};{uom.Code}";
+				// ToDo: when deviceElementConfigurationDto could not be found or mapped
+				throw new NullReferenceException();
 			}
-			return $"{representation.Code};{representation.CodeSource.ToString()};{depth}";
+
+			// Add DeviceElementConfigurationDto
+			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;
+			deviceElementDto.DeviceElementConfigurations.Add(deviceElementConfigurationDto);
+
+			return deviceElementConfigurationDto;
 		}
 
+		private DeviceElementConfigurationDto MapDeviceElementConfiguration(DeviceElementConfiguration config)
+		{
+			if (config is ImplementConfiguration)
+			{
+				return mapper.Map<ImplementConfiguration, ImplementConfigurationDto>((ImplementConfiguration)config);
+			}
+			else if (config is SectionConfiguration)
+			{
+				return mapper.Map<SectionConfiguration, SectionConfigurationDto>((SectionConfiguration)config);
+			}
+			else if (config is MachineConfiguration)
+			{
+				return mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
+			}
+			return null;
+		}
 	}
 }

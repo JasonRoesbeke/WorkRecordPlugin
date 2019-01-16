@@ -14,7 +14,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 	{
 		const string Parent = "FieldWorkRecordId";
 
-		public SummaryDto() : base(Parent)
+		public SummaryDto() : base(Parent, "Notes")
 		{
 			SummaryData = new List<StampedMeteredValuesDto>();
 			OperationSummaries = new List<OperationSummaryDto>();
@@ -32,23 +32,28 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 
 		// Company
 		public CompanyDto Company { get; set; }
-		// Grower/Farm/Field/FieldBoundary
+
+		// Grower/Farm/Field/FieldBoundary tree
 		public GrowerDto Grower { get; set; }
 
 		// ToDo: create UserRoleDto
 		[JsonProperty(PropertyName = "Persons")]
 		public List<UserDto> Users { get; set; }
 
-		[JsonProperty(PropertyName = "DeviceElements")]
-		public List<DeviceElementDto> DeviceElements { get; set; }
-
 		public DateTime? EventDate { get; set; }
+
 		public DateTime? EventEndDate { get; set; }
 
 		public List<string> Notes { get; set; }
 		// ToDo: create ProductDto
 
+		public List<DeviceElementDto> DeviceElements { get; set; }
+
+		// Change list to Dictonary to have it paired with a depth key value
+		public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
+
 		public List<StampedMeteredValuesDto> SummaryData { get; set; }
+
 		public List<OperationSummaryDto> OperationSummaries { get; set; }
 	}
 }

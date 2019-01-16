@@ -8,15 +8,29 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {
 	public class WorkingDataDto : BaseDto
 	{
-		const string Parent = "DeviceElementUseId";
+		const string Parent = "DeviceElementId";
 
 		public WorkingDataDto() : base(Parent)
 		{
 		}
 
-		[JsonProperty(PropertyName = Parent)]
-		public Guid DeviceElementUseGuid { get; set; }
+		//[JsonProperty(PropertyName = Parent)]
+		//public Guid DeviceElementUseGuid { get; set; }
 
+		[JsonIgnore]
+		public int ReferenceId { get; set; }
+
+		[JsonProperty(PropertyName = EntityId)]
+		public Guid Guid { get; set; }
+
+		//[JsonProperty(PropertyName = Parent)]
+		//public Guid DeviceElementGuid { get; set; }
+
+		//[JsonProperty(Required = Required.Always)]
+		[JsonProperty(PropertyName = Parent)]
+		public Guid DeviceElementConfigurationId { get; set; }
+
+		[JsonProperty(Required = Required.Always)]
 		public NumericRepresentationDto Representation { get; set; }
 	}
 }

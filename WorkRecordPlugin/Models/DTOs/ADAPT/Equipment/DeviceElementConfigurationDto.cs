@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
@@ -7,7 +9,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 	{
 		const string Parent = "DeviceElementId";
 
-		public DeviceElementConfigurationDto() : base(Parent)
+		public DeviceElementConfigurationDto() : base(Parent , "Offsets")
 		{
 
 		}
@@ -20,5 +22,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		[JsonProperty(PropertyName = Parent)]
 		public Guid DeviceElementGuid { get; set; }
+
+		public List<NumericRepresentationDto> Offsets { get; set; }
+
 	}
 }

@@ -19,7 +19,7 @@ namespace WorkRecordPlugin.Mappers
 		public NumericRepresentationValueMapper(ApplicationDataModel dataModel)
 		{
 			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<FieldSummaryProfile>();
+				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
 			mapper = config.CreateMapper();

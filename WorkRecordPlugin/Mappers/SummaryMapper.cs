@@ -23,7 +23,7 @@ namespace WorkRecordPlugin.Mappers
 		public SummaryMapper(ApplicationDataModel dataModel)
 		{
 			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<FieldSummaryProfile>();
+				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
 			mapper = config.CreateMapper();

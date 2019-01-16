@@ -18,7 +18,7 @@ namespace WorkRecordPlugin.Mappers
 		public DeviceElementMapper(ApplicationDataModel dataModel)
 		{
 			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<FieldSummaryProfile>();
+				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
 			mapper = config.CreateMapper();
@@ -31,10 +31,10 @@ namespace WorkRecordPlugin.Mappers
 		/// <param name="deviceElement"></param>
 		/// <param name="alreadyMappedDeviceElementDtos"></param>
 		/// <returns></returns>
-		public DeviceElementDto FindOrMap(DeviceElement deviceElement, List<DeviceElementDto> alreadyMappedDeviceElementDtos)
+		public DeviceElementDto FindOrMap(DeviceElement deviceElement, SummaryDto summaryDto)
 		{
 			// Find the dto based on referenceId
-			DeviceElementDto deviceElementDto = GetAllDeviceElementDtos(alreadyMappedDeviceElementDtos).Where(de => de.ReferenceId == deviceElement.Id.ReferenceId).FirstOrDefault();
+			DeviceElementDto deviceElementDto = GetAllDeviceElementDtos(summaryDto.DeviceElements).Where(de => de.ReferenceId == deviceElement.Id.ReferenceId).FirstOrDefault();
 			if (deviceElementDto != null)
 			{
 				return deviceElementDto;

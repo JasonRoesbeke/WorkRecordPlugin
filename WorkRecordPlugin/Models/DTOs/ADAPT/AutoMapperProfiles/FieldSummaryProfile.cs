@@ -2,6 +2,7 @@
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
+using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AutoMapper;
@@ -13,14 +14,15 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
+using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 {
-	public class FieldSummaryProfile : Profile
+	public class WorkRecordDtoProfile : Profile
 	{
-		public FieldSummaryProfile()
+		public WorkRecordDtoProfile()
 		{
 			// test MapFrom.src.enum.ToString() not needed https://stackoverflow.com/questions/45478928/how-to-give-default-mapping-of-enum-to-string-using-automapper 
 
@@ -28,28 +30,32 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			CreateMap<UniqueId, UniqueIdDto>()
 				;
 
-			// CompanyAdapt -> Dto
+			// Company -> Dto
 			CreateMap<Company, CompanyDto>()
 				;
 
-			// GrowerAdapt -> Dto
+			// Grower -> Dto
 			CreateMap<Grower, GrowerDto>()
 				;
 
-			// FarmAdapt -> Dto
+			// Farm -> Dto
 			CreateMap<Farm, FarmDto>()
 				;
 
-			// FieldAdapt -> Dto
+			// Field -> Dto
 			CreateMap<Field, FieldDto>()
 				;
 
-			// PersonAdapt -> Dto
+			// Person -> Dto
 			CreateMap<Person, UserDto>()
 				;
 
-			// WorkRecordAdapt -> Dto
-			CreateMap<WorkRecord, SummaryDto>()
+			// WorkRecord -> Dto
+			CreateMap<WorkRecord, WorkRecordDto>()
+				;
+
+			// Summary -> Dto
+			CreateMap<Summary, SummaryDto>()
 				;
 
 			// OperationSummary -> Dto
@@ -73,6 +79,13 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			// UnitOfMeasure -> Dto
 			CreateMap<UnitOfMeasure, UnitOfMeasureDto>()
 				.ForMember(dest => dest.Dimension, opt => opt.MapFrom(src => src.Dimension.ToString()))
+				;
+
+			// WorkingData -> Dto
+			CreateMap<WorkingData, WorkingDataDto>()
+				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
+				.ReverseMap()
+				.ForMember(dest => dest.Id.ReferenceId, opt => opt.MapFrom(src => src.ReferenceId))
 				;
 
 			// DeviceElement -> Dto
