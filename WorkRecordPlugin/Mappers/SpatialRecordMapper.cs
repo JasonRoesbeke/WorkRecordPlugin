@@ -35,7 +35,7 @@ namespace WorkRecordPlugin.Mappers
 			DataModel = dataModel;
 		}
 
-		public Dictionary<int, DataTable> Map(IEnumerable<SpatialRecord> spatialRecords, Dictionary<int, List<WorkingData>> metersPerDepth, int maximumDepth, SummaryDto summaryDto, out Dictionary<int, List<WorkingDataDto>> meterDtosPerDepth)
+		public Dictionary<int, DataTable> Map(IEnumerable<SpatialRecord> spatialRecords, Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>> metersPerDepth, int maximumDepth, SummaryDto summaryDto)
 		{
 			Dictionary<int, List<WorkingDataDto>> _meterDtosPerDepth = new Dictionary<int, List<WorkingDataDto>>();
 			_dataTablesPerDepth = new Dictionary<int, DataTable>();
@@ -49,31 +49,26 @@ namespace WorkRecordPlugin.Mappers
 				dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //X
 				dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("m")))); //Z
 
-				_meterDtosPerDepth[i] = CreateColumns(metersPerDepth[i], dataTable, summaryDto);
+				CreateColumns(metersPerDepth[i], dataTable, summaryDto);
 
 				foreach (var spatialRecord in spatialRecords)
 				{
-					CreateRow(metersPerDepth[i], _meterDtosPerDepth[i], spatialRecord, i, dataTable);
+					CreateRow(metersPerDepth[i], spatialRecord, i, dataTable);
 				}
 				_dataTablesPerDepth.Add(i, dataTable);
 
 			}
-			meterDtosPerDepth = _meterDtosPerDepth;
 			return _dataTablesPerDepth;
 		}
 
-		private List<WorkingDataDto> CreateColumns(List<WorkingData> workingDatas, DataTable dataTable, SummaryDto summaryDto)
+		private List<WorkingDataDto> CreateColumns(List<KeyValuePair<WorkingData, WorkingDataDto>> workingDatas, DataTable dataTable, SummaryDto summaryDto)
 		{
 			List<WorkingDataDto> meterDtos = new List<WorkingDataDto>();
 			foreach (var workingData in workingDatas)
 			{
 				try
 				{
-					var workingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
-
-
-					meterDtos.Add(workingDataDto);
-					dataTable.Columns.Add(workingDataDto.Guid.ToString());
+					dataTable.Columns.Add(workingData.Value.Guid.ToString());
 				}
 				catch (DuplicateNameException e)
 				{
@@ -84,28 +79,22 @@ namespace WorkRecordPlugin.Mappers
 			return meterDtos;
 		}
 
-		private void CreateRow(List<WorkingData> workingDatas, List<WorkingDataDto> workingDataDtos, SpatialRecord spatialRecord, int depth, DataTable dataTable)
+		private void CreateRow(List<KeyValuePair<WorkingData, WorkingDataDto>> workingDatas, SpatialRecord spatialRecord, int depth, DataTable dataTable)
 		{
 			var dataRow = dataTable.NewRow();
 
 			// Value
 			foreach (var workingData in workingDatas)
 			{
-				var workingDataDto = workingDataDtos.FirstOrDefault(wdd => wdd.ReferenceId == workingData.Id.ReferenceId);
-				if (workingDataDto == null)
+
+				if (workingData.Key as EnumeratedWorkingData != null)
 				{
-					// ToDo: what if workingData is not mapped to a Dto?
-					continue;
+					CreateEnumeratedMeterCell(spatialRecord, workingData.Key, workingData.Value.Guid, dataRow);
 				}
 
-				if (workingData as EnumeratedWorkingData != null)
+				if (workingData.Key as NumericWorkingData != null)
 				{
-					CreateNumericMeterCell(spatialRecord, workingData, workingDataDto.Guid, depth, dataRow);
-				}
-
-				if (workingData as NumericWorkingData != null)
-				{
-					CreateEnumeratedMeterCell(spatialRecord, workingData, workingDataDto.Guid, depth, dataRow);
+					CreateNumericMeterCell(spatialRecord, workingData.Key, workingData.Value.Guid, dataRow);
 				}
 			}
 
@@ -117,9 +106,12 @@ namespace WorkRecordPlugin.Mappers
 				//Fill in the other cells
 				if (spatialRecord.Geometry is Point)
 				{
-					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).Y.ToString(); //Y
-					dataRow[GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).X.ToString(); //X
-					dataRow[GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), 0, UnitSystemManager.GetUnitOfMeasure("m"))] = (spatialRecord.Geometry as Point).Z.ToString(); //Z
+					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).Y.ToString(CultureInfo.InvariantCulture); //Y
+					dataRow[GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).X.ToString(CultureInfo.InvariantCulture); //X
+					if ((spatialRecord.Geometry as Point).Z != null)
+					{
+						dataRow[GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("m"))] = ((double)(spatialRecord.Geometry as Point).Z).ToString(CultureInfo.InvariantCulture); //Z
+					}
 				}
 			}
 
@@ -127,13 +119,13 @@ namespace WorkRecordPlugin.Mappers
 			if (spatialRecord.Timestamp != null)
 			{
 				// ToDo: change way how TimeStamp is represented
-				dataRow[GetColumnName(AdditionalRepresentations.vrTimeStamp, 0)] = spatialRecord.Timestamp.ToUniversalTime().ToString();
+				dataRow[GetColumnName(AdditionalRepresentations.vrTimeStamp, depth)] = spatialRecord.Timestamp.ToUniversalTime().ToString();
 			}
 
 			dataTable.Rows.Add(dataRow);
 		}
 
-		private static void CreateEnumeratedMeterCell(SpatialRecord spatialRecord, WorkingData workingData, Guid workingDataDtoGuid, int depth, DataRow dataRow)
+		private static void CreateEnumeratedMeterCell(SpatialRecord spatialRecord, WorkingData workingData, Guid workingDataDtoGuid, DataRow dataRow)
 		{
 			var enumeratedValue = spatialRecord.GetMeterValue(workingData) as EnumeratedValue;
 			var value = enumeratedValue != null && enumeratedValue.Value != null
@@ -143,7 +135,7 @@ namespace WorkRecordPlugin.Mappers
 			dataRow[workingDataDtoGuid.ToString()] = value;
 		}
 
-		private static void CreateNumericMeterCell(SpatialRecord spatialRecord, WorkingData workingData, Guid workingDataDtoGuid, int depth, DataRow dataRow)
+		private static void CreateNumericMeterCell(SpatialRecord spatialRecord, WorkingData workingData, Guid workingDataDtoGuid, DataRow dataRow)
 		{
 			var numericRepresentationValue = spatialRecord.GetMeterValue(workingData) as NumericRepresentationValue;
 			var value = numericRepresentationValue != null
@@ -162,7 +154,5 @@ namespace WorkRecordPlugin.Mappers
 			}
 			return $"{representation.Code};{representation.CodeSource.ToString()};{depth}";
 		}
-
-
 	}
 }

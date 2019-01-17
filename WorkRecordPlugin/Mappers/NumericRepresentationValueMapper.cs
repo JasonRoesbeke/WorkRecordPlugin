@@ -34,7 +34,7 @@ namespace WorkRecordPlugin.Mappers
 			{
 				if (item.Value is NumericRepresentationValue)
 				{
-					numericRepresentationValueDtos.Add(mapper.Map<NumericRepresentationValueDto>((NumericRepresentationValue)item.Value));
+					numericRepresentationValueDtos.Add(mapper.Map<NumericRepresentationValue, NumericRepresentationValueDto>((NumericRepresentationValue)item.Value));
 				}
 			}
 			return numericRepresentationValueDtos;

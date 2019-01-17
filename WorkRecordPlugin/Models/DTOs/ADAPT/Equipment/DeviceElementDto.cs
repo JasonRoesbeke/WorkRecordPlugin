@@ -37,6 +37,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonIgnore]
 		public string Series { get; set; }
 
+		[JsonIgnore]
 		public Guid? ParentDeviceElementGuid { get; set; }
 
 		public List<DeviceElementDto> ChilderenDeviceElements { get; set; }
@@ -46,6 +47,9 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		// ToDo: check if ReferenceId prop needs to be moved to BaseDto
 		[JsonIgnore]
 		public int ReferenceId { get; set; }
+
+		[JsonIgnore]
+		public int ParentReferenceId { get; set; }
 
 		[JsonIgnore]
 		public bool IsParent { get; set; }

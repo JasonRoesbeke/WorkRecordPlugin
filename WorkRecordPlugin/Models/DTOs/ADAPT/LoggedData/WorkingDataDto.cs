@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,9 +7,9 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {
-	public class WorkingDataDto : BaseDto
+	public abstract class WorkingDataDto : BaseDto
 	{
-		const string Parent = "DeviceElementId";
+		const string Parent = "DeviceElementConfigurationId";
 
 		public WorkingDataDto() : base(Parent)
 		{
@@ -31,6 +32,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		public Guid DeviceElementConfigurationId { get; set; }
 
 		[JsonProperty(Required = Required.Always)]
-		public NumericRepresentationDto Representation { get; set; }
+		public RepresentationDto Representation { get; set; }
 	}
 }

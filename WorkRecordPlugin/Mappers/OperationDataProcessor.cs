@@ -47,57 +47,31 @@ namespace WorkRecordPlugin.Mappers
 
 			if (spatialRecords.Any())
 			{
-				
-
 				// Requested depth of mapping, default is the maximum
 				if (maximumDepth <= -1 || maximumDepth > operationData.MaxDepth)
 				{
 					maximumDepth = operationData.MaxDepth;
 				}
-
 				
 				// WorkingData per value of depth
 				var metersPerDepth = GetMetersPerDepth(operationData, maximumDepth, summaryDto);
-				var metersDtoPerDepth = GetWorkingDataDtoPerDepth(metersPerDepth);
-				operationDataDto.WorkingDatas = metersDtoPerDepth;
+				operationDataDto.WorkingDatas = metersPerDepth.ToDictionary(d => d.Key, d => d.Value.Select(kvp => kvp.Value).ToList());
 
 				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel);
-				operationDataDto.SpatialRecords = spatialRecordMapper.Map(spatialRecords, metersPerDepth, maximumDepth, summaryDto, out Dictionary<int, List<WorkingDataDto>> meterDtosPerDepth);
+				operationDataDto.SpatialRecords = spatialRecordMapper.Map(spatialRecords, metersPerDepth, maximumDepth, summaryDto);
 			}
 		}
 
-		private Dictionary<int, List<WorkingDataDto>> GetWorkingDataDtoPerDepth(Dictionary<int, List<WorkingData>> metersPerDepth)
+		private Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>> GetMetersPerDepth(OperationData operationData, int depth, SummaryDto summaryDto)
 		{
-			Dictionary<int, List<WorkingDataDto>> metersDtoPerDepth = new Dictionary<int, List<WorkingDataDto>>();
-			foreach (var keyValuePair in metersPerDepth)
-			{
-				var key = keyValuePair.Key;
-				var meters = keyValuePair.Value;
-
-				var meterDtos = new List<WorkingDataDto>();
-
-				foreach (var workingData in meters)
-				{
-					meterDtos.Add(mapper.Map<WorkingData, WorkingDataDto>(workingData));
-				}
-
-				metersDtoPerDepth.Add(key, meterDtos);
-			}
-			return metersDtoPerDepth;
-		}
-
-		private Dictionary<int, List<WorkingData>> GetMetersPerDepth(OperationData operationData, int depth, SummaryDto summaryDto)
-		{
-			Dictionary<int, List<WorkingData>> workingDataWithDepth = new Dictionary<int, List<WorkingData>>();
+			Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>> workingDataWithDepth = new Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>>();
 
 			for (int i = 0; i <= depth; i++)
 			{
 				IEnumerable<DeviceElementUse> deviceElementUses = operationData.GetDeviceElementUses(i);
 
 				// Create the list of meters to fill the dataSet.Column
-				var allMeters = new List<WorkingData>();
-
-				workingDataWithDepth.Add(i, allMeters);
+				var allMeters = new List<KeyValuePair<WorkingData, WorkingDataDto>>();
 
 				// DeviceElements & DeviceElementConfigurations
 				foreach (var deviceElementUse in deviceElementUses)
@@ -105,7 +79,10 @@ namespace WorkRecordPlugin.Mappers
 					// ToDo: Check when you use IEnumerable instead of List, provides this then less or more performance when serializing to JSON?
 					foreach (var workingData in deviceElementUse.GetWorkingDatas())
 					{
-						allMeters.Add(workingData);
+						if (workingData.Representation == null)
+						{
+							continue;
+						}
 						var deviceElementConfigurationDto = MapDeviceElementConfiguration(deviceElementUse, summaryDto);
 						if (deviceElementConfigurationDto == null)
 						{
@@ -113,15 +90,13 @@ namespace WorkRecordPlugin.Mappers
 							throw new NullReferenceException();
 						}
 
-						var workdingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
-						workdingDataDto.DeviceElementConfigurationId = deviceElementConfigurationDto.Guid;
-						//ToDo: this needs to be given with the SpatialRecord!
-
+						var workingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
+						workingDataDto.Guid = UniqueIdMapper.GetUniqueId(workingData.Id);
+						workingDataDto.DeviceElementConfigurationId = deviceElementConfigurationDto.Guid;
+						allMeters.Add(new KeyValuePair<WorkingData, WorkingDataDto>(workingData, workingDataDto));
 					}
-
-					allMeters.AddRange(deviceElementUse.GetWorkingDatas().Where(x => x.Representation != null).ToList());
 				}
-
+				workingDataWithDepth.Add(i, allMeters);
 			}
 			return workingDataWithDepth;
 		}
@@ -144,19 +119,28 @@ namespace WorkRecordPlugin.Mappers
 
 			// Add Or Find already-mapped DeviceElementDto
 			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
-			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMap(deviceElement, summaryDto);
+			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMapInSummaryDto(deviceElement, summaryDto);
 			if (deviceElementDto == null)
 			{
 				// ToDo: when deviceElementDto could not be found or mapped
 				throw new NullReferenceException();
 			}
 
-			DeviceElementConfigurationDto deviceElementConfigurationDto = MapDeviceElementConfiguration(config);
+			// Check if deviceElementConfiguration is already mapped and added to the deviceElementDto
+			DeviceElementConfigurationDto deviceElementConfigurationDto = deviceElementDto.DeviceElementConfigurations.FirstOrDefault(dec => dec.ReferenceId == config.Id.ReferenceId);
+			if (deviceElementConfigurationDto != null)
+			{
+				return deviceElementConfigurationDto;
+			}
+
+			// Not mapped, so map it and add to deviceElement
+			deviceElementConfigurationDto = MapDeviceElementConfiguration(config);
 			if (deviceElementConfigurationDto == null)
 			{
 				// ToDo: when deviceElementConfigurationDto could not be found or mapped
 				throw new NullReferenceException();
 			}
+			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(config.Id);
 
 			// Add DeviceElementConfigurationDto
 			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Representations
 {
-	public class NumericRepresentationValueDto : BaseDto
+	public class NumericRepresentationValueDto : RepresentationValueDto
 	{
 		public NumericRepresentationDto Representation { get; set; }
 		public NumericValueDto Value { get; set; }

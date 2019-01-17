@@ -40,12 +40,6 @@ namespace WorkRecordPlugin.Mappers
 				ProductMapper productMapper = new ProductMapper(DataModel);
 				operationDataDto.Product = productMapper.Map(product);
 			}
-
-			// DeviceElementUses
-
-			// EquipmentConfigurationGroup
-
-			// WorkingDatas
 			
 			// SpatialRecords
 			OperationDataProcessor operationDataProcessor = new OperationDataProcessor(DataModel);

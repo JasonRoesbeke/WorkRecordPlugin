@@ -63,17 +63,46 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 				.ForMember(dest => dest.OperationType, opt => opt.MapFrom(src => src.OperationType.ToString()))
 				;
 
-			// NumericRepresentationValue -> Dto
-			CreateMap<NumericRepresentationValue, NumericRepresentationValueDto>()
+			// Representation -> Dto
+			CreateMap<Representation, RepresentationDto>()
+				.ForMember(dest => dest.CodeSource, opt => opt.MapFrom(src => src.CodeSource.ToString()))
 				;
 
 			// NumericRepresentation -> Dto
 			CreateMap<NumericRepresentation, NumericRepresentationDto>()
-				.ForMember(dest => dest.CodeSource, opt => opt.MapFrom(src => src.CodeSource.ToString()))
+				.IncludeBase<Representation, RepresentationDto>()
+				;
+
+			// EnumeratedRepresentation -> Dto
+			CreateMap<EnumeratedRepresentation, EnumeratedRepresentationDto>()
+				.IncludeBase<Representation, RepresentationDto>()
+				;
+
+			// StringRepresentation -> Dto
+			CreateMap<StringRepresentation, StringRepresentationDto>()
+				.IncludeBase<Representation, RepresentationDto>()
+				;
+
+			// RepresentationValue -> Dto
+			CreateMap<RepresentationValue, RepresentationValueDto>()
+				;
+
+			// NumericRepresentationValue -> Dto
+			CreateMap<NumericRepresentationValue, NumericRepresentationValueDto>()
+				.IncludeBase<RepresentationValue, RepresentationValueDto>()
 				;
 
 			// NumericValue -> Dto
 			CreateMap<NumericValue, NumericValueDto>()
+				;
+
+			// EnumeratedRepresentationValue -> Dto
+			CreateMap<EnumeratedValue, EnumeratedRepresentationValueDto>()
+				.IncludeBase<RepresentationValue, RepresentationValueDto>()
+				;
+
+			// EnumerationMember -> Dto
+			CreateMap<EnumerationMember, EnumerationMemberDto>()
 				;
 
 			// UnitOfMeasure -> Dto
@@ -84,8 +113,16 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			// WorkingData -> Dto
 			CreateMap<WorkingData, WorkingDataDto>()
 				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
-				.ReverseMap()
-				.ForMember(dest => dest.Id.ReferenceId, opt => opt.MapFrom(src => src.ReferenceId))
+				;
+
+			// NumericWorkingData -> Dto
+			CreateMap<NumericWorkingData, NumericWorkingDataDto>()
+				.IncludeBase<WorkingData, WorkingDataDto>()
+				;
+
+			// EnumeratedWorkingData -> Dto
+			CreateMap<EnumeratedWorkingData, EnumeratedWorkingDataDto>()
+				.IncludeBase<WorkingData, WorkingDataDto>()
 				;
 
 			// DeviceElement -> Dto
@@ -100,10 +137,12 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 
 			// DeviceElementConfiguration -> Dto
 			CreateMap<DeviceElementConfiguration, DeviceElementConfigurationDto>()
+				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
 				;
 
 			// ImplementConfiguration -> Dto
 			CreateMap<ImplementConfiguration, ImplementConfigurationDto>()
+				.IncludeBase<DeviceElementConfiguration, DeviceElementConfigurationDto>()
 				;
 
 			// ReferencePoint -> Dto
@@ -113,10 +152,12 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			// MachineConfiguration -> Dto
 			CreateMap<MachineConfiguration, MachineConfigurationDto>()
 				.ForMember(dest => dest.OriginAxleLocation, opt => opt.MapFrom(src => src.OriginAxleLocation.ToString()))
+				.IncludeBase<DeviceElementConfiguration, DeviceElementConfigurationDto>()
 				;
 
 			// SectionConfiguration -> Dto
 			CreateMap<SectionConfiguration, SectionConfigurationDto>()
+				.IncludeBase<DeviceElementConfiguration, DeviceElementConfigurationDto>()
 				;
 		}
 	}

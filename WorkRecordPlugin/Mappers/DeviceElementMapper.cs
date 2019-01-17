@@ -31,7 +31,7 @@ namespace WorkRecordPlugin.Mappers
 		/// <param name="deviceElement"></param>
 		/// <param name="alreadyMappedDeviceElementDtos"></param>
 		/// <returns></returns>
-		public DeviceElementDto FindOrMap(DeviceElement deviceElement, SummaryDto summaryDto)
+		public DeviceElementDto FindOrMapInSummaryDto(DeviceElement deviceElement, SummaryDto summaryDto)
 		{
 			// Find the dto based on referenceId
 			DeviceElementDto deviceElementDto = GetAllDeviceElementDtos(summaryDto.DeviceElements).Where(de => de.ReferenceId == deviceElement.Id.ReferenceId).FirstOrDefault();
@@ -40,8 +40,27 @@ namespace WorkRecordPlugin.Mappers
 				return deviceElementDto;
 			}
 
-			// Map
-			return Map(deviceElement);
+			// Map DeviceElement
+			deviceElementDto = Map(deviceElement);
+
+			// if it is a parentDevice, add to SummaryDto. Else find parentDevice and add it to his childCollection
+			if (deviceElementDto.IsParent)
+			{
+				summaryDto.DeviceElements.Add(deviceElementDto);
+			}
+			else
+			{
+				var parentDeviceElementDto = GetAllDeviceElementDtos(summaryDto.DeviceElements).Where(de => de.ReferenceId == deviceElement.ParentDeviceId).FirstOrDefault();
+				if (parentDeviceElementDto == null)
+				{
+					// ToDo: when parentDeviceElementDto cannot be found or is not yet mapped
+					throw new NullReferenceException();
+				}
+				deviceElementDto.ParentDeviceElementGuid = parentDeviceElementDto.Guid;
+				parentDeviceElementDto.ChilderenDeviceElements.Add(deviceElementDto);
+			}
+
+			return deviceElementDto;
 		}
 
 		private DeviceElementDto Map(DeviceElement deviceElement)
@@ -91,6 +110,10 @@ namespace WorkRecordPlugin.Mappers
 			if (deviceElement.ParentDeviceId == 0 && deviceElementDto.ParentDeviceElementGuid == null)
 			{
 				deviceElementDto.IsParent = true;
+			}
+			else
+			{
+				deviceElementDto.ParentReferenceId = deviceElement.ParentDeviceId;
 			}
 			return deviceElementDto;
 		}
