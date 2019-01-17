@@ -24,6 +24,7 @@ using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
 using AgGateway.ADAPT.Representation.UnitSystem;
 using AutoMapper;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
@@ -100,12 +101,12 @@ namespace WorkRecordPlugin.Mappers
 
 				if (workingData.Key as EnumeratedWorkingData != null)
 				{
-					CreateEnumeratedMeterCell(spatialRecord, workingData.Key, workingData.Value.Guid, dataRow);
+					CreateEnumeratedMeterCell(spatialRecord, workingData.Key, workingData.Value, dataRow);
 				}
 
 				if (workingData.Key as NumericWorkingData != null)
 				{
-					CreateNumericMeterCell(spatialRecord, workingData.Key, workingData.Value.Guid, dataRow);
+					CreateNumericMeterCell(spatialRecord, workingData.Key, workingData.Value, dataRow);
 				}
 			}
 
@@ -136,24 +137,34 @@ namespace WorkRecordPlugin.Mappers
 			dataTable.Rows.Add(dataRow);
 		}
 
-		private static void CreateEnumeratedMeterCell(SpatialRecord spatialRecord, WorkingData workingData, Guid workingDataDtoGuid, DataRow dataRow)
+		private void CreateEnumeratedMeterCell(SpatialRecord spatialRecord, WorkingData workingData, WorkingDataDto workingDataDto, DataRow dataRow)
 		{
 			var enumeratedValue = spatialRecord.GetMeterValue(workingData) as EnumeratedValue;
 			var value = enumeratedValue != null && enumeratedValue.Value != null
 				? enumeratedValue.Value.Value
 				: "";
 
-			dataRow[workingDataDtoGuid.ToString()] = value;
+			dataRow[workingDataDto.Guid.ToString()] = value;
 		}
 
-		private static void CreateNumericMeterCell(SpatialRecord spatialRecord, WorkingData workingData, Guid workingDataDtoGuid, DataRow dataRow)
+		private void CreateNumericMeterCell(SpatialRecord spatialRecord, WorkingData workingData, WorkingDataDto workingDataDto, DataRow dataRow)
 		{
 			var numericRepresentationValue = spatialRecord.GetMeterValue(workingData) as NumericRepresentationValue;
 			var value = numericRepresentationValue != null
 				? numericRepresentationValue.Value.Value.ToString(CultureInfo.InvariantCulture)
 				: "";
 
-			dataRow[workingDataDtoGuid.ToString()] = value;
+			if (workingDataDto.Representation != null)
+			{
+				if (workingDataDto.Representation is NumericRepresentationDto)
+				{
+					if(((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasureDto == null)
+					{
+						((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasureDto = mapper.Map<AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure, UnitOfMeasureDto>(numericRepresentationValue.Value.UnitOfMeasure);
+					}
+				}
+			}
+			dataRow[workingDataDto.Guid.ToString()] = value;
 		}
 
 

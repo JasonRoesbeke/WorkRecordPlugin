@@ -13,11 +13,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Representations
 {
 	public class NumericRepresentationDto : RepresentationDto
 	{
-
+		public UnitOfMeasureDto UnitOfMeasureDto { get; set; }
 	}
 }
