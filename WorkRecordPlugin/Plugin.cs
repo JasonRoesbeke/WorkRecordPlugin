@@ -32,7 +32,8 @@ namespace WorkRecordPlugin
 
 		public Plugin() : this(new InternalJsonSerializer())
 		{
-			//ToDo: using ProtoBuf;
+			//ToDo: using ProtoBuf
+			//ToDo: Memory optimisation
 		}
 
 		public Plugin(InternalJsonSerializer internalJsonSerializer)
@@ -63,10 +64,12 @@ namespace WorkRecordPlugin
 		public void Initialize(string args = null)
 		{
 			// ToDo: add "Data anonymization" option in the plugin!
+			// ToDo: add maximum mapping depth option in the plugin!
 		}
 
 		public bool IsDataCardSupported(string dataPath, Properties properties = null)
 		{
+			// ToDo: Import support
 			return false;
 		}
 
@@ -87,15 +90,16 @@ namespace WorkRecordPlugin
 			if (!Directory.Exists(exportPath))
 				Directory.CreateDirectory(exportPath);
 
-			WorkRecordsMapper _workRecordsMapper = new WorkRecordsMapper();
-			// ToDo: check if dataModel contains workrecords
-			List<WorkRecordDto> FieldWorkRecordDtos = _workRecordsMapper.MapWorkRecords(dataModel);
-
 			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as CN1 folder/catalog/datacard description...)
 			var newPath = Path.Combine(exportPath, ZipUtils.GetSafeName(dataModel.Catalog.Description));
-			foreach (var fieldWorkRecordDto in FieldWorkRecordDtos)
+
+			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel);
+			// ToDo: check if dataModel contains workrecords
+			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
+				WorkRecordDto fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
 				bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
+				fieldWorkRecordDto = null; // Memory optimisation?
 			}
 		}
 	}

@@ -29,17 +29,38 @@ namespace WorkRecordPlugin.Mappers
 			DataModel = dataModel;
 		}
 
-		public WorkRecordDto Map(WorkRecord workRecord)
+		public List<WorkRecordDto> MapWorkRecords()
 		{
-			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
-
-			Guid? recordId = UniqueIdMapper.GetUniqueId(workRecord.Id);
-			if (recordId == null)
+			// ToDo: check if better null-checking is needed?
+			if (DataModel == null)
+			{
+				return null;
+			}
+			if (DataModel.Documents == null)
 			{
 				return null;
 			}
 
-			fieldWorkRecordDto.Guid = (Guid)recordId;
+			List<WorkRecordDto> mappedRecords = new List<WorkRecordDto>();
+
+			foreach (WorkRecord workRecord in DataModel.Documents.WorkRecords)
+			{
+				var fieldWorkRecordDto = Map(workRecord);
+				if (fieldWorkRecordDto != null)
+				{
+					mappedRecords.Add(fieldWorkRecordDto);
+				}
+			}
+			return mappedRecords;
+
+		}
+
+		public WorkRecordDto Map(WorkRecord workRecord)
+		{
+			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
+
+			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueId(workRecord.Id);
+			fieldWorkRecordDto.Description = workRecord.Description;
 
 			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel);
 			var summaryDto = fieldSummaryMapper.Map(workRecord);
@@ -56,7 +77,5 @@ namespace WorkRecordPlugin.Mappers
 
 			return fieldWorkRecordDto;
 		}
-
-		
 	}
 }
