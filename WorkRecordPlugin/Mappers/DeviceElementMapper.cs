@@ -18,6 +18,7 @@ using AutoMapper;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -129,21 +130,9 @@ namespace WorkRecordPlugin.Mappers
 			return deviceElementDto;
 		}
 
-		public static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)
+		private static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)
 		{
-			List<DeviceElementDto> allDeviceElementDtos = new List<DeviceElementDto>();
-
-			foreach (var deviceElement in deviceElements)
-			{
-				allDeviceElementDtos.Add(deviceElement);
-				var children = GetAllDeviceElementDtos(deviceElement.ChilderenDeviceElements);
-				if (children.Any())
-				{
-					allDeviceElementDtos.AddRange(children);
-				}
-			}
-
-			return allDeviceElementDtos;
+			return ListUtils.GetAllDeviceElementDtos(deviceElements);
 		}
 	}
 }

@@ -170,6 +170,20 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			CreateMap<SectionConfiguration, SectionConfigurationDto>()
 				.IncludeBase<DeviceElementConfiguration, DeviceElementConfigurationDto>()
 				;
+
+			// EquipmentConfiguration -> Dto
+			CreateMap<EquipmentConfiguration, EquipmentConfigurationDto>()
+				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
+				;
+
+			// Connector -> Dto
+			CreateMap<Connector, ConnectorDto>()
+				;
+
+			// HitchPoint -> Dto
+			CreateMap<HitchPoint, HitchPointDto>()
+				;
+
 		}
 	}
 }

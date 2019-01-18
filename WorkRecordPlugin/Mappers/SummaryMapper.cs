@@ -44,12 +44,15 @@ namespace WorkRecordPlugin.Mappers
 
 		public SummaryDto Map(WorkRecord workRecord)
 		{
+			// Grower/Farm/Field/Fieldboundary
 			SummaryDto fieldSummaryDto = SetGFFFB(workRecord);
 
 			if (fieldSummaryDto == null)
 			{
 				return null;
 			}
+
+			// EquipmentConfigurations
 
 			// OperationSummaries
 			var operationSummaryDtos = MapOperationSummaries(workRecord);

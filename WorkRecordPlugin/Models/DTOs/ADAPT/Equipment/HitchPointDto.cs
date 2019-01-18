@@ -29,6 +29,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonProperty(Required = Required.Always)]
 		public string Description { get; set; }
 
+		[JsonIgnore]
 		[JsonProperty(PropertyName = Parent)]
 		public Guid ConnectorGuid { get; set; }
 

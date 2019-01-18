@@ -145,36 +145,19 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// Not mapped, so map it and add to deviceElement
-			deviceElementConfigurationDto = MapDeviceElementConfiguration(config);
+			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel);
+			deviceElementConfigurationDto = deviceElementConfigurationMapper.Map(config);
 			if (deviceElementConfigurationDto == null)
 			{
 				// ToDo: when deviceElementConfigurationDto could not be found or mapped
 				throw new NullReferenceException();
 			}
-			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(config.Id);
 
 			// Add DeviceElementConfigurationDto
 			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;
 			deviceElementDto.DeviceElementConfigurations.Add(deviceElementConfigurationDto);
 
 			return deviceElementConfigurationDto;
-		}
-
-		private DeviceElementConfigurationDto MapDeviceElementConfiguration(DeviceElementConfiguration config)
-		{
-			if (config is ImplementConfiguration)
-			{
-				return mapper.Map<ImplementConfiguration, ImplementConfigurationDto>((ImplementConfiguration)config);
-			}
-			else if (config is SectionConfiguration)
-			{
-				return mapper.Map<SectionConfiguration, SectionConfigurationDto>((SectionConfiguration)config);
-			}
-			else if (config is MachineConfiguration)
-			{
-				return mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
-			}
-			return null;
 		}
 	}
 }
