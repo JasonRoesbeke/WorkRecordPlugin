@@ -9,13 +9,17 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {
 	public class NumericWorkingDataDto : WorkingDataDto
 	{
+		[JsonProperty(Order = 0)]
+		public UnitOfMeasureDto UnitOfMeasure { get; set; }
 	}
 }

@@ -19,6 +19,5 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Representations
 {
 	public class NumericRepresentationDto : RepresentationDto
 	{
-		public UnitOfMeasureDto UnitOfMeasureDto { get; set; }
 	}
 }

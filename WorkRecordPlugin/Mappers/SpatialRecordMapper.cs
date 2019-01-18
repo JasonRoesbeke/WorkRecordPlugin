@@ -144,6 +144,16 @@ namespace WorkRecordPlugin.Mappers
 				? enumeratedValue.Value.Value
 				: "";
 
+
+			if (workingDataDto.Representation != null)
+			{
+				if (workingDataDto.Representation is EnumeratedRepresentationDto)
+				{
+
+				}
+
+			}
+
 			dataRow[workingDataDto.Guid.ToString()] = value;
 		}
 
@@ -158,11 +168,12 @@ namespace WorkRecordPlugin.Mappers
 			{
 				if (workingDataDto.Representation is NumericRepresentationDto)
 				{
-					if(((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasureDto == null)
+					//if(((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasure == null)
 					{
-						((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasureDto = mapper.Map<AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure, UnitOfMeasureDto>(numericRepresentationValue.Value.UnitOfMeasure);
+						//((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasure = mapper.Map<AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure, UnitOfMeasureDto>(numericRepresentationValue.Value.UnitOfMeasure);
 					}
 				}
+
 			}
 			dataRow[workingDataDto.Guid.ToString()] = value;
 		}

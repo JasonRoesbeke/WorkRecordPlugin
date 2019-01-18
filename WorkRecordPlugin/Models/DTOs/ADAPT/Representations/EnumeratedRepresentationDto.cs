@@ -9,14 +9,16 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
+using AgGateway.ADAPT.ApplicationDataModel.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Representations
 {
 	public class EnumeratedRepresentationDto : RepresentationDto
 	{
-
+		
 	}
 }

@@ -9,13 +9,21 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
+using AgGateway.ADAPT.ApplicationDataModel.Common;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {
 	public class EnumeratedWorkingDataDto : WorkingDataDto
 	{
+		public UnitOfMeasureDto UnitOfMeasureDto = new UnitOfMeasureDto()
+		{
+			Code = "unitless",
+			Dimension = UnitOfMeasureDimensionEnum.Unitless.ToString(),
+		};
 	}
 }
