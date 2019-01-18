@@ -29,7 +29,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 
 		[JsonProperty(PropertyName = Parent)]
 		[JsonIgnore]
-		public Guid FieldWorkRecordId { get; set; }
+		public Guid FieldWorkRecordGuid { get; set; }
 
 		public List<OperationDataDto> OperationDatas { get; set; }
 	}

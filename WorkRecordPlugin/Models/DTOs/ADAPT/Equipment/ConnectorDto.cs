@@ -23,18 +23,19 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		}
 
-		[JsonProperty(PropertyName = EntityId, Order = -2)]
-		public Guid Guid { get; set; }
+		//[JsonProperty(PropertyName = EntityId, Order = -2)]
+		//public Guid Guid { get; set; }
 
 		[JsonProperty(Required = Required.Always)]
 		public string Description { get; set; }
 
+		[JsonIgnore]
 		[JsonProperty(PropertyName = Parent)]
-		public Guid EquipmentConfigurationId { get; set; }
+		public Guid EquipmentConfigurationGuid { get; set; }
 
 		public HitchPointDto HitchPoint { get; set; }
 
-		public Guid DeviceElementConfiguration { get; set; }
+		public Guid DeviceElementConfigurationGuid { get; set; }
 
 	}
 }

@@ -40,7 +40,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 
 		//[JsonProperty(Required = Required.Always)]
 		[JsonProperty(PropertyName = Parent, Order = -1)]
-		public Guid DeviceElementConfigurationId { get; set; }
+		public Guid DeviceElementConfigurationGuid { get; set; }
 
 		[JsonProperty(Required = Required.Always, Order = 1)]
 		public RepresentationDto Representation { get; set; }

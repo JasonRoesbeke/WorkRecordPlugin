@@ -103,7 +103,7 @@ namespace WorkRecordPlugin.Mappers
 
 						var workingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
 						workingDataDto.Guid = UniqueIdMapper.GetUniqueId(workingData.Id);
-						workingDataDto.DeviceElementConfigurationId = deviceElementConfigurationDto.Guid;
+						workingDataDto.DeviceElementConfigurationGuid = deviceElementConfigurationDto.Guid;
 						allMeters.Add(new KeyValuePair<WorkingData, WorkingDataDto>(workingData, workingDataDto));
 					}
 				}
