@@ -27,7 +27,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 
 		public OperationDataDto() : base(Parent)
 		{
-			EquipmentConfigurations = new List<EquipmentConfigurationDto>();
+			//EquipmentConfigurations = new List<EquipmentConfigurationDto>();
 			WorkingDatas = new Dictionary<int, List<WorkingDataDto>>();
 			SpatialRecords = new Dictionary<int, DataTable>();
 		}
@@ -41,8 +41,12 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		public string Product { get; set; }
 
 		public Dictionary<int, DataTable> SpatialRecords { get; set; }
+
 		//public List<DeviceElementUseDto> DeviceElementUses { get; set; }
-		public List<EquipmentConfigurationDto> EquipmentConfigurations { get; set; }
+
+		//[JsonIgnore]
+		//public List<EquipmentConfigurationDto> EquipmentConfigurations { get; set; }
+
 		public Dictionary<int, List<WorkingDataDto>> WorkingDatas { get; set; }
 
 	}
