@@ -28,10 +28,10 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 			DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
 		}
 
-		[JsonProperty(PropertyName = EntityId)]
+		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 
-		[JsonProperty(Required = Required.Always)]
+		[JsonProperty(Required = Required.Always, Order = -1)]
 		public string Description { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]

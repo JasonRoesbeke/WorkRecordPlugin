@@ -34,7 +34,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 			Notes = new List<string>();
 		}
 
-		[JsonProperty(PropertyName = EntityId)]
+		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]

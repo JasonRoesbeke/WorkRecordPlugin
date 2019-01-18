@@ -24,7 +24,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 			OperationDatas = new List<OperationDataDto>();
 		}
 
-		[JsonProperty(PropertyName = EntityId)]
+		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]

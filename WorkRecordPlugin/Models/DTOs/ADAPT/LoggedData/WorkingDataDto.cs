@@ -32,17 +32,17 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		[JsonIgnore]
 		public int ReferenceId { get; set; }
 
-		[JsonProperty(PropertyName = EntityId)]
+		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 
 		//[JsonProperty(PropertyName = Parent)]
 		//public Guid DeviceElementGuid { get; set; }
 
 		//[JsonProperty(Required = Required.Always)]
-		[JsonProperty(PropertyName = Parent)]
+		[JsonProperty(PropertyName = Parent, Order = -1)]
 		public Guid DeviceElementConfigurationId { get; set; }
 
-		[JsonProperty(Required = Required.Always)]
+		[JsonProperty(Required = Required.Always, Order = 1)]
 		public RepresentationDto Representation { get; set; }
 	}
 }

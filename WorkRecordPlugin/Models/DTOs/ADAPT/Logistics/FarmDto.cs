@@ -26,7 +26,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics
 			Fields = new List<FieldDto>();
 		}
 
-		[JsonProperty(PropertyName = EntityId)]
+		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 
 		[JsonProperty(Required = Required.Always)]

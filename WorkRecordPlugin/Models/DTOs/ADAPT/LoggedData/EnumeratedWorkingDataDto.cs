@@ -20,6 +20,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {
 	public class EnumeratedWorkingDataDto : WorkingDataDto
 	{
+		[JsonProperty(Order = 0)]
 		public UnitOfMeasureDto UnitOfMeasureDto = new UnitOfMeasureDto()
 		{
 			Code = "unitless",

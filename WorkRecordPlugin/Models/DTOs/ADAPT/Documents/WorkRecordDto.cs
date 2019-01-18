@@ -26,7 +26,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 		{
 		}
 
-		[JsonProperty(PropertyName = EntityId)]
+		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 
 		public string Description { get; set; }
