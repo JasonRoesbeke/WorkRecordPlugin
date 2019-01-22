@@ -39,6 +39,22 @@ namespace WorkRecordPlugin
 				//ZipUtil.Zip(Path.Combine(path, fileName + ".zip"), jsonFormat);
 				
 				var exportFileName = Path.Combine(path, fileName + ".json");
+				// Check if no file is already created with same name
+				if (File.Exists(exportFileName))
+				{
+					exportFileName = AlreadyExits(exportFileName);
+
+					//// Check if is the same file. Is not, then do not overwrite
+					//FileInfo alreadyExitsFile = new FileInfo(exportFileName);
+					//FileInfo tempFile = new FileInfo(jsonFormat);
+					//if (alreadyExitsFile.Length != tempFile.Length)
+					//{
+					//	exportFileName = AlreadyExits(exportFileName);
+					//}
+
+				}
+				
+
 				File.Copy(jsonFormat, exportFileName, true);
 			}
 			catch (Exception)
@@ -58,6 +74,22 @@ namespace WorkRecordPlugin
 			return true;
 		}
 
-		
+		private string AlreadyExits(string fullPath)
+		{
+			int count = 1;
+
+			string fileNameOnly = Path.GetFileNameWithoutExtension(fullPath);
+			string extension = Path.GetExtension(fullPath);
+			string path = Path.GetDirectoryName(fullPath);
+			string newFullPath = fullPath;
+
+			while (File.Exists(newFullPath))
+			{
+				string tempFileName = string.Format("{0}({1})", fileNameOnly, count++);
+				newFullPath = Path.Combine(path, tempFileName + extension);
+			}
+			return newFullPath;
+		}
+
 	}
 }
