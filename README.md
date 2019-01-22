@@ -14,7 +14,7 @@ To Do:
 - Export properties:
   - Maximum depth of mapping  
   - More simplified  
-  - Compresion Option
+  - Compression option
     - Protobuf?
     - ZipUtil?
   - Data anonymization
