@@ -41,13 +41,10 @@ namespace WorkRecordPlugin.Mappers
 			var equipmentConfigurationDto = mapper.Map<EquipmentConfiguration, EquipmentConfigurationDto>(equipmentConfiguration);
 			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(equipmentConfiguration.Id);
 
-			// Find the DeviceElementConfigurations
-			var deviceElements = ListUtils.GetAllDeviceElementDtos(summaryDto.DeviceElements);
-			var deviceElementConfigs = deviceElements.SelectMany(de => de.DeviceElementConfigurations);
 			// Connector 1
 			var connector = DataModel.Catalog.Connectors.FirstOrDefault(c => c.Id.ReferenceId == equipmentConfiguration.Connector1Id);
 			equipmentConfigurationDto.Connector1 = MapConnector(equipmentConfiguration.Connector1Id, summaryDto);
-			// Connector 2
+			// Connector 2 (if available)
 			if (equipmentConfiguration.Connector2Id != null)
 			{
 				connector = DataModel.Catalog.Connectors.FirstOrDefault(c => c.Id.ReferenceId == equipmentConfiguration.Connector2Id);
@@ -60,46 +57,22 @@ namespace WorkRecordPlugin.Mappers
 		private ConnectorDto MapConnector(int connectorId, SummaryDto summaryDto)
 		{
 			var connector = DataModel.Catalog.Connectors.FirstOrDefault(c => c.Id.ReferenceId == connectorId);
-			var deviceElementDtos = ListUtils.GetAllDeviceElementDtos(summaryDto.DeviceElements);
-			var deviceElementDto = deviceElementDtos.FirstOrDefault(de => de.DeviceElementConfigurations.FirstOrDefault(dec => dec.ReferenceId == connector.DeviceElementConfigurationId) != null);
-
-			// Map deviceElement and its config
-			DeviceElementConfigurationDto deviceElementConfigurationDto = null;
-			if (deviceElementDto == null)
+			if (connector == null)
 			{
-				deviceElementConfigurationDto = Map(connector.DeviceElementConfigurationId, out int deviceElementId);
-				if (deviceElementConfigurationDto == null)
-				{
-					// ToDo: when deviceElementConfigurationDto could not be found or mapped
-					throw new NullReferenceException();
-				}
+				// ToDo: when connector could not be found in Catalog
+				throw new NullReferenceException();
+			}
 
-				DeviceElement deviceElement = DataModel.Catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == deviceElementId);
-				DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
-				deviceElementDto = deviceElementMapper.FindOrMapInSummaryDto(deviceElement, summaryDto);
-				if (deviceElementDto == null)
-				{
-					// ToDo: when deviceElementDto could not be found or mapped
-					throw new NullReferenceException();
-				}
-				deviceElementDto.DeviceElementConfigurations.Add(deviceElementConfigurationDto);
-			}
-			else
+			// Map or Find deviceElement and its config
+			DeviceElementConfigurationDto deviceElementConfigurationDto = MapOrFind(connector.DeviceElementConfigurationId, summaryDto);
+			if (deviceElementConfigurationDto == null)
 			{
-				deviceElementConfigurationDto = deviceElementDto.DeviceElementConfigurations.FirstOrDefault(dec => dec.ReferenceId == connector.DeviceElementConfigurationId);
-				if (deviceElementConfigurationDto == null)
-				{
-					deviceElementConfigurationDto = Map(connector.DeviceElementConfigurationId, out int deviceElementId);
-					if (deviceElementConfigurationDto == null)
-					{
-						// ToDo: when deviceElementConfigurationDto could not be found or mapped
-						throw new NullReferenceException();
-					}
-				}
+				// ToDo: when deviceElementConfigurationDto could not be found or mapped
+				throw new NullReferenceException();
 			}
-			
+
 			var connectorDto = mapper.Map<Connector, ConnectorDto>(connector);
-			connectorDto.DeviceElementConfigurationGuid = deviceElementDto.DeviceElementConfigurations.FirstOrDefault(dec => dec.ReferenceId == connector.DeviceElementConfigurationId).Guid;
+			connectorDto.DeviceElementConfigurationGuid = deviceElementConfigurationDto.Guid;
 			if (connector.HitchPointId != 0)
 			{
 				var hitchPoint = DataModel.Catalog.HitchPoints.FirstOrDefault(h => h.Id.ReferenceId == connector.HitchPointId);
@@ -109,13 +82,13 @@ namespace WorkRecordPlugin.Mappers
 					throw new NullReferenceException();
 				}
 				connectorDto.HitchPoint = mapper.Map<HitchPoint, HitchPointDto>(hitchPoint);
-				connectorDto.HitchPoint.Guid = UniqueIdMapper.GetUniqueId(hitchPoint.Id);
+				//connectorDto.HitchPoint.Guid = UniqueIdMapper.GetUniqueId(hitchPoint.Id);
 			}
 
 			return connectorDto;
 		}
 
-		private DeviceElementConfigurationDto Map(int deviceElementConfigurationId, out int deviceElementId)
+		private DeviceElementConfigurationDto MapOrFind(int deviceElementConfigurationId, SummaryDto summaryDto)
 		{
 			var deviceElementConfig = DataModel.Catalog.DeviceElementConfigurations.FirstOrDefault(dec => dec.Id.ReferenceId == deviceElementConfigurationId);
 			if (deviceElementConfig == null)
@@ -123,10 +96,9 @@ namespace WorkRecordPlugin.Mappers
 				// ToDo: when deviceElementConfig could not be found in Catalog
 				throw new NullReferenceException();
 			}
-			deviceElementId = deviceElementConfig.DeviceElementId;
 
 			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel);
-			return deviceElementConfigurationMapper.Map(deviceElementConfig);
+			return deviceElementConfigurationMapper.FindOrMapInSummaryDto(deviceElementConfig, summaryDto);
 		}
 	}
 }

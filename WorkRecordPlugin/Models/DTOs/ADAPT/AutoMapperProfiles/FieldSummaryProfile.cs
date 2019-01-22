@@ -149,6 +149,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 			// DeviceElementConfiguration -> Dto
 			CreateMap<DeviceElementConfiguration, DeviceElementConfigurationDto>()
 				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
+				.ForMember(dest => dest.DeviceElementReferenceId, opt => opt.MapFrom(src => src.DeviceElementId))
 				;
 
 			// ImplementConfiguration -> Dto

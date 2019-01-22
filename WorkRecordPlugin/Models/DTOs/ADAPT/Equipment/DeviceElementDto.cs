@@ -25,7 +25,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		public DeviceElementDto() : base(Parent, "Brand", "Series")
 		{
 			ChilderenDeviceElements = new List<DeviceElementDto>();
-			DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
+			//DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
 		}
 
 		[JsonProperty(PropertyName = EntityId, Order = -2)]
@@ -53,7 +53,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public List<DeviceElementDto> ChilderenDeviceElements { get; set; }
 
-		public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
+		//public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
 
 		// ToDo: check if ReferenceId prop needs to be moved to BaseDto
 		[JsonIgnore]

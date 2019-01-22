@@ -121,41 +121,9 @@ namespace WorkRecordPlugin.Mappers
 				throw new NullReferenceException();
 			}
 
-			DeviceElement deviceElement = DataModel.Catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == config.DeviceElementId);
-			if (deviceElement == null)
-			{
-				// ToDo: when deviceElement could not be found in Catalog
-				throw new NullReferenceException();
-			}
-
-			// Add Or Find already-mapped DeviceElementDto
-			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
-			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMapInSummaryDto(deviceElement, summaryDto);
-			if (deviceElementDto == null)
-			{
-				// ToDo: when deviceElementDto could not be found or mapped
-				throw new NullReferenceException();
-			}
-
-			// Check if deviceElementConfiguration is already mapped and added to the deviceElementDto
-			DeviceElementConfigurationDto deviceElementConfigurationDto = deviceElementDto.DeviceElementConfigurations.FirstOrDefault(dec => dec.ReferenceId == config.Id.ReferenceId);
-			if (deviceElementConfigurationDto != null)
-			{
-				return deviceElementConfigurationDto;
-			}
-
-			// Not mapped, so map it and add to deviceElement
+			// Check if deviceElementConfiguration is already mapped and added to the summaryDto. If not, map it and and add reference of deviceElement by either finding or mapping deviceElement itself
 			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel);
-			deviceElementConfigurationDto = deviceElementConfigurationMapper.Map(config);
-			if (deviceElementConfigurationDto == null)
-			{
-				// ToDo: when deviceElementConfigurationDto could not be found or mapped
-				throw new NullReferenceException();
-			}
-
-			// Add DeviceElementConfigurationDto
-			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;
-			deviceElementDto.DeviceElementConfigurations.Add(deviceElementConfigurationDto);
+			DeviceElementConfigurationDto deviceElementConfigurationDto = deviceElementConfigurationMapper.FindOrMapInSummaryDto(config, summaryDto);
 
 			return deviceElementConfigurationDto;
 		}

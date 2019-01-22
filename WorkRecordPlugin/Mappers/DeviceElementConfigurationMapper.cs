@@ -10,10 +10,12 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using System;
+using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AutoMapper;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
+using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 
 namespace WorkRecordPlugin.Mappers
@@ -33,7 +35,41 @@ namespace WorkRecordPlugin.Mappers
 			DataModel = dataModel;
 		}
 
-		public DeviceElementConfigurationDto Map(DeviceElementConfiguration config)
+		public DeviceElementConfigurationDto FindOrMapInSummaryDto(DeviceElementConfiguration deviceElementConfig, SummaryDto summaryDto)
+		{
+			// Find the dto based on referenceId
+			DeviceElementConfigurationDto deviceElementConfigurationDto = summaryDto.DeviceElementConfigurations.Where(de => de.ReferenceId == deviceElementConfig.Id.ReferenceId).FirstOrDefault();
+			if (deviceElementConfigurationDto != null)
+			{
+				return deviceElementConfigurationDto;
+			}
+
+			// Map DeviceElementConfig
+			deviceElementConfigurationDto = Map(deviceElementConfig);
+			if (deviceElementConfigurationDto == null)
+			{
+				// ToDo: when deviceElementConfigurationDto cannot be mapped
+				throw new NullReferenceException();
+			}
+
+			// Add reference to DeviceElementDto
+			DeviceElement deviceElement = DataModel.Catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == deviceElementConfig.DeviceElementId);
+			if (deviceElement == null)
+			{
+				// ToDo: when deviceElement could not be found in Catalog
+				throw new NullReferenceException();
+			}
+			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
+			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMapInSummaryDto(deviceElement, summaryDto);
+			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;
+
+			// Add to SummaryDto
+			summaryDto.DeviceElementConfigurations.Add(deviceElementConfigurationDto);
+
+			return deviceElementConfigurationDto;
+		}
+
+		private DeviceElementConfigurationDto Map(DeviceElementConfiguration config)
 		{
 			var deviceElementConfigurationDto = MapDeviceElement(config);
 			if (deviceElementConfigurationDto == null)
@@ -41,6 +77,7 @@ namespace WorkRecordPlugin.Mappers
 				return null;
 			}
 			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(config.Id);
+
 			return deviceElementConfigurationDto;
 		}
 
@@ -58,6 +95,19 @@ namespace WorkRecordPlugin.Mappers
 			{
 				return mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
 			}
+			// ToDo: ADAPT 2.0
+			//else if (config is EndgunConfiguration)
+			//{
+			//	return mapper.Map<EndgunConfiguration, EndgunConfigurationDto>((EndgunConfiguration)config);
+			//}
+			//else if	(config is IrrSectionConfiguration)
+			//{
+			//	return mapper.Map<IrrSectionConfiguration, IrrSectionConfigurationDto>((IrrSectionConfiguration)config);
+			//}
+			//else if (config is IrrSystemConfiguration)
+			//{
+			//	return mapper.Map<IrrSystemConfiguration, IrrSystemConfigurationDto>((IrrSystemConfiguration)config);
+			//}
 			return null;
 		}
 	}

@@ -31,6 +31,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 			OperationSummaries = new List<OperationSummaryDto>();
 			Users = new List<UserDto>();
 			DeviceElements = new List<DeviceElementDto>();
+			DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
 			Notes = new List<string>();
 		}
 
@@ -60,8 +61,8 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 
 		public List<DeviceElementDto> DeviceElements { get; set; }
 
-		// Change list to Dictonary to have it paired with a depth key value
-		//public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
+		// ToDo: Change list to Dictonary to have it paired with a depth key value
+		public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
 
 		public List<StampedMeteredValuesDto> SummaryData { get; set; }
 

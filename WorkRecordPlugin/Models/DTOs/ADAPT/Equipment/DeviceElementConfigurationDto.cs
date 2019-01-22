@@ -31,14 +31,17 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonProperty(Required = Required.Always, Order = -1)]
 		public string Description { get; set; }
 
-		[JsonIgnore]
 		[JsonProperty(PropertyName = Parent)]
 		public Guid DeviceElementGuid { get; set; }
+
+		[JsonIgnore]
+		public int DeviceElementReferenceId { get; set; }
 
 		public List<NumericRepresentationDto> Offsets { get; set; }
 
 		[JsonIgnore]
 		public int ReferenceId { get; set; }
+
 
 	}
 }
