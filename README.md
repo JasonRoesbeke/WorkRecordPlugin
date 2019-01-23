@@ -18,6 +18,7 @@ To Do:
     - Protobuf?
     - ZipUtil?
   - Data anonymization
+  - ReferenceIds of which WorkRecords to export only
   - ...  
 - ProductDto
 - UserRoleDto
