@@ -38,10 +38,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private DataTable _dataTable;
-		private Dictionary<int, DataTable> _dataTablesPerDepth;
+		private readonly ExportProperties ExportProperties;
 
-		public OperationDataProcessor(ApplicationDataModel dataModel)
+		public OperationDataProcessor(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -49,26 +48,37 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
-		public void ProcessOperationData(OperationData operationData, SummaryDto summaryDto, OperationDataDto operationDataDto, int maximumDepth = -1)
+		public void ProcessOperationData(OperationData operationData, SummaryDto summaryDto, OperationDataDto operationDataDto)
 		{
 			// ToDo: [AgGateway] change to public Func<int,IEnumerable<SpatialRecord>> GetSpatialRecords { get; set; } where int is depth
 			var spatialRecords = operationData.GetSpatialRecords();
 
+			int maximumDepth = -1;
 			if (spatialRecords.Any())
 			{
-				// Requested depth of mapping, default is the maximum
-				if (maximumDepth <= -1 || maximumDepth > operationData.MaxDepth)
+				// Requested depth of mapping
+				if (ExportProperties.MaximumMappingDepth != null)
 				{
+					if (ExportProperties.MaximumMappingDepth >= -1 || ExportProperties.MaximumMappingDepth <= operationData.MaxDepth)
+					{
+						maximumDepth = (int)ExportProperties.MaximumMappingDepth;
+					}
+				}
+				else
+				{
+					// default is the maximum
 					maximumDepth = operationData.MaxDepth;
 				}
-				
+
+
 				// WorkingData per value of depth
 				var metersPerDepth = GetMetersPerDepth(operationData, maximumDepth, summaryDto);
 				operationDataDto.WorkingDatas = metersPerDepth.ToDictionary(d => d.Key, d => d.Value.Select(kvp => kvp.Value).ToList());
 
-				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel);
+				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel, ExportProperties);
 				operationDataDto.SpatialRecords = spatialRecordMapper.Map(spatialRecords, metersPerDepth, maximumDepth, summaryDto);
 			}
 		}

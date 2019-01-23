@@ -27,11 +27,13 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class LoggedDataMapper
 	{
-		public ApplicationDataModel DataModel { get; }
+		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public LoggedDataMapper(ApplicationDataModel dataModel)
+		public LoggedDataMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		public LoggedDataDto Map(WorkRecord workRecord, SummaryDto summaryDto)
@@ -53,7 +55,7 @@ namespace WorkRecordPlugin.Mappers
 		private IEnumerable<OperationDataDto> Map(LoggedData loggedData, SummaryDto summaryDto)
 		{
 			List<OperationDataDto> operationDataDtos = new List<OperationDataDto>();
-			OperationDataMapper operationDataMapper = new OperationDataMapper(DataModel);
+			OperationDataMapper operationDataMapper = new OperationDataMapper(DataModel, ExportProperties);
 			foreach (var operationData in loggedData.OperationData)
 			{
 				OperationDataDto operationDataDto = operationDataMapper.Map(operationData, summaryDto);

@@ -44,7 +44,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public string Brand { get; set; }
 
-		// ToDo: Voyager2 Plugin is not ADAPT 2.0 so DeviceSeries is not mapped!
 		[JsonIgnore]
 		public string Series { get; set; }
 

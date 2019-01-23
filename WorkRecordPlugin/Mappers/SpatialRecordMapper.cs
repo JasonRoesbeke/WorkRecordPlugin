@@ -23,6 +23,7 @@ using AgGateway.ADAPT.Representation.RepresentationSystem;
 using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
 using AgGateway.ADAPT.Representation.UnitSystem;
 using AutoMapper;
+using CoordinateSharp;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
@@ -35,9 +36,12 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 		private Dictionary<int, DataTable> _dataTablesPerDepth;
+		private int _distance;
+		private int _degreeBearing;
 
-		public SpatialRecordMapper(ApplicationDataModel dataModel)
+		public SpatialRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -45,12 +49,21 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		public Dictionary<int, DataTable> Map(IEnumerable<SpatialRecord> spatialRecords, Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>> metersPerDepth, int maximumDepth, SummaryDto summaryDto)
 		{
 			Dictionary<int, List<WorkingDataDto>> _meterDtosPerDepth = new Dictionary<int, List<WorkingDataDto>>();
 			_dataTablesPerDepth = new Dictionary<int, DataTable>();
+
+			if (ExportProperties.Anonymized)
+			{
+				Random rnd = new Random();
+				_distance = rnd.Next(1000, 8000);
+				_degreeBearing = rnd.Next(10, 180);
+			}
+
 			for (int i = 0; i <= maximumDepth; i++)
 			{
 				DataTable dataTable = new DataTable();
@@ -118,11 +131,23 @@ namespace WorkRecordPlugin.Mappers
 				//Fill in the other cells
 				if (spatialRecord.Geometry is Point)
 				{
-					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).Y.ToString(CultureInfo.InvariantCulture); //Y
-					dataRow[GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = (spatialRecord.Geometry as Point).X.ToString(CultureInfo.InvariantCulture); //X
-					if ((spatialRecord.Geometry as Point).Z != null)
+					var latitude = (spatialRecord.Geometry as Point).Y;
+					var longitude = (spatialRecord.Geometry as Point).X;
+					var elevation = (spatialRecord.Geometry as Point).Z;
+
+					if (ExportProperties.Anonymized)
 					{
-						dataRow[GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("m"))] = ((double)(spatialRecord.Geometry as Point).Z).ToString(CultureInfo.InvariantCulture); //Z
+						Coordinate coordinate = new Coordinate(latitude, longitude);
+						coordinate.Move(_distance, _degreeBearing, CoordinateSharp.Shape.Ellipsoid);
+						latitude = coordinate.Latitude.ToDouble();
+						longitude = coordinate.Longitude.ToDouble();
+					}
+
+					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = latitude.ToString(CultureInfo.InvariantCulture); //Y
+					dataRow[GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = longitude.ToString(CultureInfo.InvariantCulture); //X
+					if (elevation != null)
+					{
+						dataRow[GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("m"))] = ((double)elevation).ToString(CultureInfo.InvariantCulture); //Z
 					}
 				}
 			}

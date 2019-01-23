@@ -22,11 +22,13 @@ namespace WorkRecordPlugin.Mappers
 {
 	class WorkRecordMapper
 	{
-		public ApplicationDataModel DataModel { get; }
+		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public WorkRecordMapper(ApplicationDataModel dataModel)
+		public WorkRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		public List<WorkRecordDto> MapWorkRecords()
@@ -72,7 +74,7 @@ namespace WorkRecordPlugin.Mappers
 
 			fieldWorkRecordDto.Summary = summaryDto;
 
-			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel);
+			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel, ExportProperties);
 			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord, summaryDto);
 
 			return fieldWorkRecordDto;

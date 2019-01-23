@@ -30,8 +30,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public OperationDataMapper(ApplicationDataModel dataModel)
+		public OperationDataMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -39,7 +40,9 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
+
 
 		public OperationDataDto Map(OperationData operationData, SummaryDto summaryDto)
 		{
@@ -55,7 +58,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// SpatialRecords & WorkingDatas
-			OperationDataProcessor operationDataProcessor = new OperationDataProcessor(DataModel);
+			OperationDataProcessor operationDataProcessor = new OperationDataProcessor(DataModel, ExportProperties);
 			// ToDo: only process the values of a spatialRecords till the requested maximum depth, this value should be given as a property when using the plugin, '-1' is no limit
 			operationDataProcessor.ProcessOperationData(operationData, summaryDto, operationDataDto);
 

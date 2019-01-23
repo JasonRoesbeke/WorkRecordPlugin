@@ -17,6 +17,7 @@ using System.Reflection;
 using WorkRecordPlugin.Mappers;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Utils;
+using static WorkRecordPlugin.ExportProperties;
 
 namespace WorkRecordPlugin
 {
@@ -41,7 +42,7 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
 			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
-
+			ExportProperties = new ExportProperties();
 		}
 
 		public string Name { get { return "WorkRecord Plugin IoF2020"; } }
@@ -55,9 +56,11 @@ namespace WorkRecordPlugin
 		}
 		public string Owner { get { return "CNH Industrial"; } }
 
+		public ExportProperties ExportProperties { get; private set; }
 
 		public Properties GetProperties(string dataPath)
 		{
+			// ToDo GetProperties
 			return new Properties();
 		}
 
@@ -81,25 +84,56 @@ namespace WorkRecordPlugin
 
 		public IList<ApplicationDataModel> Import(string dataPath, Properties properties = null)
 		{
-			// ToDo: reading the generated JSON files and mapping to ADAPT
+			// ToDo: reading the generated JSON files and mapping it back to ADAPT
 			return null;
 		}
 
 		public void Export(ApplicationDataModel dataModel, string exportPath, Properties properties = null)
 		{
+			ParseExportProperties(properties);
+
 			if (!Directory.Exists(exportPath))
 				Directory.CreateDirectory(exportPath);
 
-			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as CN1 folder/catalog/datacard description...)
+			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as TASKDATA folder/catalog/datacard description...)
 			var newPath = Path.Combine(exportPath, ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
-			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel);
+			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, ExportProperties);
 			// ToDo: check if dataModel contains workrecords
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
 				WorkRecordDto fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
 				bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
 				fieldWorkRecordDto = null; // Memory optimisation?
+			}
+		}
+
+		private void ParseExportProperties(Properties properties)
+		{
+			// MaximumMappingDepth
+			var prop = properties.GetProperty("MaximumMappingDepth");
+			if (prop != null && int.TryParse(prop, out int depth))
+			{
+				ExportProperties.MaximumMappingDepth = depth;
+			}
+
+			// Simplified
+			prop = properties.GetProperty("Simplified");
+			if (prop != null && bool.TryParse(prop, out bool simplified))
+			{
+				ExportProperties.Simplified = simplified;
+			}
+			// Anonymized
+			prop = properties.GetProperty("Anonymized");
+			if (prop != null && bool.TryParse(prop, out bool anonymized))
+			{
+				ExportProperties.Anonymized = anonymized;
+			}
+			// CompressionEnum
+			prop = properties.GetProperty("Compression");
+			if (prop != null && Enum.TryParse<CompressionEnum>(prop, out CompressionEnum result))
+			{
+				ExportProperties.Compression = result;
 			}
 		}
 	}

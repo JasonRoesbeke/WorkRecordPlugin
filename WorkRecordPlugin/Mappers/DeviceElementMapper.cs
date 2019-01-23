@@ -95,7 +95,6 @@ namespace WorkRecordPlugin.Mappers
 				deviceElementDto.Brand = brand.Description;
 			}
 
-			// ToDo: Voyager2 Plugin is not ADAPT 2.0 so DeviceSeries is not mapped!
 			//// Series
 			//var series = DataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == deviceElement.BrandId);
 			//if (series != null)
