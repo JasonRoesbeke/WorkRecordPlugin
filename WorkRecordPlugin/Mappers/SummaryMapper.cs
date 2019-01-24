@@ -30,8 +30,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public SummaryMapper(ApplicationDataModel dataModel)
+		public SummaryMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -39,6 +40,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 
@@ -174,11 +176,9 @@ namespace WorkRecordPlugin.Mappers
 
 				// Fieldboundary
 				IEnumerable<FieldBoundary> fieldBoundaries = DataModel.Catalog.FieldBoundaries.Where(f => f.FieldId == field.Id.ReferenceId);
-				FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel);
+				FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, ExportProperties);
 				fieldDto.FieldBoundaries = fieldBoundaryMapper.Map(fieldBoundaries, fieldDto);
 			}
-
-			
 
 			return fieldSummaryDto;
 		}

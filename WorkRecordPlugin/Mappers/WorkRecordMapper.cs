@@ -59,12 +59,21 @@ namespace WorkRecordPlugin.Mappers
 
 		public WorkRecordDto Map(WorkRecord workRecord)
 		{
+			if (ExportProperties.Anonymized)
+			{
+				// Randomize the Anonymization values for each workRecord
+				Random rnd = new Random();
+				// ToDo: [IoF2020-WP6] Is a distance between 30 & 80 km enough to be anonymized?
+				ExportProperties.RandomDistance = rnd.Next(30000, 80000);
+				ExportProperties.RandomBearing = rnd.Next(10, 180);
+			}
+
 			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
 
 			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueId(workRecord.Id);
 			fieldWorkRecordDto.Description = workRecord.Description;
 
-			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel);
+			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel, ExportProperties);
 			var summaryDto = fieldSummaryMapper.Map(workRecord);
 			if (summaryDto == null)
 			{

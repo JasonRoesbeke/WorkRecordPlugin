@@ -10,9 +10,11 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
+using AgGateway.ADAPT.ApplicationDataModel.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq.Expressions;
 using System.Reflection;
 using WorkRecordPlugin.Mappers;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
@@ -45,7 +47,7 @@ namespace WorkRecordPlugin
 			ExportProperties = new ExportProperties();
 		}
 
-		public string Name { get { return "WorkRecord Plugin IoF2020"; } }
+		public string Name { get { return "WorkRecord Plugin - IoF2020"; } }
 		public string Version
 		{
 			get
@@ -60,14 +62,12 @@ namespace WorkRecordPlugin
 
 		public Properties GetProperties(string dataPath)
 		{
-			// ToDo GetProperties
+			// ToDo GetProperties of a file
 			return new Properties();
 		}
 
 		public void Initialize(string args = null)
 		{
-			// ToDo: add "Data anonymization" option in the plugin!
-			// ToDo: add maximum mapping depth option in the plugin!
 		}
 
 		public bool IsDataCardSupported(string dataPath, Properties properties = null)
@@ -111,30 +111,72 @@ namespace WorkRecordPlugin
 		private void ParseExportProperties(Properties properties)
 		{
 			// MaximumMappingDepth
-			var prop = properties.GetProperty("MaximumMappingDepth");
+			var prop = properties.GetProperty(GetPropertyName(() => ExportProperties.MaximumMappingDepth));
 			if (prop != null && int.TryParse(prop, out int depth))
 			{
 				ExportProperties.MaximumMappingDepth = depth;
 			}
+			// WorkRecordsToBeExported
+			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.WorkRecordsToBeExported));
+			if (prop != null)
+			{
+				if (int.TryParse(prop, out int referenceId))
+				{
+					ExportProperties.WorkRecordsToBeExported.Add(referenceId);
+				}
+			}
+			// OperationTypeToBeExported
+			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.OperationTypeToBeExported));
+			if (prop != null && Enum.TryParse(prop, out OperationTypeEnum operationTypeEnum))
+			{
+				ExportProperties.OperationTypeToBeExported = operationTypeEnum;
+			}
 
 			// Simplified
-			prop = properties.GetProperty("Simplified");
+			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.Simplified));
 			if (prop != null && bool.TryParse(prop, out bool simplified))
 			{
 				ExportProperties.Simplified = simplified;
 			}
 			// Anonymized
-			prop = properties.GetProperty("Anonymized");
+			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.Anonymized));
 			if (prop != null && bool.TryParse(prop, out bool anonymized))
 			{
 				ExportProperties.Anonymized = anonymized;
 			}
 			// CompressionEnum
-			prop = properties.GetProperty("Compression");
-			if (prop != null && Enum.TryParse<CompressionEnum>(prop, out CompressionEnum result))
+			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.Compression));
+			if (prop != null && Enum.TryParse(prop, out CompressionEnum result))
 			{
 				ExportProperties.Compression = result;
 			}
+
+
+
+			// OperationDataInCSV
+			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.OperationDataInCSV));
+			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
+			{
+				ExportProperties.Anonymized = operationDataInCSV;
+			}
+		}
+
+		// <summary>
+		// Get the name of a static or instance property from a property access lambda.
+		// </summary>
+		// <typeparam name="T">Type of the property</typeparam>
+		// <param name="propertyLambda">lambda expression of the form: '() => Class.Property' or '() => object.Property'</param>
+		// <returns>The name of the property</returns>
+		public string GetPropertyName<T>(Expression<Func<T>> propertyLambda)
+		{
+			var me = propertyLambda.Body as MemberExpression;
+
+			if (me == null)
+			{
+				throw new ArgumentException("You must pass a lambda of the form: '() => Class.Property' or '() => object.Property'");
+			}
+
+			return me.Member.Name;
 		}
 	}
 }

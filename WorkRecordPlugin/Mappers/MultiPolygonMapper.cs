@@ -12,14 +12,19 @@
 using System;
 using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
+using CoordinateSharp;
 using GeoJSON.Net.Geometry;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
 	internal class MultiPolygonMapper
 	{
-		public MultiPolygonMapper()
+		private readonly ExportProperties exportProperties;
+
+		public MultiPolygonMapper(ExportProperties exportProperties)
 		{
+			this.exportProperties = exportProperties;
 		}
 
 		public GeoJSON.Net.Geometry.MultiPolygon Map(AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon spatialData)
@@ -54,7 +59,15 @@ namespace WorkRecordPlugin.Mappers
 			// ToDo: Create PointMapper
 			foreach (var point in ADAPTlinearRing.Points)
 			{
-				positions.Add(new Position(point.Y, point.X, point.Z));
+				if (exportProperties.Anonymized)
+				{
+					var movedPoint = AnonymizeUtils.MovePoint(point, exportProperties.RandomDistance, exportProperties.RandomBearing);
+					positions.Add(new Position(movedPoint.Y, movedPoint.X, movedPoint.Z));
+				}
+				else
+				{
+					positions.Add(new Position(point.Y, point.X, point.Z));
+				}
 			}
 
 			return new GeoJSON.Net.Geometry.LineString(positions);

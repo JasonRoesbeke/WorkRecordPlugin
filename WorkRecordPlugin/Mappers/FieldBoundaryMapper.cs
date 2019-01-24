@@ -27,8 +27,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public FieldBoundaryMapper(ApplicationDataModel dataModel)
+		public FieldBoundaryMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -36,6 +37,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		public List<Feature> Map(IEnumerable<FieldBoundary> fieldBoundaries, FieldDto fieldDto)
@@ -83,7 +85,7 @@ namespace WorkRecordPlugin.Mappers
 				properties["ModifiedTime"] = (modifiedTime.TimeStamp1);
 			}
 
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper();
+			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(ExportProperties);
 			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
 
 			Feature fieldBoundaryDto = new Feature(multiPolygon, properties);

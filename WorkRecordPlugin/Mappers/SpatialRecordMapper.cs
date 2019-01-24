@@ -29,6 +29,7 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -38,8 +39,6 @@ namespace WorkRecordPlugin.Mappers
 		private readonly ApplicationDataModel DataModel;
 		private readonly ExportProperties ExportProperties;
 		private Dictionary<int, DataTable> _dataTablesPerDepth;
-		private int _distance;
-		private int _degreeBearing;
 
 		public SpatialRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
@@ -56,13 +55,6 @@ namespace WorkRecordPlugin.Mappers
 		{
 			Dictionary<int, List<WorkingDataDto>> _meterDtosPerDepth = new Dictionary<int, List<WorkingDataDto>>();
 			_dataTablesPerDepth = new Dictionary<int, DataTable>();
-
-			if (ExportProperties.Anonymized)
-			{
-				Random rnd = new Random();
-				_distance = rnd.Next(1000, 8000);
-				_degreeBearing = rnd.Next(10, 180);
-			}
 
 			for (int i = 0; i <= maximumDepth; i++)
 			{
@@ -131,16 +123,17 @@ namespace WorkRecordPlugin.Mappers
 				//Fill in the other cells
 				if (spatialRecord.Geometry is Point)
 				{
-					var latitude = (spatialRecord.Geometry as Point).Y;
-					var longitude = (spatialRecord.Geometry as Point).X;
-					var elevation = (spatialRecord.Geometry as Point).Z;
+					var point = (Point)spatialRecord.Geometry;
+					var latitude = point.Y;
+					var longitude = point.X;
+					var elevation = point.Z;
 
 					if (ExportProperties.Anonymized)
 					{
-						Coordinate coordinate = new Coordinate(latitude, longitude);
-						coordinate.Move(_distance, _degreeBearing, CoordinateSharp.Shape.Ellipsoid);
-						latitude = coordinate.Latitude.ToDouble();
-						longitude = coordinate.Longitude.ToDouble();
+						// Anonymize spatial records by moving the lat/long coordinates
+						var movedPoint = AnonymizeUtils.MovePoint(point, ExportProperties.RandomDistance, ExportProperties.RandomBearing);
+						latitude = movedPoint.Y;
+						longitude = movedPoint.X;
 					}
 
 					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = latitude.ToString(CultureInfo.InvariantCulture); //Y
