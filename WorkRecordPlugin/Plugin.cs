@@ -14,6 +14,7 @@ using AgGateway.ADAPT.ApplicationDataModel.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using WorkRecordPlugin.Mappers;
@@ -103,7 +104,10 @@ namespace WorkRecordPlugin
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
 				WorkRecordDto fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
-				bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
+				if (fieldWorkRecordDto != null)
+				{
+					bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
+				}
 				fieldWorkRecordDto = null; // Memory optimisation?
 			}
 		}

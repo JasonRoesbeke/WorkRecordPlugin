@@ -29,9 +29,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		//[JsonProperty(PropertyName = Parent)]
 		//public Guid DeviceElementUseGuid { get; set; }
 
-		[JsonIgnore]
-		public int ReferenceId { get; set; }
-
 		[JsonProperty(PropertyName = EntityId, Order = -2)]
 		public Guid Guid { get; set; }
 

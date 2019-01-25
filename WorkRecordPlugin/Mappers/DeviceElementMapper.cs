@@ -55,17 +55,24 @@ namespace WorkRecordPlugin.Mappers
 			// Map DeviceElement
 			deviceElementDto = Map(deviceElement);
 
-			// if it is a parentDevice, add to SummaryDto. Else find parentDevice and add it to his childCollection
-			if (deviceElementDto.IsParent)
+			// if it is a parentDevice, add to SummaryDto, else find parentDevice and add it to his childCollection
+			if (deviceElementDto.IsDeviceElementParent)
 			{
 				summaryDto.DeviceElements.Add(deviceElementDto);
 			}
 			else
 			{
-				var parentDeviceElementDto = GetAllDeviceElementDtos(summaryDto.DeviceElements).Where(de => de.ReferenceId == deviceElement.ParentDeviceId).FirstOrDefault();
+				var parentDeviceElement = DataModel.Catalog.DeviceElements.Where(de => de.Id.ReferenceId == deviceElement.ParentDeviceId).FirstOrDefault();
+				if (parentDeviceElement == null)
+				{
+					// ToDo: when parentDeviceElement cannot be found in Catalog
+					throw new NullReferenceException();
+				}
+				//var parentDeviceElementDto = GetAllDeviceElementDtos(summaryDto.DeviceElements).Where(de => de.ReferenceId == deviceElement.ParentDeviceId).FirstOrDefault();
+				var parentDeviceElementDto = FindOrMapInSummaryDto(parentDeviceElement, summaryDto);
 				if (parentDeviceElementDto == null)
 				{
-					// ToDo: when parentDeviceElementDto cannot be found or is not yet mapped
+					// ToDo: when parentDeviceElementDto cannot be mapped/found
 					throw new NullReferenceException();
 				}
 				deviceElementDto.ParentDeviceElementGuid = parentDeviceElementDto.Guid;
@@ -81,26 +88,15 @@ namespace WorkRecordPlugin.Mappers
 			DeviceElementDto deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
 			deviceElementDto.Guid = UniqueIdMapper.GetUniqueId(deviceElement.Id);
 
-			// Manufacturer
+			// Map Baseproperties
+			MapDetails(deviceElementDto, deviceElement.BrandId, deviceElement.SeriesId);
+
+			// Manufacturer -> move to MapDetails in ADAPT 2.0!
 			var manufacturer = DataModel.Catalog.Manufacturers.FirstOrDefault(b => b.Id.ReferenceId == deviceElement.ManufacturerId);
 			if (manufacturer != null)
 			{
-				deviceElementDto.Brand = manufacturer.Description;
+				deviceElementDto.Manufacturer = manufacturer.Description;
 			}
-			
-			// Brand
-			var brand = DataModel.Catalog.Brands.FirstOrDefault(b => b.Id.ReferenceId == deviceElement.BrandId);
-			if (brand != null)
-			{
-				deviceElementDto.Brand = brand.Description;
-			}
-
-			//// Series
-			//var series = DataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == deviceElement.BrandId);
-			//if (series != null)
-			//{
-			//	deviceElementDto.Series = series.Description;
-			//}
 
 			// ToDo: Do we need to map all ChildrenDeviceElements even if they are not referenced in a deviceElementUse in any of the mapped OperationDatas? Currently not.
 			//// Find all ChildrenDeviceElements, map them and add them to this DeviceElement
@@ -118,15 +114,45 @@ namespace WorkRecordPlugin.Mappers
 			//}
 
 			// Parent or not?
-			if (deviceElement.ParentDeviceId == 0 && deviceElementDto.ParentDeviceElementGuid == null)
+			if (deviceElement.ParentDeviceId == 0)
 			{
-				deviceElementDto.IsParent = true;
+				// Parent and no reference to a DeviceModel
+				deviceElementDto.IsDeviceElementParent = true;
 			}
 			else
 			{
-				deviceElementDto.ParentReferenceId = deviceElement.ParentDeviceId;
+				var parentDeviceModel = DataModel.Catalog.DeviceModels.FirstOrDefault(dm => dm.Id.ReferenceId == deviceElement.ParentDeviceId);
+				if (parentDeviceModel != null)
+				{
+					// ParentDevice is a DeviceModel
+					deviceElementDto.IsDeviceElementParent = true;
+					deviceElementDto.DeviceModel = mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
+					MapDetails(deviceElementDto.DeviceModel, parentDeviceModel.BrandId, parentDeviceModel.SeriesId);
+				}
+				else
+				{
+					// Not a parent
+					deviceElementDto.ParentReferenceId = deviceElement.ParentDeviceId;
+				}
 			}
 			return deviceElementDto;
+		}
+
+		private void MapDetails(DeviceModelDto deviceModelDto, int brandId, int seriesId)
+		{
+			// Brand
+			var brand = DataModel.Catalog.Brands.FirstOrDefault(b => b.Id.ReferenceId == brandId);
+			if (brand != null)
+			{
+				deviceModelDto.Brand = brand.Description;
+			}
+
+			//// Series
+			//var series = DataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == seriesId);
+			//if (series != null)
+			//{
+			//	deviceElementDto.Series = series.Description;
+			//}
 		}
 
 		private static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)

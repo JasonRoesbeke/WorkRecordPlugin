@@ -40,12 +40,30 @@ namespace WorkRecordPlugin.Mappers
 		{
 			LoggedDataDto fieldLoggedDataDto = new LoggedDataDto();
 			var LoggedDatas = DataModel.Documents.LoggedData.Where(ld => ld.WorkRecordId == workRecord.Id.ReferenceId);
-			foreach (var loggedData in LoggedDatas)
+			if (LoggedDatas.Any())
 			{
-				IEnumerable<OperationDataDto> operationDatas = Map(loggedData, summaryDto);
-				if (operationDatas != null || operationDatas.Any())
+				foreach (var loggedData in LoggedDatas)
 				{
-					fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
+					IEnumerable<OperationDataDto> operationDatas = Map(loggedData, summaryDto);
+					if (operationDatas != null || operationDatas.Any())
+					{
+						fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
+					}
+				}
+			}
+			else // [AgGateway] Needed for ISOXML plugin (v2.0.0, ADAPT 1.2.0)
+			{
+				foreach (var loggedDataId in workRecord.LoggedDataIds)
+				{
+					var loggedData = DataModel.Documents.LoggedData.Where(ld => ld.Id.ReferenceId == loggedDataId).FirstOrDefault();
+					if (loggedData != null)
+					{
+						IEnumerable<OperationDataDto> operationDatas = Map(loggedData, summaryDto);
+						if (operationDatas != null || operationDatas.Any())
+						{
+							fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
+						}
+					}
 				}
 			}
 

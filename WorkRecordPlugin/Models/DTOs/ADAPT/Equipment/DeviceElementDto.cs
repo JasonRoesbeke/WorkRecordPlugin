@@ -17,35 +17,19 @@ using System.Threading.Tasks;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
-	public class DeviceElementDto : BaseDto
+	public class DeviceElementDto : DeviceModelDto
 	{
 		const string Parent = "CompanyId";
 
 		// ToDo: invstigate add jsonResolver.IgnoreProperty(typeof(Person), "Title");
-		public DeviceElementDto() : base(Parent, "Brand", "Series")
+		public DeviceElementDto() : base(Parent)
 		{
 			ChilderenDeviceElements = new List<DeviceElementDto>();
 			//DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
 		}
 
-		[JsonProperty(PropertyName = EntityId, Order = -2)]
-		public Guid Guid { get; set; }
-
-		[JsonProperty(Required = Required.Always, Order = -1)]
-		public string Description { get; set; }
-
 		[JsonProperty(PropertyName = Parent)]
 		public Guid CompanyGuid { get; set; }
-
-		[JsonProperty(Required = Required.Always)]
-		public string Type { get; set; }
-
-		public string Manufacturer { get; set; }
-
-		public string Brand { get; set; }
-
-		[JsonIgnore]
-		public string Series { get; set; }
 
 		[JsonIgnore]
 		public Guid? ParentDeviceElementGuid { get; set; }
@@ -54,14 +38,17 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		//public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
 
-		// ToDo: check if ReferenceId prop needs to be moved to BaseDto
-		[JsonIgnore]
-		public int ReferenceId { get; set; }
+		[JsonProperty(Required = Required.Always)]
+		public string Type { get; set; }
+
+		public string Manufacturer { get; set; }
 
 		[JsonIgnore]
 		public int ParentReferenceId { get; set; }
 
 		[JsonIgnore]
-		public bool IsParent { get; set; }
+		public bool IsDeviceElementParent { get; set; }
+
+		public DeviceModelDto DeviceModel { get; set; }
 	}
 }

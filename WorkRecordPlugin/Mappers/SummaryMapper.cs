@@ -108,6 +108,10 @@ namespace WorkRecordPlugin.Mappers
 			IEnumerable<Summary> summaries = DataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
 			foreach (var summary in summaries)
 			{
+				if (summary.OperationSummaries == null)
+				{
+					continue;
+				}
 				// OperationData
 				operationSummaries.AddRange(operationSummaryMapper.Map(summary));
 			}
@@ -116,44 +120,53 @@ namespace WorkRecordPlugin.Mappers
 
 		private SummaryDto SetGFFFB(WorkRecord workRecord)
 		{
+			int? growerId = workRecord.GrowerId;
+			List<int> farmIds = workRecord.FarmIds ?? new List<int>();
+			List<int> fieldIds = workRecord.FieldIds ?? new List<int>();
+
+			// [AgGateway] Needed for ISOXML plugin (v2.0.0, ADAPT 1.2.0)
+			// Check also in summaries for receferences to GFF
+			var summaries = DataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
+			foreach (var summary in summaries)
+			{
+				if (summary.GrowerId != null)
+				{
+					if (growerId != (int)summary.GrowerId)
+					{
+						if (growerId != null)
+						{
+							// Should normally not happen that there are references to different growers in 1 workRecord
+							throw new ArgumentException();
+						}
+						growerId = (int)summary.GrowerId;
+					}
+				}
+				if (summary.FarmId != null)
+				{
+					if (!farmIds.Contains((int)summary.FarmId))
+					{
+						farmIds.Add((int)summary.FarmId);
+					}
+				}
+				if (summary.FieldId != null)
+				{
+					if (!fieldIds.Contains((int)summary.FieldId))
+					{
+						fieldIds.Add((int)summary.FieldId);
+					}
+				}
+			}
+
+			Grower grower = DataModel.Catalog.Growers.Find(g => g.Id.ReferenceId == growerId);
+			var farms = DataModel.Catalog.Farms.Where(f => farmIds.Contains(f.Id.ReferenceId));
+			var fields = DataModel.Catalog.Fields.Where(f => fieldIds.Contains(f.Id.ReferenceId));
+
 			SummaryDto fieldSummaryDto = new SummaryDto();
 
-			if (workRecord.FieldIds.Count == 0)
+			if (!fields.Any() || !farms.Any() || grower == null)
 			{
-				return null;
-			}
-
-			Grower grower = DataModel.Catalog.Growers.Find(g => g.Id.ReferenceId == workRecord.GrowerId);
-
-			List<Farm> farms = new List<Farm>();
-			foreach (var farmId in workRecord.FarmIds)
-			{
-				Farm farm = DataModel.Catalog.Farms.Find(f => f.Id.ReferenceId == farmId);
-				if (farm != null)
-				{
-					if (farm.GrowerId == workRecord.GrowerId)
-					{
-						farms.Add(farm);
-					}
-				}
-			}
-
-			List<Field> fields = new List<Field>();
-			foreach (var fieldId in workRecord.FieldIds)
-			{
-				Field field = DataModel.Catalog.Fields.Find(f => f.Id.ReferenceId == fieldId);
-				if (field != null)
-				{
-					if (field.GrowerId == workRecord.GrowerId)
-					{
-						fields.Add(field);
-					}
-				}
-			}
-
-			if (fields.Count == 0 || farms.Count == 0 || grower == null)
-			{
-				return null;
+				// NEED MINIMUM 1 REFERENCE TO A FIELD?
+				return fieldSummaryDto;
 			}
 
 			// Grower
@@ -161,6 +174,7 @@ namespace WorkRecordPlugin.Mappers
 			growerDto.Guid = UniqueIdMapper.GetUniqueId(grower.Id);
 			fieldSummaryDto.Grower = growerDto;
 
+			// Farms
 			foreach (var farm in farms)
 			{
 				// Farm
@@ -168,16 +182,20 @@ namespace WorkRecordPlugin.Mappers
 				farmDto.Guid = UniqueIdMapper.GetUniqueId(farm.Id);
 				growerDto.Farms.Add(farmDto);
 
-				// Field
-				var field = fields.Find(f => f.FarmId == farm.Id.ReferenceId);
-				FieldDto fieldDto = mapper.Map<FieldDto>(field);
-				fieldDto.Guid = UniqueIdMapper.GetUniqueId(field.Id);
-				farmDto.Fields.Add(fieldDto);
+				// Fields
+				var farmFields = fields.Where(f => f.FarmId == farm.Id.ReferenceId);
+				foreach (var field in farmFields)
+				{
+					// Field
+					FieldDto fieldDto = mapper.Map<FieldDto>(field);
+					fieldDto.Guid = UniqueIdMapper.GetUniqueId(field.Id);
+					farmDto.Fields.Add(fieldDto);
 
-				// Fieldboundary
-				IEnumerable<FieldBoundary> fieldBoundaries = DataModel.Catalog.FieldBoundaries.Where(f => f.FieldId == field.Id.ReferenceId);
-				FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, ExportProperties);
-				fieldDto.FieldBoundaries = fieldBoundaryMapper.Map(fieldBoundaries, fieldDto);
+					// Fieldboundary
+					IEnumerable<FieldBoundary> fieldBoundaries = DataModel.Catalog.FieldBoundaries.Where(f => f.FieldId == field.Id.ReferenceId);
+					FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, ExportProperties);
+					fieldDto.FieldBoundaries = fieldBoundaryMapper.Map(fieldBoundaries, fieldDto);
+				}
 			}
 
 			return fieldSummaryDto;

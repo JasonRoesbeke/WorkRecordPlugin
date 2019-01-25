@@ -9,6 +9,7 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
+using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
@@ -25,20 +26,37 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 		}
 
+		public bool WriteInfoFile(string path, string name, string version, string description, ExportProperties exportProperties)
+		{
+			return WriteJson(path, new InfoFile(name, version, description, exportProperties), InfoFileConstants.InfoFileName);
+		}
+
 		public bool Write(string path, WorkRecordDto workRecordDto)
+		{
+			if (workRecordDto.Description == null)
+			{
+				workRecordDto.Description = workRecordDto.Guid.ToString();
+			}
+			return WriteJson(path, workRecordDto, workRecordDto.Description);
+		}
+
+		private bool WriteJson<T>(string path, T objectToSerialize, string fileName) where T : class
 		{
 			var jsonFormat = Path.GetTempFileName();
 			try
 			{
+				// Add pluginFolder name to path
+				path = Path.Combine(path, InfoFileConstants.PluginFolder);
+
 				// Ensure path exists
 				Directory.CreateDirectory(path);
 
-				_internalJsonSerializer.Serialize(workRecordDto, jsonFormat);
-				var fileName = ZipUtils.GetSafeName(workRecordDto.Description);
+				_internalJsonSerializer.Serialize((T)objectToSerialize, jsonFormat);
+				var safeFileName = ZipUtils.GetSafeName(fileName);
 				// ToDo: add option to zip, using ZipUtil => +-8% of original size
 				//ZipUtil.Zip(Path.Combine(path, fileName + ".zip"), jsonFormat);
-				
-				var exportFileName = Path.Combine(path, fileName + ".json");
+
+				var exportFileName = Path.Combine(path, safeFileName + InfoFileConstants.jsonFileExtension);
 				// Check if no file is already created with same name
 				if (File.Exists(exportFileName))
 				{
@@ -53,7 +71,6 @@ namespace WorkRecordPlugin
 					//}
 
 				}
-				
 
 				File.Copy(jsonFormat, exportFileName, true);
 			}
@@ -70,7 +87,7 @@ namespace WorkRecordPlugin
 				catch
 				{
 				}
-			}			
+			}
 			return true;
 		}
 
@@ -91,5 +108,6 @@ namespace WorkRecordPlugin
 			return newFullPath;
 		}
 
+		
 	}
 }

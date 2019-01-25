@@ -10,6 +10,7 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.Common;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace WorkRecordPlugin
@@ -23,6 +24,7 @@ namespace WorkRecordPlugin
 
 		// What to export
 		public int? MaximumMappingDepth { get; set; }
+		[JsonIgnore]
 		public List<int> WorkRecordsToBeExported { get; set; }
 		public OperationTypeEnum OperationTypeToBeExported { get; set; }
 
@@ -32,12 +34,15 @@ namespace WorkRecordPlugin
 
 		// Anonymized data
 		public bool Anonymized { get; set; }
+		[JsonIgnore]
 		public int RandomDistance { get; set; }
+		[JsonIgnore]
 		public int RandomBearing { get; set; }
 
 
 		// Format
 		public CompressionEnum Compression { get; set; }
+
 		public enum CompressionEnum
 		{
 			None,

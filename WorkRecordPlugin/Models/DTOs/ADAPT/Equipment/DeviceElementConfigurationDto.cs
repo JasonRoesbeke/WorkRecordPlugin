@@ -22,7 +22,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public DeviceElementConfigurationDto() : base(Parent , "Offsets")
 		{
-			Offsets = new List<NumericRepresentationDto>();
+			Offsets = new List<NumericRepresentationValueDto>();
 		}
 
 		[JsonProperty(PropertyName = EntityId, Order = -2)]
@@ -37,11 +37,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonIgnore]
 		public int DeviceElementReferenceId { get; set; }
 
-		public List<NumericRepresentationDto> Offsets { get; set; }
-
-		[JsonIgnore]
-		public int ReferenceId { get; set; }
-
-
+		public List<NumericRepresentationValueDto> Offsets { get; set; }
 	}
 }

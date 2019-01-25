@@ -36,5 +36,8 @@ namespace WorkRecordPlugin.Models.DTOs
 
 		[JsonIgnore]
 		public List<string> JsonDetailProperties { get; }
+
+		[JsonIgnore]
+		public int ReferenceId { get; set; }
 	}
 }

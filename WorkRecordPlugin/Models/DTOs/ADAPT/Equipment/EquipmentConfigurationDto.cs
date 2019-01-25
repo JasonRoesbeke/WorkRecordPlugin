@@ -37,10 +37,5 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		public ConnectorDto Connector1 { get; set; }
 
 		public ConnectorDto Connector2 { get; set; }
-
-		[JsonIgnore]
-		public int ReferenceId { get; set; }
-
-
 	}
 }

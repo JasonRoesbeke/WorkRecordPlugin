@@ -136,10 +136,15 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 				.IncludeBase<WorkingData, WorkingDataDto>()
 				;
 
+			// DeviceModel -> Dto
+			CreateMap<DeviceModel, DeviceModelDto>()
+				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
+				;
+
 			// DeviceElement -> Dto
 			CreateMap<DeviceElement, DeviceElementDto>()
-				.ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.DeviceElementType.ToString()))
 				.ForMember(dest => dest.ReferenceId, opt => opt.MapFrom(src => src.Id.ReferenceId))
+				.ForMember(dest => dest.Type, opt => opt.MapFrom(src => src.DeviceElementType.ToString()))
 				;
 
 			// DeviceElementUse -> Dto
