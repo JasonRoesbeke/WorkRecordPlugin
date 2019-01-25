@@ -1,4 +1,4 @@
-# WorkRecordPlugin
+# WorkRecordPlugin (ADAPT 1.2.0)
 ADAPT plugin exporting workRecords in JSON files
 
 
@@ -11,6 +11,7 @@ Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
 
 To Do:
 - ADAPT 2.0!
+- ISOv4Plugin
 - Export properties:
   - Maximum depth of mapping  
   - More simplified  
@@ -18,6 +19,7 @@ To Do:
     - Protobuf?
     - ZipUtil?
   - Data anonymization
+  - ReferenceIds of which WorkRecords to export only
   - ...  
 - ProductDto
 - UserRoleDto
