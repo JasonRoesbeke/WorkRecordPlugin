@@ -54,7 +54,6 @@ namespace WorkRecordPlugin.Mappers
 				}
 			}
 			return mappedRecords;
-
 		}
 
 		public WorkRecordDto Map(WorkRecord workRecord)
@@ -65,7 +64,7 @@ namespace WorkRecordPlugin.Mappers
 				Random rnd = new Random();
 				// ToDo: [IoF2020-WP6] Is a distance between 30 & 80 km enough to be anonymized?
 				ExportProperties.RandomDistance = rnd.Next(30000, 80000);
-				ExportProperties.RandomBearing = rnd.Next(10, 180);
+				ExportProperties.RandomBearing = rnd.Next(0, 360);
 			}
 
 			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
