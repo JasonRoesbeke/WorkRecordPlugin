@@ -31,6 +31,7 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -39,8 +40,9 @@ namespace WorkRecordPlugin.Mappers
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
 		private readonly ExportProperties ExportProperties;
+		private readonly SpatialRecordUtils SpatialRecordUtil;
 
-		public OperationDataProcessor(ApplicationDataModel dataModel, ExportProperties exportProperties)
+		public OperationDataProcessor(ApplicationDataModel dataModel, ExportProperties exportProperties, SpatialRecordUtils spatialRecordUtil)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -49,6 +51,7 @@ namespace WorkRecordPlugin.Mappers
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
 			ExportProperties = exportProperties;
+			SpatialRecordUtil = spatialRecordUtil;
 		}
 
 		public void ProcessOperationData(OperationData operationData, SummaryDto summaryDto, OperationDataDto operationDataDto)
@@ -73,12 +76,11 @@ namespace WorkRecordPlugin.Mappers
 					maximumDepth = operationData.MaxDepth;
 				}
 
-
 				// WorkingData per value of depth
 				var metersPerDepth = GetMetersPerDepth(operationData, maximumDepth, summaryDto);
 				operationDataDto.WorkingDatas = metersPerDepth.ToDictionary(d => d.Key, d => d.Value.Select(kvp => kvp.Value).ToList());
 
-				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel, ExportProperties);
+				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel, ExportProperties, SpatialRecordUtil);
 				operationDataDto.SpatialRecords = spatialRecordMapper.Map(spatialRecords, metersPerDepth, maximumDepth, summaryDto);
 			}
 		}
@@ -93,6 +95,10 @@ namespace WorkRecordPlugin.Mappers
 
 				// Create the list of meters to fill the dataSet.Column
 				var allMeters = new List<KeyValuePair<WorkingData, WorkingDataDto>>();
+
+				// Add TimeStamp, Latitude, Longitude & Elevation
+				// ToDo: should this be added to each depth?
+				allMeters.AddRange(SpatialRecordUtil.GetKvps());
 
 				// DeviceElements & DeviceElementConfigurations
 				foreach (var deviceElementUse in deviceElementUses)

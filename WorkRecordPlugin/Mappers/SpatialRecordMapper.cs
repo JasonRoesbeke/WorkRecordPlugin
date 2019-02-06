@@ -38,9 +38,10 @@ namespace WorkRecordPlugin.Mappers
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
 		private readonly ExportProperties ExportProperties;
+		private readonly SpatialRecordUtils SpatialRecordUtil;
 		private Dictionary<int, DataTable> _dataTablesPerDepth;
 
-		public SpatialRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
+		public SpatialRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties, SpatialRecordUtils spatialRecordUtil)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -49,6 +50,10 @@ namespace WorkRecordPlugin.Mappers
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
 			ExportProperties = exportProperties;
+			SpatialRecordUtil = spatialRecordUtil;
+
+			// Initialise the representations of Base values of a Spatial Record (TimeStamp, Lat, Long, Elev)
+
 		}
 
 		public Dictionary<int, DataTable> Map(IEnumerable<SpatialRecord> spatialRecords, Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>> metersPerDepth, int maximumDepth, SummaryDto summaryDto)
@@ -61,10 +66,10 @@ namespace WorkRecordPlugin.Mappers
 				DataTable dataTable = new DataTable();
 
 				//Add base columns: time, lat, long & elev
-				dataTable.Columns.Add(new DataColumn(GetColumnName(AdditionalRepresentations.vrTimeStamp, i))); //time
-				dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //Y
-				dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //X
-				dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("m")))); //Z
+				//dataTable.Columns.Add(new DataColumn(GetColumnName(AdditionalRepresentations.vrTimeStamp, i))); //time
+				//dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //Y
+				//dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //X
+				//dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("m")))); //Z
 
 				CreateColumns(metersPerDepth[i], dataTable, summaryDto);
 
@@ -136,11 +141,11 @@ namespace WorkRecordPlugin.Mappers
 						longitude = movedPoint.X;
 					}
 
-					dataRow[GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = latitude.ToString(CultureInfo.InvariantCulture); //Y
-					dataRow[GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("arcdeg"))] = longitude.ToString(CultureInfo.InvariantCulture); //X
+					dataRow[SpatialRecordUtil.Latitude.Value.Guid.ToString()] = latitude.ToString(CultureInfo.InvariantCulture); //Y
+					dataRow[SpatialRecordUtil.Longitude.Value.Guid.ToString()] = longitude.ToString(CultureInfo.InvariantCulture); //X
 					if (elevation != null)
 					{
-						dataRow[GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), depth, UnitSystemManager.GetUnitOfMeasure("m"))] = ((double)elevation).ToString(CultureInfo.InvariantCulture); //Z
+						dataRow[SpatialRecordUtil.Elevation.Value.Guid.ToString()] = ((double)elevation).ToString(CultureInfo.InvariantCulture); //Z
 					}
 				}
 			}
@@ -149,7 +154,7 @@ namespace WorkRecordPlugin.Mappers
 			if (spatialRecord.Timestamp != null)
 			{
 				// ToDo: change way how TimeStamp is represented
-				dataRow[GetColumnName(AdditionalRepresentations.vrTimeStamp, depth)] = spatialRecord.Timestamp.ToUniversalTime().ToString();
+				dataRow[SpatialRecordUtil.TimeStamp.Value.Guid.ToString()] = spatialRecord.Timestamp.ToUniversalTime().ToString();
 			}
 
 			dataTable.Rows.Add(dataRow);
@@ -163,14 +168,12 @@ namespace WorkRecordPlugin.Mappers
 				: "";
 
 
-			if (workingDataDto.Representation != null)
-			{
-				if (workingDataDto.Representation is EnumeratedRepresentationDto)
-				{
-
-				}
-
-			}
+			//if (workingDataDto.Representation != null)
+			//{
+			//	if (workingDataDto.Representation is EnumeratedRepresentationDto)
+			//	{
+			//	}
+			//}
 
 			dataRow[workingDataDto.Guid.ToString()] = value;
 		}
@@ -182,17 +185,16 @@ namespace WorkRecordPlugin.Mappers
 				? numericRepresentationValue.Value.Value.ToString(CultureInfo.InvariantCulture)
 				: "";
 
-			if (workingDataDto.Representation != null)
-			{
-				if (workingDataDto.Representation is NumericRepresentationDto)
-				{
-					//if(((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasure == null)
-					{
-						//((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasure = mapper.Map<AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure, UnitOfMeasureDto>(numericRepresentationValue.Value.UnitOfMeasure);
-					}
-				}
-
-			}
+			//if (workingDataDto.Representation != null)
+			//{
+			//	if (workingDataDto.Representation is NumericRepresentationDto)
+			//	{
+			//		//if(((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasure == null)
+			//		{
+			//			//((NumericRepresentationDto)workingDataDto.Representation).UnitOfMeasure = mapper.Map<AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure, UnitOfMeasureDto>(numericRepresentationValue.Value.UnitOfMeasure);
+			//		}
+			//	}
+			//}
 			dataRow[workingDataDto.Guid.ToString()] = value;
 		}
 

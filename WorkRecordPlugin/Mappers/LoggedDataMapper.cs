@@ -22,6 +22,7 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -29,11 +30,14 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly ApplicationDataModel DataModel;
 		private readonly ExportProperties ExportProperties;
+		private readonly SpatialRecordUtils SpatialRecordUtil;
 
 		public LoggedDataMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			DataModel = dataModel;
 			ExportProperties = exportProperties;
+			SpatialRecordUtil = new SpatialRecordUtils();
+
 		}
 
 		public LoggedDataDto Map(WorkRecord workRecord, SummaryDto summaryDto)
@@ -73,7 +77,7 @@ namespace WorkRecordPlugin.Mappers
 		private IEnumerable<OperationDataDto> Map(LoggedData loggedData, SummaryDto summaryDto)
 		{
 			List<OperationDataDto> operationDataDtos = new List<OperationDataDto>();
-			OperationDataMapper operationDataMapper = new OperationDataMapper(DataModel, ExportProperties);
+			OperationDataMapper operationDataMapper = new OperationDataMapper(DataModel, ExportProperties, SpatialRecordUtil);
 			foreach (var operationData in loggedData.OperationData)
 			{
 				OperationDataDto operationDataDto = operationDataMapper.Map(operationData, summaryDto);
