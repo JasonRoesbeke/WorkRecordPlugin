@@ -76,7 +76,7 @@ namespace WorkRecordPlugin.Mappers
 				}
 
 				// Map EquipmentConfig
-				EquipmentConfigurationMapper equipmentConfigurationMapper = new EquipmentConfigurationMapper(DataModel);
+				EquipmentConfigurationMapper equipmentConfigurationMapper = new EquipmentConfigurationMapper(DataModel, ExportProperties);
 				operationDataDto.EquipmentConfigurations.Add(equipmentConfigurationMapper.Map(equipmentConfiguration, summaryDto));
 
 			}

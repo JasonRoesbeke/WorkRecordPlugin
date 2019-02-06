@@ -21,7 +21,6 @@ using AutoMapper;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
-using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
 namespace WorkRecordPlugin.Mappers
@@ -172,7 +171,12 @@ namespace WorkRecordPlugin.Mappers
 			// Grower
 			GrowerDto growerDto = mapper.Map<GrowerDto>(grower);
 			growerDto.Guid = UniqueIdMapper.GetUniqueId(grower.Id);
+			if (ExportProperties.Anonymized)
+			{
+				growerDto.Name = "Grower " + grower.Id.ReferenceId;
+			}
 			fieldSummaryDto.Grower = growerDto;
+
 
 			// Farms
 			foreach (var farm in farms)
@@ -180,6 +184,10 @@ namespace WorkRecordPlugin.Mappers
 				// Farm
 				FarmDto farmDto = mapper.Map<FarmDto>(farm);
 				farmDto.Guid = UniqueIdMapper.GetUniqueId(farm.Id);
+				if (ExportProperties.Anonymized)
+				{
+					farmDto.Description = "Farm " + farm.Id.ReferenceId;
+				}
 				growerDto.Farms.Add(farmDto);
 
 				// Fields
@@ -189,6 +197,10 @@ namespace WorkRecordPlugin.Mappers
 					// Field
 					FieldDto fieldDto = mapper.Map<FieldDto>(field);
 					fieldDto.Guid = UniqueIdMapper.GetUniqueId(field.Id);
+					if (ExportProperties.Anonymized)
+					{
+						fieldDto.Description = "Field " + field.Id.ReferenceId;
+					}
 					farmDto.Fields.Add(fieldDto);
 
 					// Fieldboundary

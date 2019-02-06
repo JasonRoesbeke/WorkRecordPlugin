@@ -27,5 +27,6 @@ namespace WorkRecordPlugin.Utils
 			point.X = coordinate.Longitude.ToDouble();
 			return point;
 		}
+
 	}
 }

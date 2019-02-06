@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
-using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents

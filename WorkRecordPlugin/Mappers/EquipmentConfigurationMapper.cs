@@ -25,8 +25,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public EquipmentConfigurationMapper(ApplicationDataModel dataModel)
+		public EquipmentConfigurationMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -34,12 +35,17 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		public EquipmentConfigurationDto Map(EquipmentConfiguration equipmentConfiguration, SummaryDto summaryDto)
 		{
 			var equipmentConfigurationDto = mapper.Map<EquipmentConfiguration, EquipmentConfigurationDto>(equipmentConfiguration);
 			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(equipmentConfiguration.Id);
+			if (ExportProperties.Anonymized)
+			{
+				equipmentConfigurationDto.Description = "EquipmentConfiguration " + equipmentConfiguration.Id.ReferenceId;
+			}
 
 			// Connector 1
 			var connector = DataModel.Catalog.Connectors.FirstOrDefault(c => c.Id.ReferenceId == equipmentConfiguration.Connector1Id);
@@ -72,6 +78,10 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			var connectorDto = mapper.Map<Connector, ConnectorDto>(connector);
+			if (ExportProperties.Anonymized)
+			{
+				connectorDto.Description = "Connector " + connector.Id.ReferenceId;
+			}
 			connectorDto.DeviceElementConfigurationGuid = deviceElementConfigurationDto.Guid;
 			if (connector.HitchPointId != 0)
 			{
@@ -83,6 +93,10 @@ namespace WorkRecordPlugin.Mappers
 				}
 				connectorDto.HitchPoint = mapper.Map<HitchPoint, HitchPointDto>(hitchPoint);
 				//connectorDto.HitchPoint.Guid = UniqueIdMapper.GetUniqueId(hitchPoint.Id);
+				if (ExportProperties.Anonymized)
+				{
+					connectorDto.HitchPoint.Description = "HitchPoint " + hitchPoint.Id.ReferenceId;
+				}
 			}
 
 			return connectorDto;
@@ -97,7 +111,7 @@ namespace WorkRecordPlugin.Mappers
 				throw new NullReferenceException();
 			}
 
-			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel);
+			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel, ExportProperties);
 			return deviceElementConfigurationMapper.FindOrMapInSummaryDto(deviceElementConfig, summaryDto);
 		}
 	}

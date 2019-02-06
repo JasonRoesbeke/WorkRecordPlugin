@@ -71,7 +71,14 @@ namespace WorkRecordPlugin.Mappers
 			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
 
 			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueId(workRecord.Id);
-			fieldWorkRecordDto.Description = workRecord.Description;
+			if (ExportProperties.Anonymized)
+			{
+				fieldWorkRecordDto.Description = "WorkRecord " + workRecord.Id.ReferenceId;
+			}
+			else
+			{
+				fieldWorkRecordDto.Description = workRecord.Description;
+			}
 
 			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel, ExportProperties);
 			var summaryDto = fieldSummaryMapper.Map(workRecord);

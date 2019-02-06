@@ -138,7 +138,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// Check if deviceElementConfiguration is already mapped and added to the summaryDto. If not, map it and and add reference of deviceElement by either finding or mapping deviceElement itself
-			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel);
+			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel, ExportProperties);
 			DeviceElementConfigurationDto deviceElementConfigurationDto = deviceElementConfigurationMapper.FindOrMapInSummaryDto(config, summaryDto);
 
 			return deviceElementConfigurationDto;

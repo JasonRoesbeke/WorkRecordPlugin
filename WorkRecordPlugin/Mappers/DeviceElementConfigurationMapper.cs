@@ -24,8 +24,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public DeviceElementConfigurationMapper(ApplicationDataModel dataModel)
+		public DeviceElementConfigurationMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -33,6 +34,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		public DeviceElementConfigurationDto FindOrMapInSummaryDto(DeviceElementConfiguration deviceElementConfig, SummaryDto summaryDto)
@@ -59,7 +61,7 @@ namespace WorkRecordPlugin.Mappers
 				// ToDo: when deviceElement could not be found in Catalog
 				throw new NullReferenceException();
 			}
-			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel);
+			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel, ExportProperties);
 			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMapInSummaryDto(deviceElement, summaryDto);
 			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;
 
@@ -77,6 +79,11 @@ namespace WorkRecordPlugin.Mappers
 				return null;
 			}
 			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(config.Id);
+
+			if(ExportProperties.Anonymized)
+			{
+				deviceElementConfigurationDto.Description = "DeviceElementConfiguration " + config.Id.ReferenceId;
+			}
 
 			return deviceElementConfigurationDto;
 		}

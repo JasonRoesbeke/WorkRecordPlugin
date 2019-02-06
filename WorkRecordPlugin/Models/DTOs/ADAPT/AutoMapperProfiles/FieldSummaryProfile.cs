@@ -24,7 +24,6 @@ using System.Threading.Tasks;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
-using WorkRecordPlugin.Models.DTOs.ADAPT.FieldBoundaries;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;

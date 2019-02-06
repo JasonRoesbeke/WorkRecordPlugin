@@ -65,12 +65,6 @@ namespace WorkRecordPlugin.Mappers
 			{
 				DataTable dataTable = new DataTable();
 
-				//Add base columns: time, lat, long & elev
-				//dataTable.Columns.Add(new DataColumn(GetColumnName(AdditionalRepresentations.vrTimeStamp, i))); //time
-				//dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //Y
-				//dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("arcdeg")))); //X
-				//dataTable.Columns.Add(new DataColumn(GetColumnName(RepresentationInstanceList.vrElevation.ToModelRepresentation(), i, UnitSystemManager.GetUnitOfMeasure("m")))); //Z
-
 				CreateColumns(metersPerDepth[i], dataTable, summaryDto);
 
 				foreach (var spatialRecord in spatialRecords)

@@ -58,7 +58,15 @@ namespace WorkRecordPlugin.Mappers
 		{
 			Dictionary<string, object> properties = new Dictionary<string, object>();
 			properties.Add("Id", UniqueIdMapper.GetUniqueId(fieldBoundary.Id));
-			properties.Add("Description", fieldBoundary.Description);
+
+			if (ExportProperties.Anonymized)
+			{
+				properties.Add("Description", "Field " + fieldBoundary.Id.ReferenceId);
+			}
+			else
+			{
+				properties.Add("Description", fieldBoundary.Description);
+			}
 			properties.Add("FieldId", fieldDto.Guid);
 
 			// GpsSource

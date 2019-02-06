@@ -26,8 +26,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
+		private readonly ExportProperties ExportProperties;
 
-		public DeviceElementMapper(ApplicationDataModel dataModel)
+		public DeviceElementMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -35,6 +36,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
+			ExportProperties = exportProperties;
 		}
 
 		/// <summary>
@@ -88,6 +90,11 @@ namespace WorkRecordPlugin.Mappers
 			DeviceElementDto deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
 			deviceElementDto.Guid = UniqueIdMapper.GetUniqueId(deviceElement.Id);
 
+			if (ExportProperties.Anonymized)
+			{
+				deviceElementDto.Description = "deviceElement " + deviceElement.Id.ReferenceId;
+			}
+
 			// Map Baseproperties
 			MapDetails(deviceElementDto, deviceElement.BrandId, deviceElement.SeriesId);
 
@@ -127,6 +134,10 @@ namespace WorkRecordPlugin.Mappers
 					// ParentDevice is a DeviceModel
 					deviceElementDto.IsDeviceElementParent = true;
 					deviceElementDto.DeviceModel = mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
+					if (ExportProperties.Anonymized)
+					{
+						deviceElementDto.DeviceModel.Description = "deviceElement " + parentDeviceModel.Id.ReferenceId;
+					}
 					MapDetails(deviceElementDto.DeviceModel, parentDeviceModel.BrandId, parentDeviceModel.SeriesId);
 				}
 				else
