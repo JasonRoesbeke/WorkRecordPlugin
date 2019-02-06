@@ -28,6 +28,7 @@ namespace WorkRecordPlugin
 	{
 		private readonly InternalJsonSerializer _internalJsonSerializer;
 		private readonly WorkRecordExporter _workRecordExporter;
+		private readonly InfoFileReader _infoFileReader;
 
 		// ToDo: "context": "url...",
 		// ToDo: "version plugin": "x.x.x-pre-alpha"
@@ -46,6 +47,7 @@ namespace WorkRecordPlugin
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
 			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
 			ExportProperties = new ExportProperties();
+			_infoFileReader = new InfoFileReader();
 		}
 
 		public string Name { get { return "WorkRecord Plugin - IoF2020"; } }
@@ -61,6 +63,7 @@ namespace WorkRecordPlugin
 
 		public ExportProperties ExportProperties { get; private set; }
 
+
 		public Properties GetProperties(string dataPath)
 		{
 			// ToDo GetProperties of a file
@@ -71,10 +74,39 @@ namespace WorkRecordPlugin
 		{
 		}
 
-		public bool IsDataCardSupported(string dataPath, Properties properties = null)
+		public bool IsDataCardSupported(string path, Properties properties = null)
 		{
+			if (!path.EndsWith(InfoFileConstants.PluginFolder))
+			{
+				path = Path.Combine(path, InfoFileConstants.PluginFolder);
+			}
+
+			// Check if folder contains any json files
+			if (!(Directory.Exists(path) && Directory.GetFiles(path, String.Format(InfoFileConstants.FileFormat, "*"), SearchOption.AllDirectories).Any()))
+			{
+				return false;
+			}
+
+
+
+			// First read root folder
+			// Read InfoFileName & check if same version
+			var fileName = Path.Combine(path, InfoFileConstants.InfoFileName);
+			var infoFile = _infoFileReader.ReadVersionInfoModel(fileName);
+			if (infoFile == null)
+			{
+				// ToDo: through subDirectories
+				return false;
+			}
+
+			// Check stated versions are equal to current ADAPT- & pluginVersion
+			if (infoFile.ADAPTVersion != Assembly.LoadFrom("AgGateway.ADAPT.ApplicationDataModel.dll").GetName().Version.ToString() || infoFile.VersionPlugin != Version)
+			{
+				return false;
+			}
+
 			// ToDo: Import support
-			return false;
+			return true;
 		}
 
 		public IList<IError> ValidateDataOnCard(string dataPath, Properties properties = null)
@@ -85,7 +117,11 @@ namespace WorkRecordPlugin
 
 		public IList<ApplicationDataModel> Import(string dataPath, Properties properties = null)
 		{
-			// ToDo: reading the generated JSON files and mapping it back to ADAPT
+			if(!IsDataCardSupported(dataPath, properties))
+			{
+				return null;
+			}
+
 			return null;
 		}
 
@@ -100,6 +136,7 @@ namespace WorkRecordPlugin
 			var newPath = Path.Combine(exportPath, ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
 			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, ExportProperties);
+			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, ExportProperties);
 			// ToDo: check if dataModel contains workrecords
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
