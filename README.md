@@ -9,11 +9,19 @@ To
 
 Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
 
+
+- Export properties:
+  - Maximum depth of mapping  
+- Version File/Header containing additional metadata 
+  - Version plugin
+  - Version ADAPT
+  - Date of conversion
+
+
 To Do:
 - ADAPT 2.0!
 - ISOv4Plugin
-- Export properties:
-  - Maximum depth of mapping  
+- Export properties: 
   - More simplified  
   - Compression option
     - Protobuf?
@@ -25,10 +33,6 @@ To Do:
 - UserRoleDto
 - CompoundIdentifiers!
   - In JSON-file itself or seperated JSON-file such as a LinkList (~ISO11783-10)
-- Version File/Header containing additional metadata 
-  - Version plugin
-  - Version ADAPT
-  - Date of conversion
 - Import!
 
   
