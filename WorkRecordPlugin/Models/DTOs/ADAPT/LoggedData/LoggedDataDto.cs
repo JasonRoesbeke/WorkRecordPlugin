@@ -32,5 +32,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		public Guid FieldWorkRecordGuid { get; set; }
 
 		public List<OperationDataDto> OperationDatas { get; set; }
+
+		public string Description { get; set; }
 	}
 }
