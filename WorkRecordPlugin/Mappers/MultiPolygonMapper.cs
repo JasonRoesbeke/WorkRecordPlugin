@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using CoordinateSharp;
+using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using WorkRecordPlugin.Utils;
 
@@ -20,16 +21,17 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class MultiPolygonMapper
 	{
-		private readonly PluginProperties exportProperties;
+		private readonly PluginProperties Properties;
 
-		public MultiPolygonMapper(PluginProperties exportProperties)
+		public MultiPolygonMapper(PluginProperties properties)
 		{
-			this.exportProperties = exportProperties;
+			Properties = properties;
 		}
 
+		#region Export
 		public GeoJSON.Net.Geometry.MultiPolygon Map(AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon spatialData)
 		{
-			List<GeoJSON.Net.Geometry.Polygon> polygons = new List<GeoJSON.Net.Geometry.Polygon>();
+			var polygons = new List<GeoJSON.Net.Geometry.Polygon>();
 			// ToDo: Create PolygonMapper
 			foreach (var ADAPTpolygon in spatialData.Polygons)
 			{
@@ -42,8 +44,10 @@ namespace WorkRecordPlugin.Mappers
 
 		private GeoJSON.Net.Geometry.Polygon MapPolygon(AgGateway.ADAPT.ApplicationDataModel.Shapes.Polygon ADAPTpolygon)
 		{
-			List<GeoJSON.Net.Geometry.LineString> lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
+			var lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
 			// ToDo: Create LinearRingMapper
+
+			// First LineString is ExteriorRing
 			lineStrings.Add(MapLinearRing(ADAPTpolygon.ExteriorRing));
 			foreach (var ADAPTInteriorLinearRing in ADAPTpolygon.InteriorRings)
 			{
@@ -55,13 +59,13 @@ namespace WorkRecordPlugin.Mappers
 
 		private GeoJSON.Net.Geometry.LineString MapLinearRing(LinearRing ADAPTlinearRing)
 		{
-			List<Position> positions = new List<Position>();
+			var positions = new List<Position>();
 			// ToDo: Create PointMapper
 			foreach (var point in ADAPTlinearRing.Points)
 			{
-				if (exportProperties.Anonymized)
+				if (Properties.Anonymized)
 				{
-					var movedPoint = AnonymizeUtils.MovePoint(point, exportProperties.RandomDistance, exportProperties.RandomBearing);
+					var movedPoint = AnonymizeUtils.MovePoint(point, Properties.RandomDistance, Properties.RandomBearing);
 					positions.Add(new Position(movedPoint.Y, movedPoint.X, movedPoint.Z));
 				}
 				else
@@ -72,5 +76,60 @@ namespace WorkRecordPlugin.Mappers
 
 			return new GeoJSON.Net.Geometry.LineString(positions);
 		}
+		#endregion
+
+		#region Import
+
+		public AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon Map(Feature fieldBoundaryGeoJson)
+		{
+			var multiPolygon = new AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon();
+
+			var multiPolygonGeoJson = (GeoJSON.Net.Geometry.MultiPolygon)fieldBoundaryGeoJson.Geometry;
+
+			foreach (var polygonGeoJson in multiPolygonGeoJson.Coordinates)
+			{
+				var polygon = MapPolygon(polygonGeoJson);
+				multiPolygon.Polygons.Add(polygon);
+			}
+
+			return multiPolygon;
+		}
+
+		private AgGateway.ADAPT.ApplicationDataModel.Shapes.Polygon MapPolygon(GeoJSON.Net.Geometry.Polygon polygonGeoJson)
+		{
+			var polygon = new AgGateway.ADAPT.ApplicationDataModel.Shapes.Polygon();
+
+			// First LineString is ExteriorRing
+			for (int i = 0; i < polygonGeoJson.Coordinates.Count; i++)
+			{
+				if (i == 0)
+				{
+					polygon.ExteriorRing = MapLinearRing(polygonGeoJson.Coordinates[i]);
+				}
+				else
+				{
+					polygon.InteriorRings.Add(MapLinearRing(polygonGeoJson.Coordinates[i]));
+				}
+			}
+
+			return polygon;
+		}
+
+		private LinearRing MapLinearRing(GeoJSON.Net.Geometry.LineString lineString)
+		{
+			LinearRing linearRing = new LinearRing();
+
+			foreach (var position in lineString.Coordinates)
+			{
+				AgGateway.ADAPT.ApplicationDataModel.Shapes.Point point = new AgGateway.ADAPT.ApplicationDataModel.Shapes.Point();
+				point.Y = position.Latitude;
+				point.X = position.Longitude;
+				point.Z = position.Altitude;
+				linearRing.Points.Add(point);
+			}
+
+			return linearRing;
+		}
+		#endregion
 	}
 }

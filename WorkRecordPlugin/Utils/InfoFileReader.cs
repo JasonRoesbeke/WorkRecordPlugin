@@ -27,12 +27,15 @@ namespace WorkRecordPlugin.Utils
 			AssemblyVersion = assemblyVersion;
 		}
 
-		public InfoFile ReadVersionInfoModel(string filename)
+		public InfoFile ReadVersionInfoModel(string path)
 		{
-			if (!File.Exists(filename))
+			var fileName = Path.Combine(path, string.Format(InfoFileConstants.FileFormat, InfoFileConstants.InfoFileName));
+			if (!File.Exists(fileName))
+			{
 				return null;
+			}
 
-			var fileString = File.ReadAllText(filename);
+			var fileString = File.ReadAllText(fileName);
 
 			var model = JsonConvert.DeserializeObject<InfoFile>(fileString);
 			return model;
@@ -60,8 +63,7 @@ namespace WorkRecordPlugin.Utils
 			}
 
 			// Find InfoFileName
-			var fileName = Path.Combine(path, string.Format(InfoFileConstants.FileFormat, InfoFileConstants.InfoFileName));
-			var infoFile = ReadVersionInfoModel(fileName);
+			var infoFile = ReadVersionInfoModel(path);
 			if (infoFile == null)
 			{
 				// ToDo: through subDirectories

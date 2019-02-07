@@ -27,9 +27,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
+		private readonly PluginProperties Properties;
 
-		public FieldBoundaryMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
+		public FieldBoundaryMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -37,7 +37,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
-			ExportProperties = exportProperties;
+			Properties = properties;
 		}
 
 		public List<Feature> Map(IEnumerable<FieldBoundary> fieldBoundaries, FieldDto fieldDto)
@@ -57,17 +57,17 @@ namespace WorkRecordPlugin.Mappers
 		private Feature Map(FieldBoundary fieldBoundary, FieldDto fieldDto)
 		{
 			Dictionary<string, object> properties = new Dictionary<string, object>();
-			properties.Add("Id", UniqueIdMapper.GetUniqueId(fieldBoundary.Id));
+			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id));
 
-			if (ExportProperties.Anonymized)
+			if (Properties.Anonymized)
 			{
-				properties.Add("Description", "Field " + fieldBoundary.Id.ReferenceId);
+				properties.Add("Description", "Field boundary " + fieldBoundary.Id.ReferenceId);
 			}
 			else
 			{
 				properties.Add("Description", fieldBoundary.Description);
 			}
-			properties.Add("FieldId", fieldDto.Guid);
+			//properties.Add("FieldId", fieldDto.Guid);
 
 			// GpsSource
 			var gpsSource = fieldBoundary.GpsSource;
@@ -93,12 +93,24 @@ namespace WorkRecordPlugin.Mappers
 				properties["ModifiedTime"] = (modifiedTime.TimeStamp1);
 			}
 
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(ExportProperties);
+			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(Properties);
 			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
 
 			Feature fieldBoundaryDto = new Feature(multiPolygon, properties);
 
 			return fieldBoundaryDto;
+		}
+
+		public FieldBoundary Map(Feature fieldBoundaryGeoJson)
+		{
+			FieldBoundary fieldBoundary = new FieldBoundary();
+
+			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(Properties);
+			fieldBoundary.SpatialData = multiPolygonMapper.Map(fieldBoundaryGeoJson);
+
+			// ToDo: map properties of a fieldBoundary in GeoJson
+
+			return fieldBoundary;
 		}
 	}
 }

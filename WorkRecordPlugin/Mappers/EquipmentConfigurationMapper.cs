@@ -41,7 +41,7 @@ namespace WorkRecordPlugin.Mappers
 		public EquipmentConfigurationDto Map(EquipmentConfiguration equipmentConfiguration, SummaryDto summaryDto)
 		{
 			var equipmentConfigurationDto = mapper.Map<EquipmentConfiguration, EquipmentConfigurationDto>(equipmentConfiguration);
-			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(equipmentConfiguration.Id);
+			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(equipmentConfiguration.Id);
 			if (ExportProperties.Anonymized)
 			{
 				equipmentConfigurationDto.Description = "EquipmentConfiguration " + equipmentConfiguration.Id.ReferenceId;

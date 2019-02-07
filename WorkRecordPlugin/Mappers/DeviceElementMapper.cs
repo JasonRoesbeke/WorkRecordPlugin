@@ -88,7 +88,7 @@ namespace WorkRecordPlugin.Mappers
 		{
 			// Map
 			DeviceElementDto deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
-			deviceElementDto.Guid = UniqueIdMapper.GetUniqueId(deviceElement.Id);
+			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id);
 
 			if (ExportProperties.Anonymized)
 			{

@@ -24,8 +24,8 @@ namespace WorkRecordPlugin.Mappers
 		/* LinkList idea:
 		 * For each GUID: all the uniqueIds + as 'checksum' the ADAPT ReferenceId
 		 * In WebAPI could be an URL to save bytes in file
-		 */ 
-		static public Guid GetUniqueId(CompoundIdentifier id, string preferredSource = null)
+		 */
+		public static Guid GetUniqueGuid(CompoundIdentifier id, string preferredSource = null)
 		{
 			if (id.UniqueIds.Count == 0)
 			{
@@ -58,7 +58,7 @@ namespace WorkRecordPlugin.Mappers
 
 			// 4rd: if idType is LongInt
 			// ToDo: [AgGateway] Ask AgGateway if IdTypeEnum.LongInt is int32
-			if (GetUniqueIdFromLong(id.UniqueIds, out guid))
+			if (GetUniqueGuidFromLong(id.UniqueIds, out guid))
 			{
 				return guid;
 			}
@@ -79,7 +79,7 @@ namespace WorkRecordPlugin.Mappers
 			return Guid.NewGuid();
 		}
 
-		static private bool GetUniqueIdFromSource(CompoundIdentifier id, string preferredSource, out Guid guid)
+		private static bool GetUniqueIdFromSource(CompoundIdentifier id, string preferredSource, out Guid guid)
 		{
 			var preferredUniqueIds = id.UniqueIds.Where(ud => ud.Source == preferredSource);
 			if (preferredUniqueIds.Any())
@@ -96,7 +96,7 @@ namespace WorkRecordPlugin.Mappers
 			return false;
 		}
 
-		static private bool GetUniqueId(IEnumerable<UniqueId> GuidUniqueIds, out Guid guid)
+		private static bool GetUniqueId(IEnumerable<UniqueId> GuidUniqueIds, out Guid guid)
 		{
 			if (GuidUniqueIds.Count() > 0)
 			{
@@ -112,7 +112,7 @@ namespace WorkRecordPlugin.Mappers
 			return false;
 		}
 
-		static private bool GetUniqueIdFromLong(List<UniqueId> uniqueIds, out Guid guid)
+		private static bool GetUniqueGuidFromLong(List<UniqueId> uniqueIds, out Guid guid)
 		{
 			var list = uniqueIds.Where(ui => ui.IdType == IdTypeEnum.LongInt);
 
@@ -129,6 +129,17 @@ namespace WorkRecordPlugin.Mappers
 			}
 			guid = Guid.Empty;
 			return false;
-		}		
+		}
+
+		public static UniqueId GetUniqueId(Guid guid, InfoFile infoFile)
+		{
+			return new UniqueId
+			{
+				Id = guid.ToString(),
+				IdType = IdTypeEnum.UUID,
+				SourceType = IdSourceTypeEnum.URI,
+				Source = infoFile.NamePlugin + " " + infoFile.VersionPlugin
+			};
+		}
 	}
 }

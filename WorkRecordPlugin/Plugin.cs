@@ -46,7 +46,7 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
 			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
-			Properties = new PluginProperties();
+			CustomProperties = new PluginProperties();
 			_infoFileReader = new InfoFileReader(AssemblyVersion);
 		}
 
@@ -110,7 +110,7 @@ namespace WorkRecordPlugin
 				{
 					if (_infoFileReader.ValidateMinimalFolderStructure(folder))
 					{
-						workRecordFolders.Add(path);
+						workRecordFolders.Add(folder);
 					}
 				}
 				return workRecordFolders;
@@ -131,16 +131,29 @@ namespace WorkRecordPlugin
 				return null;
 			}
 
-			ParseImportProperties(properties);
+			
+
 
 			List<ApplicationDataModel> adms = new List<ApplicationDataModel>();
 
 			foreach (string folder in workRecordFolders)
 			{
-				//Deserialize each workRecord.json as a seperate adm 
+				var infoFile = _infoFileReader.ReadVersionInfoModel(folder);
+				if (infoFile == null)
+				{
+					continue;
+				}
+				ParseImportProperties(properties, infoFile);
+
 				WorkRecordImporter workRecordImporter = new WorkRecordImporter(CustomProperties);
-				List<ApplicationDataModel> dataModels = workRecordImporter.Import(folder);
-				adms.AddRange(dataModels);
+				//Deserialize each workRecord.json
+				List<WorkRecordDto> workRecordDtos = WorkRecordImporter.ReadFolder(folder);
+				//Map each WorkRecordDto to a seperated adm
+				var dataModels = workRecordImporter.Import(workRecordDtos);
+				if (dataModels != null)
+				{
+					adms.AddRange(dataModels);
+				}
 			}
 
 			return adms;
@@ -158,8 +171,8 @@ namespace WorkRecordPlugin
 			// Path of exportfolder: "PluginFolder - [Name of Catalog]"
 			var newPath = Path.Combine(exportPath, InfoFileConstants.PluginFolderPrefix + "-" + ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
-			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, Properties);
-			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, Properties);
+			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
+			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, CustomProperties);
 			// ToDo: check if dataModel contains workrecords
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
@@ -175,83 +188,86 @@ namespace WorkRecordPlugin
 		private void ParseExportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties)
 		{
 			// MaximumMappingDepth
-			var prop = properties.GetProperty(GetPropertyName(() => PluginProperties.MaximumMappingDepth));
+			var prop = properties.GetProperty(GetPropertyName(() => CustomProperties.MaximumMappingDepth));
 			if (prop != null && int.TryParse(prop, out int depth))
 			{
-				PluginProperties.MaximumMappingDepth = depth;
+				CustomProperties.MaximumMappingDepth = depth;
 			}
 			// WorkRecordsToBeExported
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.WorkRecordsToBeExported));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.WorkRecordsToBeExported));
 			if (prop != null)
 			{
 				if (int.TryParse(prop, out int referenceId))
 				{
-					PluginProperties.WorkRecordsToBeExported.Add(referenceId);
+					CustomProperties.WorkRecordsToBeExported.Add(referenceId);
 				}
 			}
 			// OperationTypeToBeExported
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.OperationTypeToBeExported));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationTypeToBeExported));
 			if (prop != null && Enum.TryParse(prop, out OperationTypeEnum operationTypeEnum))
 			{
-				PluginProperties.OperationTypeToBeExported = operationTypeEnum;
+				CustomProperties.OperationTypeToBeExported = operationTypeEnum;
 			}
 
 			// Simplified
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Simplified));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Simplified));
 			if (prop != null && bool.TryParse(prop, out bool simplified))
 			{
-				PluginProperties.Simplified = simplified;
+				CustomProperties.Simplified = simplified;
 			}
 			// Anonymized
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Anonymized));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Anonymized));
 			if (prop != null && bool.TryParse(prop, out bool anonymized))
 			{
-				PluginProperties.Anonymized = anonymized;
+				CustomProperties.Anonymized = anonymized;
 			}
 			// CompressionEnum
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Compression));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Compression));
 			if (prop != null && Enum.TryParse(prop, out CompressionEnum result))
 			{
-				PluginProperties.Compression = result;
+				CustomProperties.Compression = result;
 			}
 
 
 
 			// OperationDataInCSV
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.OperationDataInCSV));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCSV));
 			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
 			{
-				PluginProperties.OperationDataInCSV = operationDataInCSV;
+				CustomProperties.OperationDataInCSV = operationDataInCSV;
 			}
 		}
 
-		private void ParseImportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties)
+		private void ParseImportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties, InfoFile infoFile)
 		{
 			// Simplified
-			var prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Simplified));
+			var prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Simplified));
 			if (prop != null && bool.TryParse(prop, out bool simplified))
 			{
-				PluginProperties.Simplified = simplified;
+				CustomProperties.Simplified = simplified;
 			}
 			// Anonymized
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Anonymized));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Anonymized));
 			if (prop != null && bool.TryParse(prop, out bool anonymized))
 			{
-				PluginProperties.Anonymized = anonymized;
+				CustomProperties.Anonymized = anonymized;
 			}
 			// CompressionEnum
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Compression));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Compression));
 			if (prop != null && Enum.TryParse(prop, out CompressionEnum result))
 			{
-				PluginProperties.Compression = result;
+				CustomProperties.Compression = result;
 			}
 
 			// OperationDataInCSV
-			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.OperationDataInCSV));
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCSV));
 			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
 			{
-				PluginProperties.OperationDataInCSV = operationDataInCSV;
+				CustomProperties.OperationDataInCSV = operationDataInCSV;
 			}
+
+			// To get Source string for UniqueIds
+			CustomProperties.InfoFile = infoFile;
 		}
 
 		// <summary>

@@ -78,7 +78,7 @@ namespace WorkRecordPlugin.Mappers
 			{
 				return null;
 			}
-			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueId(config.Id);
+			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(config.Id);
 
 			if(ExportProperties.Anonymized)
 			{

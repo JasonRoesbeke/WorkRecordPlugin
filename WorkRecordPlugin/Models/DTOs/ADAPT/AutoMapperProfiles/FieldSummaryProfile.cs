@@ -46,14 +46,17 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles
 
 			// Grower -> Dto
 			CreateMap<Grower, GrowerDto>()
+				.ReverseMap()
 				;
 
 			// Farm -> Dto
 			CreateMap<Farm, FarmDto>()
+				.ReverseMap()
 				;
 
 			// Field -> Dto
 			CreateMap<Field, FieldDto>()
+				.ReverseMap()
 				;
 
 			// Person -> Dto

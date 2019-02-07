@@ -60,7 +60,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Documents
 
 		public List<DeviceElementDto> DeviceElements { get; set; }
 
-		// ToDo: Change list to Dictonary to have it paired with a depth key value
 		public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
 
 		public List<StampedMeteredValuesDto> SummaryData { get; set; }

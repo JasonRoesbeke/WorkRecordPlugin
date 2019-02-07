@@ -23,12 +23,12 @@ namespace WorkRecordPlugin.Mappers
 	class WorkRecordMapper
 	{
 		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
+		private readonly PluginProperties PluginProperties;
 
-		public WorkRecordMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
+		public WorkRecordMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
 			DataModel = dataModel;
-			ExportProperties = exportProperties;
+			PluginProperties = properties;
 		}
 
 		public List<WorkRecordDto> MapWorkRecords()
@@ -58,20 +58,20 @@ namespace WorkRecordPlugin.Mappers
 
 		public WorkRecordDto Map(WorkRecord workRecord)
 		{
-			if (ExportProperties.Anonymized)
+			if (PluginProperties.Anonymized)
 			{
 				// Randomize the Anonymization values for each workRecord
 				Random rnd = new Random();
 				// ToDo: [IoF2020-WP6] Is a distance between 30 & 80 km enough to be anonymized?
 				// ToDo: tip: move it to the sea
-				ExportProperties.RandomDistance = rnd.Next(30000, 80000);
-				ExportProperties.RandomBearing = rnd.Next(0, 360);
+				PluginProperties.RandomDistance = rnd.Next(30000, 80000);
+				PluginProperties.RandomBearing = rnd.Next(0, 360);
 			}
 
 			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
 
-			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueId(workRecord.Id);
-			if (ExportProperties.Anonymized)
+			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueGuid(workRecord.Id);
+			if (PluginProperties.Anonymized)
 			{
 				fieldWorkRecordDto.Description = "WorkRecord " + workRecord.Id.ReferenceId;
 			}
@@ -80,7 +80,7 @@ namespace WorkRecordPlugin.Mappers
 				fieldWorkRecordDto.Description = workRecord.Description;
 			}
 
-			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel, ExportProperties);
+			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel, PluginProperties);
 			var summaryDto = fieldSummaryMapper.Map(workRecord);
 			if (summaryDto == null)
 			{
@@ -90,10 +90,16 @@ namespace WorkRecordPlugin.Mappers
 
 			fieldWorkRecordDto.Summary = summaryDto;
 
-			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel, ExportProperties);
+			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel, PluginProperties);
 			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord, summaryDto);
 
 			return fieldWorkRecordDto;
+		}
+
+		public void Map(WorkRecordDto workRecordDto)
+		{
+			SummaryMapper summaryMapper = new SummaryMapper(DataModel, PluginProperties);
+			summaryMapper.Map(workRecordDto);
 		}
 	}
 }

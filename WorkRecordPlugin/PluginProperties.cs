@@ -44,6 +44,7 @@ namespace WorkRecordPlugin
 		// What to Import
 		[JsonIgnore]
 		public List<Guid> WorkRecordsToBeImported { get; set; }
+		public InfoFile InfoFile { get; set; }
 
 		// Format
 		public CompressionEnum Compression { get; set; }

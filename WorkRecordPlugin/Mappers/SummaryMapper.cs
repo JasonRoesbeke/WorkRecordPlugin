@@ -29,9 +29,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
+		private readonly PluginProperties Properties;
 
-		public SummaryMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
+		public SummaryMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -39,7 +39,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
-			ExportProperties = exportProperties;
+			Properties = properties;
 		}
 
 
@@ -170,8 +170,8 @@ namespace WorkRecordPlugin.Mappers
 
 			// Grower
 			GrowerDto growerDto = mapper.Map<GrowerDto>(grower);
-			growerDto.Guid = UniqueIdMapper.GetUniqueId(grower.Id);
-			if (ExportProperties.Anonymized)
+			growerDto.Guid = UniqueIdMapper.GetUniqueGuid(grower.Id);
+			if (Properties.Anonymized)
 			{
 				growerDto.Name = "Grower " + grower.Id.ReferenceId;
 			}
@@ -183,8 +183,8 @@ namespace WorkRecordPlugin.Mappers
 			{
 				// Farm
 				FarmDto farmDto = mapper.Map<FarmDto>(farm);
-				farmDto.Guid = UniqueIdMapper.GetUniqueId(farm.Id);
-				if (ExportProperties.Anonymized)
+				farmDto.Guid = UniqueIdMapper.GetUniqueGuid(farm.Id);
+				if (Properties.Anonymized)
 				{
 					farmDto.Description = "Farm " + farm.Id.ReferenceId;
 				}
@@ -196,8 +196,8 @@ namespace WorkRecordPlugin.Mappers
 				{
 					// Field
 					FieldDto fieldDto = mapper.Map<FieldDto>(field);
-					fieldDto.Guid = UniqueIdMapper.GetUniqueId(field.Id);
-					if (ExportProperties.Anonymized)
+					fieldDto.Guid = UniqueIdMapper.GetUniqueGuid(field.Id);
+					if (Properties.Anonymized)
 					{
 						fieldDto.Description = "Field " + field.Id.ReferenceId;
 					}
@@ -205,12 +205,66 @@ namespace WorkRecordPlugin.Mappers
 
 					// Fieldboundary
 					IEnumerable<FieldBoundary> fieldBoundaries = DataModel.Catalog.FieldBoundaries.Where(f => f.FieldId == field.Id.ReferenceId);
-					FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, ExportProperties);
+					FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, Properties);
 					fieldDto.FieldBoundaries = fieldBoundaryMapper.Map(fieldBoundaries, fieldDto);
 				}
 			}
 
 			return fieldSummaryDto;
+		}
+
+
+		public void Map(WorkRecordDto workRecordDto)
+		{
+			if (workRecordDto.Summary != null)
+			{
+				if (workRecordDto.Summary.Grower != null)
+				{
+					// Grower
+					GrowerDto growerDto = workRecordDto.Summary.Grower;
+					Grower grower = mapper.Map<GrowerDto, Grower>(growerDto);
+					grower.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(growerDto.Guid, Properties.InfoFile));
+					DataModel.Catalog.Growers.Add(grower);
+
+					// Farms
+					foreach (var farmDto in workRecordDto.Summary.Grower.Farms)
+					{
+						Farm farm = mapper.Map<FarmDto, Farm>(farmDto);
+						farm.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(farmDto.Guid, Properties.InfoFile));
+						farm.GrowerId = grower.Id.ReferenceId;
+						DataModel.Catalog.Farms.Add(farm);
+						// Field
+						foreach (var fieldDto in farmDto.Fields)
+						{
+							Field field = mapper.Map<FieldDto, Field>(fieldDto);
+							field.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(fieldDto.Guid, Properties.InfoFile));
+							field.FarmId = field.Id.ReferenceId;
+							DataModel.Catalog.Fields.Add(field);
+
+							// Fieldboundary
+							FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, Properties);
+							foreach (var fieldBoundaryDto in fieldDto.FieldBoundaries)
+							{
+								FieldBoundary fieldBoundary = fieldBoundaryMapper.Map(fieldBoundaryDto);
+								fieldBoundary.FieldId = field.Id.ReferenceId;
+								DataModel.Catalog.FieldBoundaries.Add(fieldBoundary);
+							}
+						}
+					}
+				}
+			}
+			
+			//Persons
+
+			//Products
+
+			//Connector
+
+			//DeviceElements
+
+			//DeviceElementConfigurations
+
+
 		}
 	}
 }

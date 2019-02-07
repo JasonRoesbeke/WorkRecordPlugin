@@ -26,7 +26,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		//[JsonProperty(PropertyName = EntityId, Order = -2)]
 		//public Guid Guid { get; set; }
 
-		[JsonProperty(Required = Required.Always)]
 		public string Description { get; set; }
 
 		[JsonIgnore]
