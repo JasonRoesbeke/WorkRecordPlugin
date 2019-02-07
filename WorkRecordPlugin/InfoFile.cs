@@ -44,12 +44,4 @@ namespace WorkRecordPlugin
 		[JsonProperty(Order = 2)]
 		public PluginProperties ExportProperties { get; set; }
 	}
-
-	public static class InfoFileConstants
-	{
-		public const string InfoFileName = "InfoFileWorkRecordExport";
-		public const string jsonFileExtension = ".json";
-		public const string PluginFolderPrefix = "ADAPTWorkRecords";
-        public const string FileFormat = "{0}" + jsonFileExtension;
-	}
 }
