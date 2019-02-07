@@ -25,10 +25,10 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 			Offsets = new List<NumericRepresentationValueDto>();
 		}
 
-		[JsonProperty(PropertyName = EntityId, Order = -2)]
+		[JsonProperty(PropertyName = EntityId, Order = -1)]
 		public Guid Guid { get; set; }
 
-		[JsonProperty(Required = Required.Always, Order = -1)]
+		[JsonProperty(Required = Required.Always, Order = 0)]
 		public string Description { get; set; }
 
 		[JsonProperty(PropertyName = Parent)]

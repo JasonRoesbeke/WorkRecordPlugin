@@ -9,6 +9,7 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -29,14 +29,14 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 		//[JsonProperty(PropertyName = Parent)]
 		//public Guid DeviceElementUseGuid { get; set; }
 
-		[JsonProperty(PropertyName = EntityId, Order = -2)]
+		[JsonProperty(PropertyName = EntityId, Order = -1)]
 		public Guid Guid { get; set; }
 
 		//[JsonProperty(PropertyName = Parent)]
 		//public Guid DeviceElementGuid { get; set; }
 
 		//[JsonProperty(Required = Required.Always)]
-		[JsonProperty(PropertyName = Parent, Order = -1)]
+		[JsonProperty(PropertyName = Parent, Order = 0)]
 		public Guid DeviceElementConfigurationGuid { get; set; }
 
 		[JsonProperty(Required = Required.Always, Order = 1)]

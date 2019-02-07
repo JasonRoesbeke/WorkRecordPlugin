@@ -19,7 +19,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {
 	public class NumericWorkingDataDto : WorkingDataDto
 	{
-		[JsonProperty(Order = 0)]
+		[JsonProperty(Order = 2)]
 		public UnitOfMeasureDto UnitOfMeasure { get; set; }
 	}
 }
