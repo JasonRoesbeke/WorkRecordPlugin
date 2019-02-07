@@ -23,9 +23,9 @@ namespace WorkRecordPlugin.Mappers
 	class WorkRecordMapper
 	{
 		private readonly ApplicationDataModel DataModel;
-		private readonly ExportProperties ExportProperties;
+		private readonly PluginProperties ExportProperties;
 
-		public WorkRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
+		public WorkRecordMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
 		{
 			DataModel = dataModel;
 			ExportProperties = exportProperties;

@@ -20,9 +20,9 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class MultiPolygonMapper
 	{
-		private readonly ExportProperties exportProperties;
+		private readonly PluginProperties exportProperties;
 
-		public MultiPolygonMapper(ExportProperties exportProperties)
+		public MultiPolygonMapper(PluginProperties exportProperties)
 		{
 			this.exportProperties = exportProperties;
 		}

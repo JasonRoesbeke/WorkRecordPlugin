@@ -12,6 +12,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
+using System.Reflection;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Utils;
 
@@ -26,9 +27,10 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 		}
 
-		public bool WriteInfoFile(string path, string name, string version, string description, ExportProperties exportProperties)
+		public bool WriteInfoFile(string path, string name, string version, string description, PluginProperties exportProperties)
 		{
-			return WriteJson(path, new InfoFile(name, version, description, exportProperties), InfoFileConstants.InfoFileName);
+			var adaptVersion = Assembly.LoadFrom("AgGateway.ADAPT.ApplicationDataModel.dll").GetName().Version.ToString();
+			return WriteJson(path, new InfoFile(name, version, adaptVersion, description, exportProperties, DateTime.Now), InfoFileConstants.InfoFileName);
 		}
 
 		public bool Write(string path, WorkRecordDto workRecordDto)
@@ -45,9 +47,6 @@ namespace WorkRecordPlugin
 			var jsonFormat = Path.GetTempFileName();
 			try
 			{
-				// Add pluginFolder name to path
-				path = Path.Combine(path, InfoFileConstants.PluginFolder);
-
 				// Ensure path exists
 				Directory.CreateDirectory(path);
 

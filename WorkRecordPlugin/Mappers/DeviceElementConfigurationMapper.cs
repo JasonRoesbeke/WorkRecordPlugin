@@ -24,9 +24,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private readonly ExportProperties ExportProperties;
+		private readonly PluginProperties ExportProperties;
 
-		public DeviceElementConfigurationMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
+		public DeviceElementConfigurationMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();

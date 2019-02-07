@@ -17,49 +17,39 @@ namespace WorkRecordPlugin
 {
 	public class InfoFile
 	{
-		public InfoFile(string name, string version, string description, ExportProperties exportProperties)
+		public InfoFile(string name, string version, string adaptVersion, string description, PluginProperties exportProperties, DateTime dateOfConversion)
 		{
 			NamePlugin = name;
 			VersionPlugin = version;
-			ADAPTVersion = Assembly.LoadFrom("AgGateway.ADAPT.ApplicationDataModel.dll").GetName().Version.ToString();
+			ADAPTVersion = adaptVersion;
 			DescriptionOfCatalog = description;
 			ExportProperties = exportProperties;
-			DateConversion = DateTime.Now;
+			DateOfConversion = dateOfConversion;
 		}
 
 		[JsonProperty(Order = -4)]
-		public string ADAPTVersion { get; }
+		public string ADAPTVersion { get; set; }
 		[JsonProperty(Order = -3)]
-		public string NamePlugin { get; }
+		public string NamePlugin { get; set; }
 
 		[JsonProperty(Order = -2)]
-		public string VersionPlugin { get; }
+		public string VersionPlugin { get; set; }
 
 		[JsonProperty(Order = -1)]
-		public string DescriptionOfCatalog { get; }
+		public string DescriptionOfCatalog { get; set; }
 
 		[JsonProperty(Order = 0)]
-		public string DateOfConversion
-		{
-			get
-			{
-				return DateConversion.ToString();
-			}
-		}
-
-		[JsonIgnore]
-		public DateTime DateConversion { get; }
+		public DateTime DateOfConversion { get; set; }
 
 		[JsonProperty(Order = 2)]
-		public ExportProperties ExportProperties { get; }
-
+		public PluginProperties ExportProperties { get; set; }
 	}
 
 	public static class InfoFileConstants
 	{
 		public const string InfoFileName = "InfoFileWorkRecordExport";
 		public const string jsonFileExtension = ".json";
-		public const string PluginFolder = "ADAPTWorkRecords";
+		public const string PluginFolderPrefix = "ADAPTWorkRecords";
         public const string FileFormat = "{0}" + jsonFileExtension;
 	}
 }

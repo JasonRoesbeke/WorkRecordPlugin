@@ -37,11 +37,11 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private readonly ExportProperties ExportProperties;
+		private readonly PluginProperties ExportProperties;
 		private readonly SpatialRecordUtils SpatialRecordUtil;
 		private Dictionary<int, DataTable> _dataTablesPerDepth;
 
-		public SpatialRecordMapper(ApplicationDataModel dataModel, ExportProperties exportProperties, SpatialRecordUtils spatialRecordUtil)
+		public SpatialRecordMapper(ApplicationDataModel dataModel, PluginProperties exportProperties, SpatialRecordUtils spatialRecordUtil)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();

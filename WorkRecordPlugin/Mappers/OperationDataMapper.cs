@@ -30,10 +30,10 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private readonly ExportProperties ExportProperties;
+		private readonly PluginProperties ExportProperties;
 		private readonly Utils.SpatialRecordUtils SpatialRecordUtil;
 
-		public OperationDataMapper(ApplicationDataModel dataModel, ExportProperties exportProperties, Utils.SpatialRecordUtils spatialRecordUtil)
+		public OperationDataMapper(ApplicationDataModel dataModel, PluginProperties exportProperties, Utils.SpatialRecordUtils spatialRecordUtil)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();

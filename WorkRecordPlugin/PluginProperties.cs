@@ -11,18 +11,20 @@
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace WorkRecordPlugin
 {
-	public class ExportProperties
+	public class PluginProperties
 	{
-		public ExportProperties()
+		public PluginProperties()
 		{
 			WorkRecordsToBeExported = new List<int>();
+			WorkRecordsToBeImported = new List<Guid>();
 		}
 
-		// What to export
+		// What to Export
 		public int? MaximumMappingDepth { get; set; }
 		[JsonIgnore]
 		public List<int> WorkRecordsToBeExported { get; set; }
@@ -39,6 +41,9 @@ namespace WorkRecordPlugin
 		[JsonIgnore]
 		public int RandomBearing { get; set; }
 
+		// What to Import
+		[JsonIgnore]
+		public List<Guid> WorkRecordsToBeImported { get; set; }
 
 		// Format
 		public CompressionEnum Compression { get; set; }

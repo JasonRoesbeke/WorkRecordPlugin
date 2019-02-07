@@ -29,10 +29,10 @@ namespace WorkRecordPlugin.Mappers
 	public class LoggedDataMapper
 	{
 		private readonly ApplicationDataModel DataModel;
-		private readonly ExportProperties ExportProperties;
+		private readonly PluginProperties ExportProperties;
 		private readonly SpatialRecordUtils SpatialRecordUtil;
 
-		public LoggedDataMapper(ApplicationDataModel dataModel, ExportProperties exportProperties)
+		public LoggedDataMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
 		{
 			DataModel = dataModel;
 			ExportProperties = exportProperties;

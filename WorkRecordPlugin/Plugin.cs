@@ -20,7 +20,7 @@ using System.Reflection;
 using WorkRecordPlugin.Mappers;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Utils;
-using static WorkRecordPlugin.ExportProperties;
+using static WorkRecordPlugin.PluginProperties;
 
 namespace WorkRecordPlugin
 {
@@ -46,22 +46,31 @@ namespace WorkRecordPlugin
 			_internalJsonSerializer = internalJsonSerializer;
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
 			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
-			ExportProperties = new ExportProperties();
-			_infoFileReader = new InfoFileReader();
+			Properties = new PluginProperties();
+			_infoFileReader = new InfoFileReader(AssemblyVersion);
 		}
 
 		public string Name { get { return "WorkRecord Plugin - IoF2020"; } }
+
 		public string Version
 		{
 			get
 			{
-				var version = Assembly.GetExecutingAssembly().GetName().Version;
-				return version.ToString();
+				return AssemblyVersion.ToString();
 			}
 		}
+
+		public Version AssemblyVersion
+		{
+			get
+			{
+				return Assembly.GetExecutingAssembly().GetName().Version;
+			}
+		}
+
 		public string Owner { get { return "CNH Industrial"; } }
 
-		public ExportProperties ExportProperties { get; private set; }
+		public PluginProperties CustomProperties { get; private set; }
 
 
 		public Properties GetProperties(string dataPath)
@@ -74,69 +83,83 @@ namespace WorkRecordPlugin
 		{
 		}
 
-		public bool IsDataCardSupported(string path, Properties properties = null)
+		public bool IsDataCardSupported(string path, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
 		{
-			if (!path.EndsWith(InfoFileConstants.PluginFolder))
-			{
-				path = Path.Combine(path, InfoFileConstants.PluginFolder);
-			}
-
-			// Check if folder contains any json files
-			if (!(Directory.Exists(path) && Directory.GetFiles(path, String.Format(InfoFileConstants.FileFormat, "*"), SearchOption.AllDirectories).Any()))
-			{
-				return false;
-			}
-
-
-
-			// First read root folder
-			// Read InfoFileName & check if same version
-			var fileName = Path.Combine(path, InfoFileConstants.InfoFileName);
-			var infoFile = _infoFileReader.ReadVersionInfoModel(fileName);
-			if (infoFile == null)
-			{
-				// ToDo: through subDirectories
-				return false;
-			}
-
-			// Check stated versions are equal to current ADAPT- & pluginVersion
-			if (infoFile.ADAPTVersion != Assembly.LoadFrom("AgGateway.ADAPT.ApplicationDataModel.dll").GetName().Version.ToString() || infoFile.VersionPlugin != Version)
-			{
-				return false;
-			}
-
-			// ToDo: Import support
-			return true;
+			List<string> workRecordFolders = GetListOfWorkRecordFolders(path);
+			return workRecordFolders.Any();
 		}
 
-		public IList<IError> ValidateDataOnCard(string dataPath, Properties properties = null)
+		private List<string> GetListOfWorkRecordFolders(string path)
+		{
+			List<string> workRecordFolders = new List<string>();
+			// [Check] if dataPath is the rootfolder of one workRecord folder
+			if (_infoFileReader.ValidateMinimalFolderStructure(path))
+			{
+				workRecordFolders.Add(path);
+				return workRecordFolders;
+			}
+			// If not, [check] if any subdirectories is a workRecord folder
+			else
+			{
+				/* dataPath may contains multiple workRecord subfolders
+                 * Subfolders must have a name starting with "InfoFileConstants.PluginFolder" & containing correct "InfoFileWorkRecordExport.json" with same PluginAssemblyVersion
+				 * SubSubfolder are not checked
+                 */
+				string[] subfolders = Directory.GetDirectories(path, InfoFileConstants.PluginFolderPrefix + "*", SearchOption.TopDirectoryOnly);
+				foreach (string folder in subfolders)
+				{
+					if (_infoFileReader.ValidateMinimalFolderStructure(folder))
+					{
+						workRecordFolders.Add(path);
+					}
+				}
+				return workRecordFolders;
+			}
+		}
+
+		public IList<IError> ValidateDataOnCard(string dataPath, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
 		{
 			// ToDo: When mapping to ADAPT, log errors
 			return new List<IError>();
 		}
 
-		public IList<ApplicationDataModel> Import(string dataPath, Properties properties = null)
+		public IList<ApplicationDataModel> Import(string dataPath, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
 		{
-			if(!IsDataCardSupported(dataPath, properties))
+			List<string> workRecordFolders = GetListOfWorkRecordFolders(dataPath);
+			if (!workRecordFolders.Any())
 			{
 				return null;
 			}
 
-			return null;
+			ParseImportProperties(properties);
+
+			List<ApplicationDataModel> adms = new List<ApplicationDataModel>();
+
+			foreach (string folder in workRecordFolders)
+			{
+				//Deserialize each workRecord.json as a seperate adm 
+				WorkRecordImporter workRecordImporter = new WorkRecordImporter(CustomProperties);
+				List<ApplicationDataModel> dataModels = workRecordImporter.Import(folder);
+				adms.AddRange(dataModels);
+			}
+
+			return adms;
 		}
 
-		public void Export(ApplicationDataModel dataModel, string exportPath, Properties properties = null)
+		
+
+		public void Export(ApplicationDataModel dataModel, string exportPath, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
 		{
 			ParseExportProperties(properties);
 
 			if (!Directory.Exists(exportPath))
 				Directory.CreateDirectory(exportPath);
 
-			// ToDo: versionFile/Header containing additional metadata (version plugin, version ADAPT, date of conversion, origin such as TASKDATA folder/catalog/datacard description...)
-			var newPath = Path.Combine(exportPath, ZipUtils.GetSafeName(dataModel.Catalog.Description));
+			// Path of exportfolder: "PluginFolder - [Name of Catalog]"
+			var newPath = Path.Combine(exportPath, InfoFileConstants.PluginFolderPrefix + "-" + ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
-			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, ExportProperties);
-			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, ExportProperties);
+			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, Properties);
+			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, Properties);
 			// ToDo: check if dataModel contains workrecords
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
@@ -149,56 +172,85 @@ namespace WorkRecordPlugin
 			}
 		}
 
-		private void ParseExportProperties(Properties properties)
+		private void ParseExportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties)
 		{
 			// MaximumMappingDepth
-			var prop = properties.GetProperty(GetPropertyName(() => ExportProperties.MaximumMappingDepth));
+			var prop = properties.GetProperty(GetPropertyName(() => PluginProperties.MaximumMappingDepth));
 			if (prop != null && int.TryParse(prop, out int depth))
 			{
-				ExportProperties.MaximumMappingDepth = depth;
+				PluginProperties.MaximumMappingDepth = depth;
 			}
 			// WorkRecordsToBeExported
-			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.WorkRecordsToBeExported));
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.WorkRecordsToBeExported));
 			if (prop != null)
 			{
 				if (int.TryParse(prop, out int referenceId))
 				{
-					ExportProperties.WorkRecordsToBeExported.Add(referenceId);
+					PluginProperties.WorkRecordsToBeExported.Add(referenceId);
 				}
 			}
 			// OperationTypeToBeExported
-			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.OperationTypeToBeExported));
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.OperationTypeToBeExported));
 			if (prop != null && Enum.TryParse(prop, out OperationTypeEnum operationTypeEnum))
 			{
-				ExportProperties.OperationTypeToBeExported = operationTypeEnum;
+				PluginProperties.OperationTypeToBeExported = operationTypeEnum;
 			}
 
 			// Simplified
-			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.Simplified));
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Simplified));
 			if (prop != null && bool.TryParse(prop, out bool simplified))
 			{
-				ExportProperties.Simplified = simplified;
+				PluginProperties.Simplified = simplified;
 			}
 			// Anonymized
-			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.Anonymized));
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Anonymized));
 			if (prop != null && bool.TryParse(prop, out bool anonymized))
 			{
-				ExportProperties.Anonymized = anonymized;
+				PluginProperties.Anonymized = anonymized;
 			}
 			// CompressionEnum
-			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.Compression));
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Compression));
 			if (prop != null && Enum.TryParse(prop, out CompressionEnum result))
 			{
-				ExportProperties.Compression = result;
+				PluginProperties.Compression = result;
 			}
 
 
 
 			// OperationDataInCSV
-			prop = properties.GetProperty(GetPropertyName(() => ExportProperties.OperationDataInCSV));
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.OperationDataInCSV));
 			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
 			{
-				ExportProperties.Anonymized = operationDataInCSV;
+				PluginProperties.OperationDataInCSV = operationDataInCSV;
+			}
+		}
+
+		private void ParseImportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties)
+		{
+			// Simplified
+			var prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Simplified));
+			if (prop != null && bool.TryParse(prop, out bool simplified))
+			{
+				PluginProperties.Simplified = simplified;
+			}
+			// Anonymized
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Anonymized));
+			if (prop != null && bool.TryParse(prop, out bool anonymized))
+			{
+				PluginProperties.Anonymized = anonymized;
+			}
+			// CompressionEnum
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.Compression));
+			if (prop != null && Enum.TryParse(prop, out CompressionEnum result))
+			{
+				PluginProperties.Compression = result;
+			}
+
+			// OperationDataInCSV
+			prop = properties.GetProperty(GetPropertyName(() => PluginProperties.OperationDataInCSV));
+			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
+			{
+				PluginProperties.OperationDataInCSV = operationDataInCSV;
 			}
 		}
 

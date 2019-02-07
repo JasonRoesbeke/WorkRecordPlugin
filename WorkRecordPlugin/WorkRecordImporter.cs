@@ -12,10 +12,22 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using AgGateway.ADAPT.ApplicationDataModel.ADM;
 
 namespace WorkRecordPlugin
 {
 	public class WorkRecordImporter
 	{
+		private readonly PluginProperties ImportProperties;
+
+		public WorkRecordImporter(PluginProperties importProperties)
+		{
+			ImportProperties = importProperties;
+		}
+
+		public List<ApplicationDataModel> Import(string folder)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }
