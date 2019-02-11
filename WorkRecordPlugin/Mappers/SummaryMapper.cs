@@ -253,18 +253,18 @@ namespace WorkRecordPlugin.Mappers
 					}
 				}
 			}
-			
+
 			//Persons
 
 			//Products
 
 			//Connector
 
-			//DeviceElements
+			//DeviceElements & DeviceModels
+			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel, Properties);
+			//deviceElementMapper.Map(workRecordDto);
 
 			//DeviceElementConfigurations
-
-
 		}
 	}
 }

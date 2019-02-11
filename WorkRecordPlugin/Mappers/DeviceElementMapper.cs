@@ -26,9 +26,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly IMapper mapper;
 		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
+		private readonly PluginProperties Properties;
 
-		public DeviceElementMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
+		public DeviceElementMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -36,7 +36,7 @@ namespace WorkRecordPlugin.Mappers
 
 			mapper = config.CreateMapper();
 			DataModel = dataModel;
-			ExportProperties = exportProperties;
+			Properties = properties;
 		}
 
 		/// <summary>
@@ -90,7 +90,7 @@ namespace WorkRecordPlugin.Mappers
 			DeviceElementDto deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
 			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id);
 
-			if (ExportProperties.Anonymized)
+			if (Properties.Anonymized)
 			{
 				deviceElementDto.Description = "deviceElement " + deviceElement.Id.ReferenceId;
 			}
@@ -134,7 +134,7 @@ namespace WorkRecordPlugin.Mappers
 					// ParentDevice is a DeviceModel
 					deviceElementDto.IsDeviceElementParent = true;
 					deviceElementDto.DeviceModel = mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
-					if (ExportProperties.Anonymized)
+					if (Properties.Anonymized)
 					{
 						deviceElementDto.DeviceModel.Description = "deviceElement " + parentDeviceModel.Id.ReferenceId;
 					}
@@ -169,6 +169,41 @@ namespace WorkRecordPlugin.Mappers
 		private static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)
 		{
 			return ListUtils.GetAllDeviceElementDtos(deviceElements);
+		}
+
+		public void Map(WorkRecordDto workRecordDto)
+		{
+			if (workRecordDto.Summary != null)
+			{
+				if (workRecordDto.Summary.DeviceElements != null)
+				{
+					foreach (var deviceElementDto in workRecordDto.Summary.DeviceElements)
+					{
+						MapAndAddToDataModel(deviceElementDto);
+					}
+				}
+			}
+		}
+
+		private void MapAndAddToDataModel(DeviceElementDto deviceElementDto, bool isParentDeviceElement = false)
+		{
+			DeviceElement deviceElement = mapper.Map<DeviceElementDto, DeviceElement>(deviceElementDto);
+			deviceElement.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(deviceElementDto.Guid, Properties.InfoFile));
+			DataModel.Catalog.DeviceElements.Add(deviceElement);
+
+			if (deviceElementDto.DeviceModel != null)
+			{
+				DeviceModel deviceModel = mapper.Map<DeviceModelDto, DeviceModel>(deviceElementDto.DeviceModel);
+				deviceModel.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(deviceElementDto.DeviceModel.Guid, Properties.InfoFile));
+				DataModel.Catalog.DeviceModels.Add(deviceModel);
+
+				// Parent is DeviceModel
+				deviceElement.ParentDeviceId = deviceModel.Id.ReferenceId;
+			}
+			else if (isParentDeviceElement)
+			{
+
+			}
 		}
 	}
 }
