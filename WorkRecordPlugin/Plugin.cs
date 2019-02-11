@@ -176,7 +176,20 @@ namespace WorkRecordPlugin
 			// ToDo: check if dataModel contains workrecords
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
 			{
-				WorkRecordDto fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
+				WorkRecordDto fieldWorkRecordDto = null;
+				if (CustomProperties.WorkRecordsToBeExported.Any())
+				{
+					// Export only the requested WorkRecords
+					if (CustomProperties.WorkRecordsToBeExported.Contains(workRecord.Id.ReferenceId))
+					{
+						fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
+					}
+				}
+				else // Export all WorkRecords
+				{
+					fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
+				}
+
 				if (fieldWorkRecordDto != null)
 				{
 					bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
