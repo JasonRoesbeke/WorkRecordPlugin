@@ -210,10 +210,7 @@ namespace WorkRecordPlugin
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.WorkRecordsToBeExported));
 			if (prop != null)
 			{
-				if (int.TryParse(prop, out int referenceId))
-				{
-					CustomProperties.WorkRecordsToBeExported.Add(referenceId);
-				}
+				ParseReferenceIdArray(prop);
 			}
 			// OperationTypeToBeExported
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationTypeToBeExported));
@@ -249,6 +246,23 @@ namespace WorkRecordPlugin
 			{
 				CustomProperties.OperationDataInCSV = operationDataInCSV;
 			}
+		}
+
+		private void ParseReferenceIdArray(string prop)
+		{
+			List<string> StringArray = prop.Split(';').ToList();
+			foreach (var propValue in StringArray)
+			{
+				if (int.TryParse(propValue, out int referenceId))
+				{
+					CustomProperties.WorkRecordsToBeExported.Add(referenceId);
+				}
+			}
+		}
+
+		private List<string> ParseStringArray(string prop)
+		{
+			throw new NotImplementedException();
 		}
 
 		private void ParseImportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties, InfoFile infoFile)
