@@ -12,7 +12,10 @@ Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
 
 - Export properties:
   - Maximum depth of mapping
-  - Data anonymization (Need to explain what exactly this means!)
+  - Data anonymization 
+    - Currently Data is NOT truly anonymised, e.g.: 
+      - Timestamps are not changed
+      - Distance of moving coordinates of spatial records is randomly chosen between 30 km and 80 km but this may not be enough!
   - ReferenceIds of which WorkRecords to export only
 - Version File/Header containing additional metadata 
   - Version plugin
