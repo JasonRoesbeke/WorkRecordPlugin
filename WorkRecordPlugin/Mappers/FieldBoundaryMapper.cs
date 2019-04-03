@@ -56,6 +56,13 @@ namespace WorkRecordPlugin.Mappers
 
 		private Feature Map(FieldBoundary fieldBoundary, FieldDto fieldDto)
 		{
+			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(Properties);
+			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
+			if (multiPolygon == null)
+			{
+				return null;
+			}
+
 			Dictionary<string, object> properties = new Dictionary<string, object>();
 			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id));
 
@@ -92,9 +99,6 @@ namespace WorkRecordPlugin.Mappers
 			{
 				properties["ModifiedTime"] = (modifiedTime.TimeStamp1);
 			}
-
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(Properties);
-			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
 
 			Feature fieldBoundaryDto = new Feature(multiPolygon, properties);
 
