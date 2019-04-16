@@ -11,33 +11,31 @@ Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
 
 
 - Export properties:
-  - Maximum depth of mapping
-  - Data anonymization 
-    - Currently Data is NOT truly anonymised, e.g.: 
-      - Timestamps are not changed
-      - Distance of moving coordinates of spatial records is randomly chosen between 30 km and 80 km but this may not be enough!
-  - ReferenceIds of which WorkRecords to export only
-- Version File/Header containing additional metadata 
-  - Version plugin
-  - Version ADAPT
-  - Date of conversion
+- [x] Maximum depth of mapping
+- [x] Data anonymization 
+  - Currently Data is NOT truly anonymised, e.g.: 
+    - Timestamps are not changed
+    - Distance of moving coordinates of spatial records is randomly chosen between 30 km and 80 km but this may not be enough!
+- [x] ReferenceIds of which WorkRecords to export only
+  - Version File/Header containing additional metadata 
+- [x] Version plugin
+- [x] Version ADAPT
+- [x] Date of conversion
   
 
 
 To Do:
-- ADAPT 2.0!
-- ISOv4Plugin
-- Export properties: 
+- [ ] ISOv4Plugin Support
+- [ ] Export properties: 
   - More simplified  
   - Compression option
     - Protobuf?
     - ZipUtil?  
-  - ReferenceIds of which WorkRecords to export only
   - ...  
-- ProductDto
-- UserRoleDto
-- CompoundIdentifiers!
+- [ ] ProductDto
+- [ ] UserRoleDto
+- [ ] CompoundIdentifiers!
   - In JSON-file itself or seperated JSON-file such as a LinkList (~ISO11783-10)
-- Import!
+- [ ] Import!
 
   
