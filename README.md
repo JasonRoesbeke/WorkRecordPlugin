@@ -1,4 +1,4 @@
-# WorkRecordPlugin (ADAPT 1.2.0)
+# WorkRecordPlugin (ADAPT 2.0.2)
 ADAPT plugin exporting workRecords in JSON files
 
 
