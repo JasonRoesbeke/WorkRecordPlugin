@@ -16,6 +16,7 @@ using CoordinateSharp;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using WorkRecordPlugin.Utils;
+using LineString = GeoJSON.Net.Geometry.LineString;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -36,7 +37,15 @@ namespace WorkRecordPlugin.Mappers
 			foreach (var ADAPTpolygon in spatialData.Polygons)
 			{
 				GeoJSON.Net.Geometry.Polygon polygon = MapPolygon(ADAPTpolygon);
-				polygons.Add(polygon);
+				if (polygon != null)
+				{
+					polygons.Add(polygon);
+				}
+			}
+
+			if (polygons.Count == 0)
+			{
+				return null;
 			}
 
 			return new GeoJSON.Net.Geometry.MultiPolygon(polygons);
@@ -44,20 +53,47 @@ namespace WorkRecordPlugin.Mappers
 
 		private GeoJSON.Net.Geometry.Polygon MapPolygon(AgGateway.ADAPT.ApplicationDataModel.Shapes.Polygon ADAPTpolygon)
 		{
-			var lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
+			var lineStrings = new List<LineString>();
 			// ToDo: Create LinearRingMapper
 
 			// First LineString is ExteriorRing
-			lineStrings.Add(MapLinearRing(ADAPTpolygon.ExteriorRing));
+			var linearRing = MapLinearRing(ADAPTpolygon.ExteriorRing);
+			if (linearRing == null)
+			{
+				// Stopping here because ExteriorRing is needed
+				return null;
+			}
+			lineStrings.Add(linearRing);
 			foreach (var ADAPTInteriorLinearRing in ADAPTpolygon.InteriorRings)
 			{
-				lineStrings.Add(MapLinearRing(ADAPTInteriorLinearRing));
+				var interiorLinearRing = MapLinearRing(ADAPTInteriorLinearRing);
+				if (interiorLinearRing != null)
+				{
+					lineStrings.Add(interiorLinearRing);
+				}
 			}
 
 			return new GeoJSON.Net.Geometry.Polygon(lineStrings);
 		}
 
-		private GeoJSON.Net.Geometry.LineString MapLinearRing(LinearRing ADAPTlinearRing)
+		private LineString MapLinearRing(LinearRing ADAPTlinearRing)
+		{
+			var lineString = MapLineString(ADAPTlinearRing);
+
+			// [Check] for https://tools.ietf.org/html/rfc7946#section-3.1.6 to ensure no ArgumentException from GeoJSON.Net when adding the lineString to a Polygon
+			if (!lineString.IsLinearRing())
+			{
+				lineString = MakeClosedLinearRing(lineString);
+
+				if (lineString.Coordinates.Count < 4)
+				{
+					return null;
+				}
+			}
+
+			return lineString;
+		}
+		private LineString MapLineString(LinearRing ADAPTlinearRing)
 		{
 			var positions = new List<Position>();
 			// ToDo: Create PointMapper
@@ -74,7 +110,24 @@ namespace WorkRecordPlugin.Mappers
 				}
 			}
 
-			return new GeoJSON.Net.Geometry.LineString(positions);
+			return new LineString(positions);
+		}
+
+		private static LineString MakeClosedLinearRing(LineString lineString)
+		{
+			if (!lineString.IsClosed())
+			{
+				var positions = new List<Position>();
+				foreach (var coordinate in lineString.Coordinates)
+				{
+					positions.Add((Position)coordinate);
+				}
+				// Add first position also as last position
+				positions.Add((Position)lineString.Coordinates[0]);
+				lineString = new LineString(positions);
+			}
+
+			return lineString;
 		}
 		#endregion
 
