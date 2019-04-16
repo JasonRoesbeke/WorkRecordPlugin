@@ -102,19 +102,18 @@ namespace WorkRecordPlugin.Mappers
 			{
 				return mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
 			}
-			// ToDo: ADAPT 2.0
-			//else if (config is EndgunConfiguration)
-			//{
-			//	return mapper.Map<EndgunConfiguration, EndgunConfigurationDto>((EndgunConfiguration)config);
-			//}
-			//else if	(config is IrrSectionConfiguration)
-			//{
-			//	return mapper.Map<IrrSectionConfiguration, IrrSectionConfigurationDto>((IrrSectionConfiguration)config);
-			//}
-			//else if (config is IrrSystemConfiguration)
-			//{
-			//	return mapper.Map<IrrSystemConfiguration, IrrSystemConfigurationDto>((IrrSystemConfiguration)config);
-			//}
+			else if (config is EndgunConfiguration)
+			{
+				return mapper.Map<EndgunConfiguration, EndgunConfigurationDto>((EndgunConfiguration)config);
+			}
+			else if (config is IrrSectionConfiguration)
+			{
+				return mapper.Map<IrrSectionConfiguration, IrrSectionConfigurationDto>((IrrSectionConfiguration)config);
+			}
+			else if (config is IrrSystemConfiguration)
+			{
+				return mapper.Map<IrrSystemConfiguration, IrrSystemConfigurationDto>((IrrSystemConfiguration)config);
+			}
 			return null;
 		}
 	}

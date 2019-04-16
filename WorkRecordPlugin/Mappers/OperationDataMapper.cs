@@ -51,12 +51,15 @@ namespace WorkRecordPlugin.Mappers
 			OperationDataDto operationDataDto = new OperationDataDto();
 			operationDataDto.OperationType = operationData.OperationType.ToString();
 
-			// Product
-			var product = DataModel.Catalog.Products.Find(p => p.Id.ReferenceId == operationData.ProductId);
-			if (product != null)
+			// Products
+			ProductMapper productMapper = new ProductMapper(DataModel);
+			foreach (var productId in operationData.ProductIds)
 			{
-				ProductMapper productMapper = new ProductMapper(DataModel);
-				operationDataDto.Product = productMapper.Map(product);
+				var product = DataModel.Catalog.Products.Find(p => p.Id.ReferenceId == productId);
+				if (product != null)
+				{
+					operationDataDto.Product = productMapper.Map(product);
+				}
 			}
 
 			// SpatialRecords & WorkingDatas

@@ -33,10 +33,10 @@ namespace WorkRecordPlugin
 		// ToDo: "context": "url...",
 		// ToDo: "version plugin": "x.x.x-pre-alpha"
 		// ToDo: "Modified": "DateTime"
-		public List<IError> ErrorList1 { get; private set; }
 
 		public Plugin() : this(new InternalJsonSerializer())
 		{
+			Errors = new List<IError>();
 			//ToDo: using ProtoBuf
 			//ToDo: Memory optimisation
 		}
@@ -72,6 +72,7 @@ namespace WorkRecordPlugin
 
 		public PluginProperties CustomProperties { get; private set; }
 
+		public IList<IError> Errors { get; set; }
 
 		public Properties GetProperties(string dataPath)
 		{
@@ -237,8 +238,6 @@ namespace WorkRecordPlugin
 			{
 				CustomProperties.Compression = result;
 			}
-
-
 
 			// OperationDataInCSV
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCSV));
