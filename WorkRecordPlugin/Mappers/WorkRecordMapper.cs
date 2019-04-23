@@ -11,10 +11,7 @@
   *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
-using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
@@ -22,30 +19,30 @@ namespace WorkRecordPlugin.Mappers
 {
 	class WorkRecordMapper
 	{
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties PluginProperties;
+		private readonly ApplicationDataModel _dataModel;
+		private readonly PluginProperties _pluginProperties;
 
 		public WorkRecordMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
-			DataModel = dataModel;
-			PluginProperties = properties;
+			_dataModel = dataModel;
+			_pluginProperties = properties;
 		}
 
 		public List<WorkRecordDto> MapWorkRecords()
 		{
 			// ToDo: check if better null-checking is needed?
-			if (DataModel == null)
+			if (_dataModel == null)
 			{
 				return null;
 			}
-			if (DataModel.Documents == null)
+			if (_dataModel.Documents == null)
 			{
 				return null;
 			}
 
 			List<WorkRecordDto> mappedRecords = new List<WorkRecordDto>();
 
-			foreach (WorkRecord workRecord in DataModel.Documents.WorkRecords)
+			foreach (WorkRecord workRecord in _dataModel.Documents.WorkRecords)
 			{
 				var fieldWorkRecordDto = Map(workRecord);
 				if (fieldWorkRecordDto != null)
@@ -58,20 +55,20 @@ namespace WorkRecordPlugin.Mappers
 
 		public WorkRecordDto Map(WorkRecord workRecord)
 		{
-			if (PluginProperties.Anonymized)
+			if (_pluginProperties.Anonymized)
 			{
 				// Randomize the Anonymization values for each workRecord
 				Random rnd = new Random();
 				// ToDo: [IoF2020-WP6] Is a distance between 30 & 80 km enough to be anonymized?
 				// ToDo: tip: move it to the sea
-				PluginProperties.RandomDistance = rnd.Next(30000, 80000);
-				PluginProperties.RandomBearing = rnd.Next(0, 360);
+				_pluginProperties.RandomDistance = rnd.Next(30000, 80000);
+				_pluginProperties.RandomBearing = rnd.Next(0, 360);
 			}
 
 			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
 
 			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueGuid(workRecord.Id);
-			if (PluginProperties.Anonymized)
+			if (_pluginProperties.Anonymized)
 			{
 				fieldWorkRecordDto.Description = "WorkRecord " + workRecord.Id.ReferenceId;
 			}
@@ -80,7 +77,7 @@ namespace WorkRecordPlugin.Mappers
 				fieldWorkRecordDto.Description = workRecord.Description;
 			}
 
-			SummaryMapper fieldSummaryMapper = new SummaryMapper(DataModel, PluginProperties);
+			SummaryMapper fieldSummaryMapper = new SummaryMapper(_dataModel, _pluginProperties);
 			var summaryDto = fieldSummaryMapper.Map(workRecord);
 			if (summaryDto == null)
 			{
@@ -90,7 +87,7 @@ namespace WorkRecordPlugin.Mappers
 
 			fieldWorkRecordDto.Summary = summaryDto;
 
-			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(DataModel, PluginProperties);
+			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(_dataModel, _pluginProperties);
 			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord, summaryDto);
 
 			return fieldWorkRecordDto;
@@ -98,7 +95,7 @@ namespace WorkRecordPlugin.Mappers
 
 		public void Map(WorkRecordDto workRecordDto)
 		{
-			SummaryMapper summaryMapper = new SummaryMapper(DataModel, PluginProperties);
+			SummaryMapper summaryMapper = new SummaryMapper(_dataModel, _pluginProperties);
 			summaryMapper.Map(workRecordDto);
 		}
 	}

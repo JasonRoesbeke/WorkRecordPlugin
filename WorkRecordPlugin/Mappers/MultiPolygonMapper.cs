@@ -9,10 +9,8 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
-using CoordinateSharp;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using WorkRecordPlugin.Utils;
@@ -22,11 +20,11 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class MultiPolygonMapper
 	{
-		private readonly PluginProperties Properties;
+		private readonly PluginProperties _properties;
 
 		public MultiPolygonMapper(PluginProperties properties)
 		{
-			Properties = properties;
+			_properties = properties;
 		}
 
 		#region Export
@@ -34,9 +32,9 @@ namespace WorkRecordPlugin.Mappers
 		{
 			var polygons = new List<GeoJSON.Net.Geometry.Polygon>();
 			// ToDo: Create PolygonMapper
-			foreach (var ADAPTpolygon in spatialData.Polygons)
+			foreach (var adaptPolygon in spatialData.Polygons)
 			{
-				GeoJSON.Net.Geometry.Polygon polygon = MapPolygon(ADAPTpolygon);
+				GeoJSON.Net.Geometry.Polygon polygon = MapPolygon(adaptPolygon);
 				if (polygon != null)
 				{
 					polygons.Add(polygon);
@@ -51,22 +49,22 @@ namespace WorkRecordPlugin.Mappers
 			return new GeoJSON.Net.Geometry.MultiPolygon(polygons);
 		}
 
-		private GeoJSON.Net.Geometry.Polygon MapPolygon(AgGateway.ADAPT.ApplicationDataModel.Shapes.Polygon ADAPTpolygon)
+		private GeoJSON.Net.Geometry.Polygon MapPolygon(AgGateway.ADAPT.ApplicationDataModel.Shapes.Polygon adaptPolygon)
 		{
 			var lineStrings = new List<LineString>();
 			// ToDo: Create LinearRingMapper
 
 			// First LineString is ExteriorRing
-			var linearRing = MapLinearRing(ADAPTpolygon.ExteriorRing);
+			var linearRing = MapLinearRing(adaptPolygon.ExteriorRing);
 			if (linearRing == null)
 			{
 				// Stopping here because ExteriorRing is needed
 				return null;
 			}
 			lineStrings.Add(linearRing);
-			foreach (var ADAPTInteriorLinearRing in ADAPTpolygon.InteriorRings)
+			foreach (var adaptInteriorLinearRing in adaptPolygon.InteriorRings)
 			{
-				var interiorLinearRing = MapLinearRing(ADAPTInteriorLinearRing);
+				var interiorLinearRing = MapLinearRing(adaptInteriorLinearRing);
 				if (interiorLinearRing != null)
 				{
 					lineStrings.Add(interiorLinearRing);
@@ -76,9 +74,9 @@ namespace WorkRecordPlugin.Mappers
 			return new GeoJSON.Net.Geometry.Polygon(lineStrings);
 		}
 
-		private LineString MapLinearRing(LinearRing ADAPTlinearRing)
+		private LineString MapLinearRing(LinearRing adaptLinearRing)
 		{
-			var lineString = MapLineString(ADAPTlinearRing);
+			var lineString = MapLineString(adaptLinearRing);
 
 			// [Check] for https://tools.ietf.org/html/rfc7946#section-3.1.6 to ensure no ArgumentException from GeoJSON.Net when adding the lineString to a Polygon
 			if (!lineString.IsLinearRing())
@@ -93,15 +91,15 @@ namespace WorkRecordPlugin.Mappers
 
 			return lineString;
 		}
-		private LineString MapLineString(LinearRing ADAPTlinearRing)
+		private LineString MapLineString(LinearRing adaptLinearRing)
 		{
 			var positions = new List<Position>();
 			// ToDo: Create PointMapper
-			foreach (var point in ADAPTlinearRing.Points)
+			foreach (var point in adaptLinearRing.Points)
 			{
-				if (Properties.Anonymized)
+				if (_properties.Anonymized)
 				{
-					var movedPoint = AnonymizeUtils.MovePoint(point, Properties.RandomDistance, Properties.RandomBearing);
+					var movedPoint = AnonymizeUtils.MovePoint(point, _properties.RandomDistance, _properties.RandomBearing);
 					positions.Add(new Position(movedPoint.Y, movedPoint.X, movedPoint.Z));
 				}
 				else
@@ -168,16 +166,19 @@ namespace WorkRecordPlugin.Mappers
 			return polygon;
 		}
 
-		private LinearRing MapLinearRing(GeoJSON.Net.Geometry.LineString lineString)
+		private LinearRing MapLinearRing(LineString lineString)
 		{
 			LinearRing linearRing = new LinearRing();
 
 			foreach (var position in lineString.Coordinates)
 			{
-				AgGateway.ADAPT.ApplicationDataModel.Shapes.Point point = new AgGateway.ADAPT.ApplicationDataModel.Shapes.Point();
-				point.Y = position.Latitude;
-				point.X = position.Longitude;
-				point.Z = position.Altitude;
+				AgGateway.ADAPT.ApplicationDataModel.Shapes.Point point =
+					new AgGateway.ADAPT.ApplicationDataModel.Shapes.Point
+					{
+						Y = position.Latitude,
+						X = position.Longitude,
+						Z = position.Altitude
+					};
 				linearRing.Points.Add(point);
 			}
 

@@ -22,9 +22,9 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class DeviceElementConfigurationMapper
 	{
-		private readonly IMapper mapper;
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
+		private readonly IMapper _mapper;
+		private readonly ApplicationDataModel _dataModel;
+		private readonly PluginProperties _exportProperties;
 
 		public DeviceElementConfigurationMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
 		{
@@ -32,9 +32,9 @@ namespace WorkRecordPlugin.Mappers
 				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
-			mapper = config.CreateMapper();
-			DataModel = dataModel;
-			ExportProperties = exportProperties;
+			_mapper = config.CreateMapper();
+			_dataModel = dataModel;
+			_exportProperties = exportProperties;
 		}
 
 		public DeviceElementConfigurationDto FindOrMapInSummaryDto(DeviceElementConfiguration deviceElementConfig, SummaryDto summaryDto)
@@ -55,13 +55,13 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// Add reference to DeviceElementDto
-			DeviceElement deviceElement = DataModel.Catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == deviceElementConfig.DeviceElementId);
+			DeviceElement deviceElement = _dataModel.Catalog.DeviceElements.FirstOrDefault(de => de.Id.ReferenceId == deviceElementConfig.DeviceElementId);
 			if (deviceElement == null)
 			{
 				// ToDo: when deviceElement could not be found in Catalog
 				throw new NullReferenceException();
 			}
-			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(DataModel, ExportProperties);
+			DeviceElementMapper deviceElementMapper = new DeviceElementMapper(_dataModel, _exportProperties);
 			DeviceElementDto deviceElementDto = deviceElementMapper.FindOrMapInSummaryDto(deviceElement, summaryDto);
 			deviceElementConfigurationDto.DeviceElementGuid = deviceElementDto.Guid;
 
@@ -80,7 +80,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(config.Id);
 
-			if(ExportProperties.Anonymized)
+			if(_exportProperties.Anonymized)
 			{
 				deviceElementConfigurationDto.Description = "DeviceElementConfiguration " + config.Id.ReferenceId;
 			}
@@ -92,15 +92,15 @@ namespace WorkRecordPlugin.Mappers
 		{
 			if (config is ImplementConfiguration)
 			{
-				return mapper.Map<ImplementConfiguration, ImplementConfigurationDto>((ImplementConfiguration)config);
+				return _mapper.Map<ImplementConfiguration, ImplementConfigurationDto>((ImplementConfiguration)config);
 			}
 			else if (config is SectionConfiguration)
 			{
-				return mapper.Map<SectionConfiguration, SectionConfigurationDto>((SectionConfiguration)config);
+				return _mapper.Map<SectionConfiguration, SectionConfigurationDto>((SectionConfiguration)config);
 			}
 			else if (config is MachineConfiguration)
 			{
-				return mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
+				return _mapper.Map<MachineConfiguration, MachineConfigurationDto>((MachineConfiguration)config);
 			}
 			// ToDo: ADAPT 2.0
 			//else if (config is EndgunConfiguration)

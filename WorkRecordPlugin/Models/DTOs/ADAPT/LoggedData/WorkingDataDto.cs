@@ -9,11 +9,8 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData

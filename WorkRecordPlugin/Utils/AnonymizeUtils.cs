@@ -11,9 +11,6 @@
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using CoordinateSharp;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace WorkRecordPlugin.Utils
 {

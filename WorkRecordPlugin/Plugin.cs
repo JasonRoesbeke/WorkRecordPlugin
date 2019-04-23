@@ -26,7 +26,6 @@ namespace WorkRecordPlugin
 {
 	public class Plugin : IPlugin
 	{
-		private readonly InternalJsonSerializer _internalJsonSerializer;
 		private readonly WorkRecordExporter _workRecordExporter;
 		private readonly InfoFileReader _infoFileReader;
 
@@ -43,9 +42,8 @@ namespace WorkRecordPlugin
 
 		public Plugin(InternalJsonSerializer internalJsonSerializer)
 		{
-			_internalJsonSerializer = internalJsonSerializer;
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
-			_workRecordExporter = new WorkRecordExporter(_internalJsonSerializer);
+			_workRecordExporter = new WorkRecordExporter(internalJsonSerializer);
 			CustomProperties = new PluginProperties();
 			_infoFileReader = new InfoFileReader(AssemblyVersion);
 		}
@@ -83,7 +81,7 @@ namespace WorkRecordPlugin
 		{
 		}
 
-		public bool IsDataCardSupported(string path, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
+		public bool IsDataCardSupported(string path, Properties properties = null)
 		{
 			List<string> workRecordFolders = GetListOfWorkRecordFolders(path);
 			return workRecordFolders.Any();
@@ -117,22 +115,19 @@ namespace WorkRecordPlugin
 			}
 		}
 
-		public IList<IError> ValidateDataOnCard(string dataPath, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
+		public IList<IError> ValidateDataOnCard(string dataPath, Properties properties = null)
 		{
 			// ToDo: When mapping to ADAPT, log errors
 			return new List<IError>();
 		}
 
-		public IList<ApplicationDataModel> Import(string dataPath, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
+		public IList<ApplicationDataModel> Import(string dataPath, Properties properties = null)
 		{
 			List<string> workRecordFolders = GetListOfWorkRecordFolders(dataPath);
 			if (!workRecordFolders.Any())
 			{
 				return null;
 			}
-
-			
-
 
 			List<ApplicationDataModel> adms = new List<ApplicationDataModel>();
 
@@ -161,7 +156,7 @@ namespace WorkRecordPlugin
 
 		
 
-		public void Export(ApplicationDataModel dataModel, string exportPath, AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties = null)
+		public void Export(ApplicationDataModel dataModel, string exportPath, Properties properties = null)
 		{
 			ParseExportProperties(properties);
 
@@ -171,7 +166,7 @@ namespace WorkRecordPlugin
 			// Path of exportfolder: "PluginFolder - [Name of Catalog]"
 			var newPath = Path.Combine(exportPath, InfoFileConstants.PluginFolderPrefix + "-" + ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
-			WorkRecordMapper _workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
+			WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
 			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, CustomProperties);
 			// ToDo: check if dataModel contains workrecords
 			foreach (var workRecord in dataModel.Documents.WorkRecords)
@@ -182,23 +177,23 @@ namespace WorkRecordPlugin
 					// Export only the requested WorkRecords
 					if (CustomProperties.WorkRecordsToBeExported.Contains(workRecord.Id.ReferenceId))
 					{
-						fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
+						fieldWorkRecordDto = workRecordsMapper.Map(workRecord);
 					}
 				}
 				else // Export all WorkRecords
 				{
-					fieldWorkRecordDto = _workRecordsMapper.Map(workRecord);
+					fieldWorkRecordDto = workRecordsMapper.Map(workRecord);
 				}
 
 				if (fieldWorkRecordDto != null)
 				{
-					bool success = _workRecordExporter.Write(newPath, fieldWorkRecordDto);
+					_workRecordExporter.Write(newPath, fieldWorkRecordDto);
 				}
 				fieldWorkRecordDto = null; // Memory optimisation?
 			}
 		}
 
-		private void ParseExportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties)
+		private void ParseExportProperties(Properties properties)
 		{
 			// MaximumMappingDepth
 			var prop = properties.GetProperty(GetPropertyName(() => CustomProperties.MaximumMappingDepth));
@@ -241,17 +236,17 @@ namespace WorkRecordPlugin
 
 
 			// OperationDataInCSV
-			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCSV));
-			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCsv));
+			if (prop != null && bool.TryParse(prop, out bool operationDataInCsv))
 			{
-				CustomProperties.OperationDataInCSV = operationDataInCSV;
+				CustomProperties.OperationDataInCsv = operationDataInCsv;
 			}
 		}
 
 		private void ParseReferenceIdArray(string prop)
 		{
-			List<string> StringArray = prop.Split(';').ToList();
-			foreach (var propValue in StringArray)
+			List<string> stringArray = prop.Split(';').ToList();
+			foreach (var propValue in stringArray)
 			{
 				if (int.TryParse(propValue, out int referenceId))
 				{
@@ -260,12 +255,7 @@ namespace WorkRecordPlugin
 			}
 		}
 
-		private List<string> ParseStringArray(string prop)
-		{
-			throw new NotImplementedException();
-		}
-
-		private void ParseImportProperties(AgGateway.ADAPT.ApplicationDataModel.ADM.Properties properties, InfoFile infoFile)
+		private void ParseImportProperties(Properties properties, InfoFile infoFile)
 		{
 			// Simplified
 			var prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Simplified));
@@ -287,10 +277,10 @@ namespace WorkRecordPlugin
 			}
 
 			// OperationDataInCSV
-			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCSV));
-			if (prop != null && bool.TryParse(prop, out bool operationDataInCSV))
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationDataInCsv));
+			if (prop != null && bool.TryParse(prop, out bool operationDataInCsv))
 			{
-				CustomProperties.OperationDataInCSV = operationDataInCSV;
+				CustomProperties.OperationDataInCsv = operationDataInCsv;
 			}
 
 			// To get Source string for UniqueIds

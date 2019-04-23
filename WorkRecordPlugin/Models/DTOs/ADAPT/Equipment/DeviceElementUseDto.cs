@@ -11,8 +11,6 @@
   *******************************************************************************/
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment

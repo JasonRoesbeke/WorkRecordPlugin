@@ -10,23 +10,32 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
-using AgGateway.ADAPT.ApplicationDataModel.Products;
 
 namespace WorkRecordPlugin.Mappers
 {
-	public class ProductMapper
+	internal class GrowerMapper
 	{
-		private readonly ApplicationDataModel DataModel;
+		private ApplicationDataModel DataModel;
+		private readonly PluginProperties Properties;
 
-		public ProductMapper(ApplicationDataModel dataModel)
+		public GrowerMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
 			DataModel = dataModel;
+			Properties = properties;
 		}
 
-		public string Map(Product product)
-		{
-			// ToDo: create Full ProductDto!!
-			return product.Description;
-		}
+
+		#region import
+		//public Grower ImportOrFind(GrowerDto growerDto)
+		//{
+		//	Grower grower = Find(growerDto);
+		//}
+
+		//private Grower Find(GrowerDto growerDto)
+		//{
+		//	var uniqueId = UniqueIdMapper.GetUniqueId(growerDto.Guid, Properties.InfoFile);
+
+		//}
+		#endregion
 	}
 }

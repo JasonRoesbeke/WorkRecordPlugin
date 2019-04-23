@@ -9,15 +9,12 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
 using AutoMapper;
 using GeoJSON.Net.Feature;
-using Newtonsoft.Json;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
@@ -25,19 +22,16 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class FieldBoundaryMapper
 	{
-		private readonly IMapper mapper;
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties Properties;
+		private readonly PluginProperties _properties;
 
-		public FieldBoundaryMapper(ApplicationDataModel dataModel, PluginProperties properties)
+		public FieldBoundaryMapper(PluginProperties properties)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
-			mapper = config.CreateMapper();
-			DataModel = dataModel;
-			Properties = properties;
+			config.CreateMapper();
+			_properties = properties;
 		}
 
 		public List<Feature> Map(IEnumerable<FieldBoundary> fieldBoundaries, FieldDto fieldDto)
@@ -56,7 +50,7 @@ namespace WorkRecordPlugin.Mappers
 
 		private Feature Map(FieldBoundary fieldBoundary, FieldDto fieldDto)
 		{
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(Properties);
+			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(_properties);
 			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
 			if (multiPolygon == null)
 			{
@@ -66,7 +60,7 @@ namespace WorkRecordPlugin.Mappers
 			Dictionary<string, object> properties = new Dictionary<string, object>();
 			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id));
 
-			if (Properties.Anonymized)
+			if (_properties.Anonymized)
 			{
 				properties.Add("Description", "Field boundary " + fieldBoundary.Id.ReferenceId);
 			}
@@ -109,7 +103,7 @@ namespace WorkRecordPlugin.Mappers
 		{
 			FieldBoundary fieldBoundary = new FieldBoundary();
 
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(Properties);
+			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(_properties);
 			fieldBoundary.SpatialData = multiPolygonMapper.Map(fieldBoundaryGeoJson);
 
 			// ToDo: map properties of a fieldBoundary in GeoJson

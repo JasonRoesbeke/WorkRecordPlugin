@@ -12,8 +12,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
@@ -21,10 +19,10 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 	{
 		const string Parent = "CompanyId";
 
-		// ToDo: invstigate add jsonResolver.IgnoreProperty(typeof(Person), "Title");
+		// ToDo: investigate add jsonResolver.IgnoreProperty(typeof(Person), "Title");
 		public DeviceElementDto() : base(Parent)
 		{
-			ChilderenDeviceElements = new List<DeviceElementDto>();
+			ChildrenDeviceElements = new List<DeviceElementDto>();
 			//DeviceElementConfigurations = new List<DeviceElementConfigurationDto>();
 		}
 
@@ -34,7 +32,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonIgnore]
 		public Guid? ParentDeviceElementGuid { get; set; }
 
-		public List<DeviceElementDto> ChilderenDeviceElements { get; set; }
+		public List<DeviceElementDto> ChildrenDeviceElements { get; set; }
 
 		//public List<DeviceElementConfigurationDto> DeviceElementConfigurations { get; set; }
 

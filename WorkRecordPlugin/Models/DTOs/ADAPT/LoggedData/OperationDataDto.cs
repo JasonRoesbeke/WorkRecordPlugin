@@ -9,15 +9,11 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using AgGateway.ADAPT.ApplicationDataModel.Representations;
-using AgGateway.ADAPT.Representation.RepresentationSystem;
-using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 {

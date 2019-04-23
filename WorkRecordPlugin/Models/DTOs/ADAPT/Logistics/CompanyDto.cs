@@ -12,8 +12,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Logistics

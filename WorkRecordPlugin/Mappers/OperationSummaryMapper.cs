@@ -9,7 +9,6 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
@@ -19,11 +18,11 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class OperationSummaryMapper
 	{
-		private readonly ApplicationDataModel DataModel;
+		private readonly ApplicationDataModel _dataModel;
 
 		public OperationSummaryMapper(ApplicationDataModel dataModel)
 		{
-			DataModel = dataModel;
+			_dataModel = dataModel;
 		}
 
 		public IEnumerable<OperationSummaryDto> Map(Summary summary)
@@ -45,10 +44,10 @@ namespace WorkRecordPlugin.Mappers
 			OperationSummaryDto operationSummaryDto = new OperationSummaryDto();
 			operationSummaryDto.OperationType = operationSummary.OperationType.ToString();
 
-			var product = DataModel.Catalog.Products.Find(p => p.Id.ReferenceId == operationSummary.ProductId);
+			var product = _dataModel.Catalog.Products.Find(p => p.Id.ReferenceId == operationSummary.ProductId);
 			if (product != null)
 			{
-				ProductMapper productMapper = new ProductMapper(DataModel);
+				ProductMapper productMapper = new ProductMapper(_dataModel);
 				operationSummaryDto.Product = productMapper.Map(product);
 			}
 
@@ -56,7 +55,7 @@ namespace WorkRecordPlugin.Mappers
 			{
 				return null;
 			}
-			StampedMeteredValuesMapper stampedMeteredValuesMapper = new StampedMeteredValuesMapper(DataModel);
+			StampedMeteredValuesMapper stampedMeteredValuesMapper = new StampedMeteredValuesMapper();
 			operationSummaryDto.Data = stampedMeteredValuesMapper.Map(operationSummary.Data);
 
 			
