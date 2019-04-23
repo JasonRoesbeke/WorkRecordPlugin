@@ -11,20 +11,18 @@
   *******************************************************************************/
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace WorkRecordPlugin.Utils
 {
 	public class InfoFileReader
 	{
-		private readonly Version AssemblyVersion;
+		private readonly Version _assemblyVersion;
 
 		public InfoFileReader(Version assemblyVersion)
 		{
-			AssemblyVersion = assemblyVersion;
+			_assemblyVersion = assemblyVersion;
 		}
 
 		public InfoFile ReadVersionInfoModel(string path)
@@ -72,7 +70,7 @@ namespace WorkRecordPlugin.Utils
 
 			// [Check] if version is equal to current pluginVersion
 			// ToDo: only check Major version number!
-			if (infoFile.VersionPlugin != AssemblyVersion.ToString())
+			if (infoFile.VersionPlugin != _assemblyVersion.ToString())
 			{
 				return false;
 			}

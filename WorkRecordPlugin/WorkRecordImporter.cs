@@ -12,8 +12,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.ReferenceLayers;
 using Newtonsoft.Json;
@@ -24,11 +22,11 @@ namespace WorkRecordPlugin
 {
 	public class WorkRecordImporter
 	{
-		private readonly PluginProperties ImportProperties;
+		private readonly PluginProperties _importProperties;
 
 		public WorkRecordImporter(PluginProperties importProperties)
 		{
-			ImportProperties = importProperties;
+			_importProperties = importProperties;
 		}
 
 		public static List<WorkRecordDto> ReadFolder(string folder)
@@ -64,7 +62,7 @@ namespace WorkRecordPlugin
 		{
 			ApplicationDataModel dataModel = InitAdaptDataModel();
 
-			WorkRecordMapper workRecordMapper = new WorkRecordMapper(dataModel, ImportProperties);
+			WorkRecordMapper workRecordMapper = new WorkRecordMapper(dataModel, _importProperties);
 
 			foreach (var workRecordDto in workRecordDtos)
 			{

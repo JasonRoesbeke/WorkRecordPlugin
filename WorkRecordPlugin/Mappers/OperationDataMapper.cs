@@ -10,39 +10,25 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
-using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
-using AgGateway.ADAPT.Representation.RepresentationSystem;
-using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
-using AutoMapper;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Mappers
 {
 	public class OperationDataMapper
 	{
-		private readonly IMapper mapper;
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
-		private readonly Utils.SpatialRecordUtils SpatialRecordUtil;
+		private readonly ApplicationDataModel _dataModel;
+		private readonly PluginProperties _exportProperties;
+		private readonly Utils.SpatialRecordUtils _spatialRecordUtil;
 
 		public OperationDataMapper(ApplicationDataModel dataModel, PluginProperties exportProperties, Utils.SpatialRecordUtils spatialRecordUtil)
 		{
-			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<WorkRecordDtoProfile>();
-			});
-
-			mapper = config.CreateMapper();
-			DataModel = dataModel;
-			ExportProperties = exportProperties;
-			SpatialRecordUtil = spatialRecordUtil;
+			_dataModel = dataModel;
+			_exportProperties = exportProperties;
+			_spatialRecordUtil = spatialRecordUtil;
 		}
 
 
@@ -52,10 +38,10 @@ namespace WorkRecordPlugin.Mappers
 			operationDataDto.OperationType = operationData.OperationType.ToString();
 
 			// Products
-			ProductMapper productMapper = new ProductMapper(DataModel);
+			ProductMapper productMapper = new ProductMapper(_dataModel);
 			foreach (var productId in operationData.ProductIds)
 			{
-				var product = DataModel.Catalog.Products.Find(p => p.Id.ReferenceId == productId);
+				var product = _dataModel.Catalog.Products.Find(p => p.Id.ReferenceId == productId);
 				if (product != null)
 				{
 					operationDataDto.Product = productMapper.Map(product);
@@ -63,15 +49,14 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// SpatialRecords & WorkingDatas
-			OperationDataProcessor operationDataProcessor = new OperationDataProcessor(DataModel, ExportProperties, SpatialRecordUtil);
+			OperationDataProcessor operationDataProcessor = new OperationDataProcessor(_dataModel, _exportProperties, _spatialRecordUtil);
 			// ToDo: only process the values of a spatialRecords till the requested maximum depth, this value should be given as a property when using the plugin, '-1' is no limit
 			operationDataProcessor.ProcessOperationData(operationData, summaryDto, operationDataDto);
 
 			// EquipmentConfigurations
-			var equipmentConfigurationDtos = new List<EquipmentConfigurationDto>();
 			foreach (var equipmentConfigId in operationData.EquipmentConfigurationIds)
 			{
-				var equipmentConfiguration = DataModel.Catalog.EquipmentConfigurations.FirstOrDefault(ec => ec.Id.ReferenceId == equipmentConfigId);
+				var equipmentConfiguration = _dataModel.Catalog.EquipmentConfigurations.FirstOrDefault(ec => ec.Id.ReferenceId == equipmentConfigId);
 				if (equipmentConfiguration == null)
 				{
 					// ToDo: when an equipmentConfig is not found in DataModel
@@ -79,7 +64,7 @@ namespace WorkRecordPlugin.Mappers
 				}
 
 				// Map EquipmentConfig
-				EquipmentConfigurationMapper equipmentConfigurationMapper = new EquipmentConfigurationMapper(DataModel, ExportProperties);
+				EquipmentConfigurationMapper equipmentConfigurationMapper = new EquipmentConfigurationMapper(_dataModel, _exportProperties);
 				operationDataDto.EquipmentConfigurations.Add(equipmentConfigurationMapper.Map(equipmentConfiguration, summaryDto));
 
 			}

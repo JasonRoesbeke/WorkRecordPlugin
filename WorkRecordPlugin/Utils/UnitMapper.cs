@@ -11,15 +11,12 @@
   *******************************************************************************/
 using AgGateway.ADAPT.Representation.UnitSystem;
 using AgGateway.ADAPT.Representation.UnitSystem.ExtensionMethods;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace WorkRecordPlugin.Utils
 {
 	public static class UnitMapper
 	{
-		public static AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure GetModelUOM(string unit)
+		public static AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure GetModelUom(string unit)
 		{
 			AgGateway.ADAPT.ApplicationDataModel.Common.UnitOfMeasure uom = UnitSystemManager.GetUnitOfMeasure(unit);
 

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
+﻿using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {

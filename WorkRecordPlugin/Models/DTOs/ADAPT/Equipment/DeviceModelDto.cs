@@ -11,15 +11,13 @@
   *******************************************************************************/
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 {
 	public class DeviceModelDto : BaseDto
 	{
 
-		public DeviceModelDto(string Parent) : base(Parent, "Brand", "Manufacturer")
+		public DeviceModelDto(string parent) : base(parent, "Brand", "Manufacturer")
 		{
 		}
 

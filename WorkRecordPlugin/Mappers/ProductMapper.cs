@@ -9,7 +9,6 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Products;
 
@@ -17,11 +16,11 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class ProductMapper
 	{
-		private readonly ApplicationDataModel DataModel;
+		private readonly ApplicationDataModel _dataModel;
 
 		public ProductMapper(ApplicationDataModel dataModel)
 		{
-			DataModel = dataModel;
+			_dataModel = dataModel;
 		}
 
 		public string Map(Product product)

@@ -18,11 +18,11 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class SummaryDataMapper
 	{
-		private readonly ApplicationDataModel DataModel;
+		private readonly ApplicationDataModel _dataModel;
 
 		public SummaryDataMapper(ApplicationDataModel dataModel)
 		{
-			DataModel = dataModel;
+			_dataModel = dataModel;
 		}
 
 		public StampedMeteredValuesDto Map(Summary summary)

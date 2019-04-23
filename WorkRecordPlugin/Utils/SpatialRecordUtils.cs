@@ -17,7 +17,6 @@ using AgGateway.ADAPT.Representation.UnitSystem;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 
@@ -25,7 +24,7 @@ namespace WorkRecordPlugin.Utils
 {
 	public class SpatialRecordUtils
 	{
-		private readonly IMapper mapper;
+		private readonly IMapper _mapper;
 
 		public KeyValuePair<WorkingData, WorkingDataDto> TimeStamp { get; set; }
 		public KeyValuePair<WorkingData, WorkingDataDto> Latitude { get; set; }
@@ -38,7 +37,7 @@ namespace WorkRecordPlugin.Utils
 				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
-			mapper = config.CreateMapper();
+			_mapper = config.CreateMapper();
 
 			// Initalise properties
 			Initialise();
@@ -46,7 +45,7 @@ namespace WorkRecordPlugin.Utils
 
 		private void Initialise()
 		{
-			TimeStamp = GetStringKvp(Representations.srTimeStamp);
+			TimeStamp = GetStringKvp(Representations.SrTimeStamp);
 			Latitude = GetNumericKvp(RepresentationInstanceList.vrLatitude.ToModelRepresentation(), "arcdeg");
 			Longitude = GetNumericKvp(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), "arcdeg");
 			Elevation = GetNumericKvp(RepresentationInstanceList.vrElevation.ToModelRepresentation(), "m");
@@ -55,7 +54,7 @@ namespace WorkRecordPlugin.Utils
 		private KeyValuePair<WorkingData, WorkingDataDto> GetStringKvp(StringRepresentation representation)
 		{
 			EnumeratedWorkingData enumeratedWorkingData = GetEnumeratedWorkingData(representation);
-			EnumeratedWorkingDataDto dto = mapper.Map<EnumeratedWorkingData, EnumeratedWorkingDataDto>(enumeratedWorkingData);
+			EnumeratedWorkingDataDto dto = _mapper.Map<EnumeratedWorkingData, EnumeratedWorkingDataDto>(enumeratedWorkingData);
 			dto.Guid = Guid.NewGuid();
 			return new KeyValuePair<WorkingData, WorkingDataDto>(enumeratedWorkingData, dto);
 		}
@@ -63,7 +62,7 @@ namespace WorkRecordPlugin.Utils
 		private KeyValuePair<WorkingData, WorkingDataDto> GetEnumeratedKvp(AgGateway.ADAPT.ApplicationDataModel.Representations.EnumeratedRepresentation representation)
 		{
 			EnumeratedWorkingData enumeratedWorkingData = GetEnumeratedWorkingData(representation);
-			EnumeratedWorkingDataDto dto = mapper.Map<EnumeratedWorkingData, EnumeratedWorkingDataDto>(enumeratedWorkingData);
+			EnumeratedWorkingDataDto dto = _mapper.Map<EnumeratedWorkingData, EnumeratedWorkingDataDto>(enumeratedWorkingData);
 			dto.Guid = Guid.NewGuid();
 			return new KeyValuePair<WorkingData, WorkingDataDto>(enumeratedWorkingData, dto);
 		}
@@ -78,7 +77,7 @@ namespace WorkRecordPlugin.Utils
 		private KeyValuePair<WorkingData, WorkingDataDto> GetNumericKvp(AgGateway.ADAPT.ApplicationDataModel.Representations.NumericRepresentation numericRepresentation, string uomAbbr)
 		{
 			NumericWorkingData numericWorkingData = GetNumericWorkingData(numericRepresentation, uomAbbr);
-			NumericWorkingDataDto dto = mapper.Map<NumericWorkingData, NumericWorkingDataDto>(numericWorkingData);
+			NumericWorkingDataDto dto = _mapper.Map<NumericWorkingData, NumericWorkingDataDto>(numericWorkingData);
 			dto.Guid = Guid.NewGuid();
 			return new KeyValuePair<WorkingData, WorkingDataDto>(numericWorkingData, dto);
 		}

@@ -9,9 +9,7 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using System.Collections.Generic;
-using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AutoMapper;
@@ -22,19 +20,15 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class NumericRepresentationValueMapper
 	{
-		private readonly IMapper mapper;
+		private readonly IMapper _mapper;
 
-		// ToDo: check if this class can be made static, no need then for a constructor!
-		private readonly ApplicationDataModel DataModel;
-
-		public NumericRepresentationValueMapper(ApplicationDataModel dataModel)
+		public NumericRepresentationValueMapper()
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
-			mapper = config.CreateMapper();
-			DataModel = dataModel;
+			_mapper = config.CreateMapper();
 		}
 
 		public List<NumericRepresentationValueDto> Map(List<MeteredValue> values)
@@ -45,7 +39,7 @@ namespace WorkRecordPlugin.Mappers
 			{
 				if (item.Value is NumericRepresentationValue)
 				{
-					numericRepresentationValueDtos.Add(mapper.Map<NumericRepresentationValue, NumericRepresentationValueDto>((NumericRepresentationValue)item.Value));
+					numericRepresentationValueDtos.Add(_mapper.Map<NumericRepresentationValue, NumericRepresentationValueDto>((NumericRepresentationValue)item.Value));
 				}
 			}
 			return numericRepresentationValueDtos;

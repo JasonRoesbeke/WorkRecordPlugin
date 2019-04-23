@@ -32,7 +32,7 @@ namespace WorkRecordPlugin
 
 		// Other structures
 		public bool Simplified { get; set; }
-		public bool OperationDataInCSV { get; set; }
+		public bool OperationDataInCsv { get; set; }
 
 		// Anonymized data
 		public bool Anonymized { get; set; }

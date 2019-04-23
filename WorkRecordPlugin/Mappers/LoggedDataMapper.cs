@@ -9,47 +9,41 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
-using AgGateway.ADAPT.Representation.RepresentationSystem;
-using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
-using AutoMapper;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
 	public class LoggedDataMapper
 	{
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
-		private readonly SpatialRecordUtils SpatialRecordUtil;
+		private readonly ApplicationDataModel _dataModel;
+		private readonly PluginProperties _exportProperties;
+		private readonly SpatialRecordUtils _spatialRecordUtil;
 
 		public LoggedDataMapper(ApplicationDataModel dataModel, PluginProperties exportProperties)
 		{
-			DataModel = dataModel;
-			ExportProperties = exportProperties;
-			SpatialRecordUtil = new SpatialRecordUtils();
+			_dataModel = dataModel;
+			_exportProperties = exportProperties;
+			_spatialRecordUtil = new SpatialRecordUtils();
 
 		}
 
 		public LoggedDataDto Map(WorkRecord workRecord, SummaryDto summaryDto)
 		{
 			LoggedDataDto fieldLoggedDataDto = new LoggedDataDto();
-			var LoggedDatas = DataModel.Documents.LoggedData.Where(ld => ld.WorkRecordId == workRecord.Id.ReferenceId);
-			if (LoggedDatas.Any())
+			var loggedDatas = _dataModel.Documents.LoggedData.Where(ld => ld.WorkRecordId == workRecord.Id.ReferenceId).ToList();
+			if (loggedDatas.Any())
 			{
-				foreach (var loggedData in LoggedDatas)
+				foreach (var loggedData in loggedDatas)
 				{
-					IEnumerable<OperationDataDto> operationDatas = Map(loggedData, summaryDto);
-					if (operationDatas != null || operationDatas.Any())
+					var operationDatas = Map(loggedData, summaryDto);
+					if (operationDatas.Any())
 					{
 						fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
 					}
@@ -59,11 +53,11 @@ namespace WorkRecordPlugin.Mappers
 			{
 				foreach (var loggedDataId in workRecord.LoggedDataIds)
 				{
-					var loggedData = DataModel.Documents.LoggedData.Where(ld => ld.Id.ReferenceId == loggedDataId).FirstOrDefault();
+					var loggedData = _dataModel.Documents.LoggedData.Where(ld => ld.Id.ReferenceId == loggedDataId).FirstOrDefault();
 					if (loggedData != null)
 					{
-						IEnumerable<OperationDataDto> operationDatas = Map(loggedData, summaryDto);
-						if (operationDatas != null || operationDatas.Any())
+						var operationDatas = Map(loggedData, summaryDto);
+						if (operationDatas.Any())
 						{
 							fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
 						}
@@ -74,10 +68,10 @@ namespace WorkRecordPlugin.Mappers
 			return fieldLoggedDataDto;
 		}
 
-		private IEnumerable<OperationDataDto> Map(LoggedData loggedData, SummaryDto summaryDto)
+		private List<OperationDataDto> Map(LoggedData loggedData, SummaryDto summaryDto)
 		{
 			List<OperationDataDto> operationDataDtos = new List<OperationDataDto>();
-			OperationDataMapper operationDataMapper = new OperationDataMapper(DataModel, ExportProperties, SpatialRecordUtil);
+			OperationDataMapper operationDataMapper = new OperationDataMapper(_dataModel, _exportProperties, _spatialRecordUtil);
 			foreach (var operationData in loggedData.OperationData)
 			{
 				OperationDataDto operationDataDto = operationDataMapper.Map(operationData, summaryDto);

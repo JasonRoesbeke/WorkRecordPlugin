@@ -9,12 +9,9 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using GeoJSON.Net.Feature;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 

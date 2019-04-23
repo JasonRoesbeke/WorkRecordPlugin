@@ -11,21 +11,13 @@
   *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
 namespace WorkRecordPlugin.Mappers
 {
-	internal class StampedMeteredValuesMapper
+	public class StampedMeteredValuesMapper
 	{
-		private readonly ApplicationDataModel DataModel;
-
-		public StampedMeteredValuesMapper(ApplicationDataModel dataModel)
-		{
-			DataModel = dataModel;
-		}
-
 		public List<StampedMeteredValuesDto> Map(List<StampedMeteredValues> data)
 		{
 			List<StampedMeteredValuesDto> stampedMeteredValuesDtos = new List<StampedMeteredValuesDto>();
@@ -65,7 +57,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 			
 
-			NumericRepresentationValueMapper numericRepresentationValueMapper = new NumericRepresentationValueMapper(DataModel);
+			NumericRepresentationValueMapper numericRepresentationValueMapper = new NumericRepresentationValueMapper();
 			stampedMeteredValuesDto.Values = numericRepresentationValueMapper.Map(stampedMeteredValues.Values);
 			if (stampedMeteredValuesDto.Values == null)
 			{

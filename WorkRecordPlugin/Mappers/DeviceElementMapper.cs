@@ -24,9 +24,9 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class DeviceElementMapper
 	{
-		private readonly IMapper mapper;
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties Properties;
+		private readonly IMapper _mapper;
+		private readonly ApplicationDataModel _dataModel;
+		private readonly PluginProperties _properties;
 
 		public DeviceElementMapper(ApplicationDataModel dataModel, PluginProperties properties)
 		{
@@ -34,16 +34,16 @@ namespace WorkRecordPlugin.Mappers
 				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
-			mapper = config.CreateMapper();
-			DataModel = dataModel;
-			Properties = properties;
+			_mapper = config.CreateMapper();
+			_dataModel = dataModel;
+			_properties = properties;
 		}
 
 		/// <summary>
 		/// First try to find the mapped DeviceElement. If not found, then try to map it.
 		/// </summary>
 		/// <param name="deviceElement"></param>
-		/// <param name="alreadyMappedDeviceElementDtos"></param>
+		/// <param name="summaryDto"></param>
 		/// <returns></returns>
 		public DeviceElementDto FindOrMapInSummaryDto(DeviceElement deviceElement, SummaryDto summaryDto)
 		{
@@ -64,7 +64,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 			else
 			{
-				var parentDeviceElement = DataModel.Catalog.DeviceElements.Where(de => de.Id.ReferenceId == deviceElement.ParentDeviceId).FirstOrDefault();
+				var parentDeviceElement = _dataModel.Catalog.DeviceElements.Where(de => de.Id.ReferenceId == deviceElement.ParentDeviceId).FirstOrDefault();
 				if (parentDeviceElement == null)
 				{
 					// ToDo: when parentDeviceElement cannot be found in Catalog
@@ -78,7 +78,7 @@ namespace WorkRecordPlugin.Mappers
 					throw new NullReferenceException();
 				}
 				deviceElementDto.ParentDeviceElementGuid = parentDeviceElementDto.Guid;
-				parentDeviceElementDto.ChilderenDeviceElements.Add(deviceElementDto);
+				parentDeviceElementDto.ChildrenDeviceElements.Add(deviceElementDto);
 			}
 
 			return deviceElementDto;
@@ -87,10 +87,10 @@ namespace WorkRecordPlugin.Mappers
 		private DeviceElementDto Map(DeviceElement deviceElement)
 		{
 			// Map
-			DeviceElementDto deviceElementDto = mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
+			DeviceElementDto deviceElementDto = _mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
 			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id);
 
-			if (Properties.Anonymized)
+			if (_properties.Anonymized)
 			{
 				deviceElementDto.Description = "deviceElement " + deviceElement.Id.ReferenceId;
 			}
@@ -99,7 +99,7 @@ namespace WorkRecordPlugin.Mappers
 			MapDetails(deviceElementDto, deviceElement.BrandId, deviceElement.SeriesId);
 
 			// Manufacturer -> move to MapDetails in ADAPT 2.0!
-			var manufacturer = DataModel.Catalog.Manufacturers.FirstOrDefault(b => b.Id.ReferenceId == deviceElement.ManufacturerId);
+			var manufacturer = _dataModel.Catalog.Manufacturers.FirstOrDefault(b => b.Id.ReferenceId == deviceElement.ManufacturerId);
 			if (manufacturer != null)
 			{
 				deviceElementDto.Manufacturer = manufacturer.Description;
@@ -128,13 +128,13 @@ namespace WorkRecordPlugin.Mappers
 			}
 			else
 			{
-				var parentDeviceModel = DataModel.Catalog.DeviceModels.FirstOrDefault(dm => dm.Id.ReferenceId == deviceElement.ParentDeviceId);
+				var parentDeviceModel = _dataModel.Catalog.DeviceModels.FirstOrDefault(dm => dm.Id.ReferenceId == deviceElement.ParentDeviceId);
 				if (parentDeviceModel != null)
 				{
 					// ParentDevice is a DeviceModel
 					deviceElementDto.IsDeviceElementParent = true;
-					deviceElementDto.DeviceModel = mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
-					if (Properties.Anonymized)
+					deviceElementDto.DeviceModel = _mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
+					if (_properties.Anonymized)
 					{
 						deviceElementDto.DeviceModel.Description = "deviceElement " + parentDeviceModel.Id.ReferenceId;
 					}
@@ -152,18 +152,18 @@ namespace WorkRecordPlugin.Mappers
 		private void MapDetails(DeviceModelDto deviceModelDto, int brandId, int seriesId)
 		{
 			// Brand
-			var brand = DataModel.Catalog.Brands.FirstOrDefault(b => b.Id.ReferenceId == brandId);
+			var brand = _dataModel.Catalog.Brands.FirstOrDefault(b => b.Id.ReferenceId == brandId);
 			if (brand != null)
 			{
 				deviceModelDto.Brand = brand.Description;
 			}
 
-			//// Series
-			//var series = DataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == seriesId);
-			//if (series != null)
-			//{
-			//	deviceElementDto.Series = series.Description;
-			//}
+			// Series
+			var series = _dataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == seriesId);
+			if (series != null)
+			{
+				deviceModelDto.Series = series.Description;
+			}
 		}
 
 		private static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)
@@ -187,15 +187,15 @@ namespace WorkRecordPlugin.Mappers
 
 		private void MapAndAddToDataModel(DeviceElementDto deviceElementDto, bool isParentDeviceElement = false)
 		{
-			DeviceElement deviceElement = mapper.Map<DeviceElementDto, DeviceElement>(deviceElementDto);
-			deviceElement.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(deviceElementDto.Guid, Properties.InfoFile));
-			DataModel.Catalog.DeviceElements.Add(deviceElement);
+			DeviceElement deviceElement = _mapper.Map<DeviceElementDto, DeviceElement>(deviceElementDto);
+			deviceElement.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(deviceElementDto.Guid, _properties.InfoFile));
+			_dataModel.Catalog.DeviceElements.Add(deviceElement);
 
 			if (deviceElementDto.DeviceModel != null)
 			{
-				DeviceModel deviceModel = mapper.Map<DeviceModelDto, DeviceModel>(deviceElementDto.DeviceModel);
-				deviceModel.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(deviceElementDto.DeviceModel.Guid, Properties.InfoFile));
-				DataModel.Catalog.DeviceModels.Add(deviceModel);
+				DeviceModel deviceModel = _mapper.Map<DeviceModelDto, DeviceModel>(deviceElementDto.DeviceModel);
+				deviceModel.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(deviceElementDto.DeviceModel.Guid, _properties.InfoFile));
+				_dataModel.Catalog.DeviceModels.Add(deviceModel);
 
 				// Parent is DeviceModel
 				deviceElement.ParentDeviceId = deviceModel.Id.ReferenceId;

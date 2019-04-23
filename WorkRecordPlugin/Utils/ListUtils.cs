@@ -9,10 +9,8 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 
 namespace WorkRecordPlugin.Utils
@@ -27,7 +25,7 @@ namespace WorkRecordPlugin.Utils
 			foreach (var deviceElement in deviceElements)
 			{
 				allDeviceElementDtos.Add(deviceElement);
-				var children = GetAllDeviceElementDtos(deviceElement.ChilderenDeviceElements);
+				var children = GetAllDeviceElementDtos(deviceElement.ChildrenDeviceElements);
 				if (children.Any())
 				{
 					allDeviceElementDtos.AddRange(children);

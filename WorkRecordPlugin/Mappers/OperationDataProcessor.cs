@@ -11,36 +11,25 @@
   *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Globalization;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
-using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
-using AgGateway.ADAPT.ApplicationDataModel.Representations;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
-using AgGateway.ADAPT.Representation.RepresentationSystem;
-using AgGateway.ADAPT.Representation.RepresentationSystem.ExtensionMethods;
-using AgGateway.ADAPT.Representation.UnitSystem;
 using AutoMapper;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
 	public class OperationDataProcessor
 	{
-		private readonly IMapper mapper;
-		private readonly ApplicationDataModel DataModel;
-		private readonly PluginProperties ExportProperties;
-		private readonly SpatialRecordUtils SpatialRecordUtil;
+		private readonly IMapper _mapper;
+		private readonly ApplicationDataModel _dataModel;
+		private readonly PluginProperties _exportProperties;
+		private readonly SpatialRecordUtils _spatialRecordUtil;
 
 		public OperationDataProcessor(ApplicationDataModel dataModel, PluginProperties exportProperties, SpatialRecordUtils spatialRecordUtil)
 		{
@@ -48,26 +37,26 @@ namespace WorkRecordPlugin.Mappers
 				cfg.AddProfile<WorkRecordDtoProfile>();
 			});
 
-			mapper = config.CreateMapper();
-			DataModel = dataModel;
-			ExportProperties = exportProperties;
-			SpatialRecordUtil = spatialRecordUtil;
+			_mapper = config.CreateMapper();
+			_dataModel = dataModel;
+			_exportProperties = exportProperties;
+			_spatialRecordUtil = spatialRecordUtil;
 		}
 
 		public void ProcessOperationData(OperationData operationData, SummaryDto summaryDto, OperationDataDto operationDataDto)
 		{
 			// ToDo: [AgGateway] change to public Func<int,IEnumerable<SpatialRecord>> GetSpatialRecords { get; set; } where int is depth
-			var spatialRecords = operationData.GetSpatialRecords();
+			var spatialRecords = operationData.GetSpatialRecords().ToList();
 
 			int maximumDepth = -1;
 			if (spatialRecords.Any())
 			{
 				// Requested depth of mapping
-				if (ExportProperties.MaximumMappingDepth != null)
+				if (_exportProperties.MaximumMappingDepth != null)
 				{
-					if (ExportProperties.MaximumMappingDepth >= -1 || ExportProperties.MaximumMappingDepth <= operationData.MaxDepth)
+					if (_exportProperties.MaximumMappingDepth >= -1 || _exportProperties.MaximumMappingDepth <= operationData.MaxDepth)
 					{
-						maximumDepth = (int)ExportProperties.MaximumMappingDepth;
+						maximumDepth = (int)_exportProperties.MaximumMappingDepth;
 					}
 				}
 				else
@@ -80,7 +69,7 @@ namespace WorkRecordPlugin.Mappers
 				var metersPerDepth = GetMetersPerDepth(operationData, maximumDepth, summaryDto);
 				operationDataDto.WorkingDatas = metersPerDepth.ToDictionary(d => d.Key, d => d.Value.Select(kvp => kvp.Value).ToList());
 
-				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(DataModel, ExportProperties, SpatialRecordUtil);
+				SpatialRecordMapper spatialRecordMapper = new SpatialRecordMapper(_exportProperties, _spatialRecordUtil);
 				operationDataDto.SpatialRecords = spatialRecordMapper.Map(spatialRecords, metersPerDepth, maximumDepth, summaryDto);
 			}
 		}
@@ -98,7 +87,7 @@ namespace WorkRecordPlugin.Mappers
 
 				// Add TimeStamp, Latitude, Longitude & Elevation
 				// ToDo: should this be added to each depth?
-				allMeters.AddRange(SpatialRecordUtil.GetKvps());
+				allMeters.AddRange(_spatialRecordUtil.GetKvps());
 
 				// DeviceElements & DeviceElementConfigurations
 				foreach (var deviceElementUse in deviceElementUses)
@@ -117,7 +106,7 @@ namespace WorkRecordPlugin.Mappers
 							throw new NullReferenceException();
 						}
 
-						var workingDataDto = mapper.Map<WorkingData, WorkingDataDto>(workingData);
+						var workingDataDto = _mapper.Map<WorkingData, WorkingDataDto>(workingData);
 						workingDataDto.Guid = UniqueIdMapper.GetUniqueGuid(workingData.Id);
 						workingDataDto.DeviceElementConfigurationGuid = deviceElementConfigurationDto.Guid;
 						allMeters.Add(new KeyValuePair<WorkingData, WorkingDataDto>(workingData, workingDataDto));
@@ -130,7 +119,7 @@ namespace WorkRecordPlugin.Mappers
 
 		public DeviceElementConfigurationDto MapDeviceElementConfiguration(DeviceElementUse deviceElementUse, SummaryDto summaryDto)
 		{
-			DeviceElementConfiguration config = DataModel.Catalog.DeviceElementConfigurations.FirstOrDefault(c => c.Id.ReferenceId == deviceElementUse.DeviceConfigurationId);
+			DeviceElementConfiguration config = _dataModel.Catalog.DeviceElementConfigurations.FirstOrDefault(c => c.Id.ReferenceId == deviceElementUse.DeviceConfigurationId);
 			if (config == null)
 			{
 				// ToDo: when DeviceElementConfigurations could not be found in Catalog
@@ -138,7 +127,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// Check if deviceElementConfiguration is already mapped and added to the summaryDto. If not, map it and and add reference of deviceElement by either finding or mapping deviceElement itself
-			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(DataModel, ExportProperties);
+			DeviceElementConfigurationMapper deviceElementConfigurationMapper = new DeviceElementConfigurationMapper(_dataModel, _exportProperties);
 			DeviceElementConfigurationDto deviceElementConfigurationDto = deviceElementConfigurationMapper.FindOrMapInSummaryDto(config, summaryDto);
 
 			return deviceElementConfigurationDto;

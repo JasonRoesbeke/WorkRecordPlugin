@@ -13,7 +13,6 @@ using AgGateway.ADAPT.ApplicationDataModel.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
@@ -81,7 +80,7 @@ namespace WorkRecordPlugin.Mappers
 
 		private static bool GetUniqueIdFromSource(CompoundIdentifier id, string preferredSource, out Guid guid)
 		{
-			var preferredUniqueIds = id.UniqueIds.Where(ud => ud.Source == preferredSource);
+			var preferredUniqueIds = id.UniqueIds.Where(ud => ud.Source == preferredSource).ToList();
 			if (preferredUniqueIds.Any())
 			{
 				foreach (var uniqueId in preferredUniqueIds)
@@ -96,11 +95,12 @@ namespace WorkRecordPlugin.Mappers
 			return false;
 		}
 
-		private static bool GetUniqueId(IEnumerable<UniqueId> GuidUniqueIds, out Guid guid)
+		private static bool GetUniqueId(IEnumerable<UniqueId> guidUniqueIds, out Guid guid)
 		{
-			if (GuidUniqueIds.Count() > 0)
+			var uniqueIds = guidUniqueIds.ToList();
+			if (uniqueIds.Count() > 0)
 			{
-				foreach (var guidUniqueId in GuidUniqueIds)
+				foreach (var guidUniqueId in uniqueIds)
 				{
 					if (Guid.TryParse(guidUniqueId.Id, out guid))
 					{
@@ -114,7 +114,7 @@ namespace WorkRecordPlugin.Mappers
 
 		private static bool GetUniqueGuidFromLong(List<UniqueId> uniqueIds, out Guid guid)
 		{
-			var list = uniqueIds.Where(ui => ui.IdType == IdTypeEnum.LongInt);
+			var list = uniqueIds.Where(ui => ui.IdType == IdTypeEnum.LongInt).ToList();
 
 			if (list.Any())
 			{

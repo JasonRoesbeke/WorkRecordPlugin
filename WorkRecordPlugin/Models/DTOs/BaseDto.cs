@@ -10,10 +10,7 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WorkRecordPlugin.Models.DTOs
 {
@@ -21,12 +18,12 @@ namespace WorkRecordPlugin.Models.DTOs
 	{
 		public const string EntityId = "@Id";
 
-		public BaseDto(string ParentPropertyName = null, params string[] otherDetailProperties)
+		public BaseDto(string parentPropertyName = null, params string[] otherDetailProperties)
 		{
 			JsonDetailProperties = new List<string>();
-			if (ParentPropertyName != null || ParentPropertyName != "")
+			if (parentPropertyName != null || parentPropertyName != "")
 			{
-				JsonDetailProperties.Add(ParentPropertyName);
+				JsonDetailProperties.Add(parentPropertyName);
 			}
 			if (otherDetailProperties != null)
 			{

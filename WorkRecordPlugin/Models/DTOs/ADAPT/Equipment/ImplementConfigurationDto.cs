@@ -9,10 +9,6 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
 
 namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
@@ -31,7 +27,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 
 		public NumericRepresentationValueDto VerticalCuttingEdgeZOffset { get; set; }
 
-		public NumericRepresentationValueDto GPSReceiverZOffset { get; set; }
+		public NumericRepresentationValueDto GpsReceiverZOffset { get; set; }
 
 		public NumericRepresentationValueDto YOffset { get; set; }
 

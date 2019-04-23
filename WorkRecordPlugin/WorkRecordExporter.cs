@@ -9,7 +9,6 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
-using Newtonsoft.Json.Linq;
 using System;
 using System.IO;
 using System.Reflection;
@@ -50,12 +49,12 @@ namespace WorkRecordPlugin
 				// Ensure path exists
 				Directory.CreateDirectory(path);
 
-				_internalJsonSerializer.Serialize((T)objectToSerialize, jsonFormat);
+				_internalJsonSerializer.Serialize(objectToSerialize, jsonFormat);
 				var safeFileName = ZipUtils.GetSafeName(fileName);
 				// ToDo: add option to zip, using ZipUtil => +-8% of original size
 				//ZipUtil.Zip(Path.Combine(path, fileName + ".zip"), jsonFormat);
 
-				var exportFileName = Path.Combine(path, safeFileName + InfoFileConstants.jsonFileExtension);
+				var exportFileName = Path.Combine(path, safeFileName + InfoFileConstants.JsonFileExtension);
 				// Check if no file is already created with same name
 				if (File.Exists(exportFileName))
 				{
@@ -96,7 +95,7 @@ namespace WorkRecordPlugin
 
 			string fileNameOnly = Path.GetFileNameWithoutExtension(fullPath);
 			string extension = Path.GetExtension(fullPath);
-			string path = Path.GetDirectoryName(fullPath);
+			string path = Path.GetDirectoryName(fullPath) ?? "";
 			string newFullPath = fullPath;
 
 			while (File.Exists(newFullPath))

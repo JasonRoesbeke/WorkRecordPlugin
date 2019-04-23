@@ -11,7 +11,6 @@
   *******************************************************************************/
 using Newtonsoft.Json;
 using System;
-using System.Reflection;
 
 namespace WorkRecordPlugin
 {
@@ -21,14 +20,14 @@ namespace WorkRecordPlugin
 		{
 			NamePlugin = name;
 			VersionPlugin = version;
-			ADAPTVersion = adaptVersion;
+			AdaptVersion = adaptVersion;
 			DescriptionOfCatalog = description;
 			ExportProperties = exportProperties;
 			DateOfConversion = dateOfConversion;
 		}
 
 		[JsonProperty(Order = -4)]
-		public string ADAPTVersion { get; set; }
+		public string AdaptVersion { get; set; }
 		[JsonProperty(Order = -3)]
 		public string NamePlugin { get; set; }
 

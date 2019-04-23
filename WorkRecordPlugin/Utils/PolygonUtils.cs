@@ -1,7 +1,6 @@
 ﻿using GeoJSON.Net.Geometry;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace WorkRecordPlugin.Utils
 {
@@ -42,7 +41,7 @@ namespace WorkRecordPlugin.Utils
 			return ComputeSignedArea(positions);
 		}
 
-		const double EARTH_RADIUS = 6371009; //Mean radius as defined by IUGG
+		const double EarthRadius = 6371009; //Mean radius as defined by IUGG
 
 		static double ToRadians(double input)
 		{
@@ -51,7 +50,7 @@ namespace WorkRecordPlugin.Utils
 
 		public static double ComputeSignedArea(IList<Position> path)
 		{
-			return ComputeSignedArea(path, EARTH_RADIUS);
+			return ComputeSignedArea(path, EarthRadius);
 		}
 
 		static double ComputeSignedArea(IList<Position> path, double radius)

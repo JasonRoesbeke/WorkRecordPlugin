@@ -12,15 +12,10 @@
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
-using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AutoMapper;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Common;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
