@@ -1,4 +1,4 @@
-# WorkRecordPlugin (ADAPT 1.2.0)
+# WorkRecordPlugin v2.2.2 (ADAPT 1.2.0)
 ADAPT plugin exporting workRecords in JSON files
 
 
@@ -17,6 +17,7 @@ Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
       - Timestamps are not changed
       - Distance of moving coordinates of spatial records is randomly chosen between 30 km and 80 km but this may not be enough!
   - ReferenceIds of which WorkRecords to export only
+  - ReferenceIds of which WorkRecords to export only based on FieldId
 - Version File/Header containing additional metadata 
   - Version plugin
   - Version ADAPT
@@ -25,14 +26,12 @@ Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
 
 
 To Do:
-- ADAPT 2.0!
 - ISOv4Plugin
 - Export properties: 
   - More simplified  
   - Compression option
     - Protobuf?
     - ZipUtil?  
-  - ReferenceIds of which WorkRecords to export only
   - ...  
 - ProductDto
 - UserRoleDto
