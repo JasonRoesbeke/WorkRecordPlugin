@@ -1,4 +1,4 @@
-# WorkRecordPlugin v2.2.2 (ADAPT 1.2.0)
+# WorkRecordPlugin v3.2.0 (ADAPT 2.0.2)
 ADAPT plugin exporting workRecords in JSON files
 
 
@@ -7,7 +7,7 @@ From
 To
 ![JSON](https://i.imgur.com/PV0eZhR.png)
 
-Currently only exporting from ADM to JSON-files USING ADAPT 1.2.0
+Currently only exporting from ADM to JSON-files USING ADAPT 2.0.2
 
 
 - Export properties:
