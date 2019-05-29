@@ -80,7 +80,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(config.Id);
 
-			if(_exportProperties.Anonymized)
+			if(_exportProperties.Anonymise)
 			{
 				deviceElementConfigurationDto.Description = "DeviceElementConfiguration " + config.Id.ReferenceId;
 			}

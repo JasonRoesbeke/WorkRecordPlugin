@@ -90,7 +90,7 @@ namespace WorkRecordPlugin.Mappers
 			DeviceElementDto deviceElementDto = _mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
 			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id);
 
-			if (_properties.Anonymized)
+			if (_properties.Anonymise)
 			{
 				deviceElementDto.Description = "deviceElement " + deviceElement.Id.ReferenceId;
 			}
@@ -134,7 +134,7 @@ namespace WorkRecordPlugin.Mappers
 					// ParentDevice is a DeviceModel
 					deviceElementDto.IsDeviceElementParent = true;
 					deviceElementDto.DeviceModel = _mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
-					if (_properties.Anonymized)
+					if (_properties.Anonymise)
 					{
 						deviceElementDto.DeviceModel.Description = "deviceElement " + parentDeviceModel.Id.ReferenceId;
 					}

@@ -10,6 +10,7 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
@@ -32,13 +33,26 @@ namespace WorkRecordPlugin
 			return WriteJson(path, new InfoFile(name, version, adaptVersion, description, exportProperties, DateTime.Now), InfoFileConstants.InfoFileName);
 		}
 
+		public bool Write(string path, List<WorkRecordDto> workRecordDtos)
+		{
+			var succes = 0;
+			foreach (var workRecordDto in workRecordDtos)
+			{
+				succes += Write(path, workRecordDto) ? 0 : 1;
+			}
+			return succes == 0;
+		}
 		public bool Write(string path, WorkRecordDto workRecordDto)
 		{
+			if (workRecordDto == null)
+			{
+				return false;
+			}
 			if (workRecordDto.Description == null)
 			{
 				workRecordDto.Description = workRecordDto.Guid.ToString();
 			}
-			return WriteJson(path, workRecordDto, workRecordDto.Description);
+			return WriteJson(path, workRecordDto, workRecordDto.Description); ;
 		}
 
 		private bool WriteJson<T>(string path, T objectToSerialize, string fileName) where T : class

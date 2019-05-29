@@ -110,7 +110,7 @@ namespace WorkRecordPlugin.Mappers
 					var longitude = point.X;
 					var elevation = point.Z;
 
-					if (_exportProperties.Anonymized)
+					if (_exportProperties.Anonymise)
 					{
 						// Anonymize spatial records by moving the lat/long coordinates
 						var movedPoint = AnonymizeUtils.MovePoint(point, _exportProperties.RandomDistance, _exportProperties.RandomBearing);
@@ -129,7 +129,7 @@ namespace WorkRecordPlugin.Mappers
 
 			// TimeStamp
 			// ToDo: change way how TimeStamp is represented
-			dataRow[_spatialRecordUtil.TimeStamp.Value.Guid.ToString()] = spatialRecord.Timestamp.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
+			dataRow[_spatialRecordUtil.TimeStamp.Value.Guid.ToString()] = spatialRecord.Timestamp.ToString("O", CultureInfo.InvariantCulture);
 
 			dataTable.Rows.Add(dataRow);
 		}

@@ -41,7 +41,7 @@ namespace WorkRecordPlugin.Mappers
 		{
 			var equipmentConfigurationDto = _mapper.Map<EquipmentConfiguration, EquipmentConfigurationDto>(equipmentConfiguration);
 			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(equipmentConfiguration.Id);
-			if (_exportProperties.Anonymized)
+			if (_exportProperties.Anonymise)
 			{
 				equipmentConfigurationDto.Description = "EquipmentConfiguration " + equipmentConfiguration.Id.ReferenceId;
 			}
@@ -75,7 +75,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			var connectorDto = _mapper.Map<Connector, ConnectorDto>(connector);
-			if (_exportProperties.Anonymized)
+			if (_exportProperties.Anonymise)
 			{
 				connectorDto.Description = "Connector " + connector.Id.ReferenceId;
 			}
@@ -90,7 +90,7 @@ namespace WorkRecordPlugin.Mappers
 				}
 				connectorDto.HitchPoint = _mapper.Map<HitchPoint, HitchPointDto>(hitchPoint);
 				//connectorDto.HitchPoint.Guid = UniqueIdMapper.GetUniqueId(hitchPoint.Id);
-				if (_exportProperties.Anonymized)
+				if (_exportProperties.Anonymise)
 				{
 					connectorDto.HitchPoint.Description = "HitchPoint " + hitchPoint.Id.ReferenceId;
 				}

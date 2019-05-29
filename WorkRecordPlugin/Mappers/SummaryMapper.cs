@@ -174,7 +174,7 @@ namespace WorkRecordPlugin.Mappers
 			// Grower
 			GrowerDto growerDto = _mapper.Map<GrowerDto>(grower);
 			growerDto.Guid = UniqueIdMapper.GetUniqueGuid(grower.Id);
-			if (_properties.Anonymized)
+			if (_properties.Anonymise)
 			{
 				growerDto.Name = "Grower " + grower.Id.ReferenceId;
 			}
@@ -187,7 +187,7 @@ namespace WorkRecordPlugin.Mappers
 				// Farm
 				FarmDto farmDto = _mapper.Map<FarmDto>(farm);
 				farmDto.Guid = UniqueIdMapper.GetUniqueGuid(farm.Id);
-				if (_properties.Anonymized)
+				if (_properties.Anonymise)
 				{
 					farmDto.Description = "Farm " + farm.Id.ReferenceId;
 				}
@@ -200,7 +200,7 @@ namespace WorkRecordPlugin.Mappers
 					// Field
 					FieldDto fieldDto = _mapper.Map<FieldDto>(field);
 					fieldDto.Guid = UniqueIdMapper.GetUniqueGuid(field.Id);
-					if (_properties.Anonymized)
+					if (_properties.Anonymise)
 					{
 						fieldDto.Description = "Field " + field.Id.ReferenceId;
 					}

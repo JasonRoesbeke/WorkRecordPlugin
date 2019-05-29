@@ -60,7 +60,7 @@ namespace WorkRecordPlugin.Mappers
 			Dictionary<string, object> properties = new Dictionary<string, object>();
 			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id));
 
-			if (_properties.Anonymized)
+			if (_properties.Anonymise)
 			{
 				properties.Add("Description", "Field boundary " + fieldBoundary.Id.ReferenceId);
 			}

@@ -97,7 +97,7 @@ namespace WorkRecordPlugin.Mappers
 			// ToDo: Create PointMapper
 			foreach (var point in adaptLinearRing.Points)
 			{
-				if (_properties.Anonymized)
+				if (_properties.Anonymise)
 				{
 					var movedPoint = AnonymizeUtils.MovePoint(point, _properties.RandomDistance, _properties.RandomBearing);
 					positions.Add(new Position(movedPoint.Y, movedPoint.X, movedPoint.Z));
