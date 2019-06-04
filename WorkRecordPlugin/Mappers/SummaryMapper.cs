@@ -45,7 +45,7 @@ namespace WorkRecordPlugin.Mappers
 		public SummaryDto Map(WorkRecord workRecord)
 		{
 			// Grower/Farm/Field/Fieldboundary
-			SummaryDto fieldSummaryDto = SetGrowerFarmerFieldFieldBoundary(workRecord);
+			SummaryDto fieldSummaryDto = SetGrowerFarmFieldFieldBoundary(workRecord);
 
 			if (fieldSummaryDto == null)
 			{
@@ -55,7 +55,7 @@ namespace WorkRecordPlugin.Mappers
 			// EquipmentConfigurations
 
 			// OperationSummaries
-			var operationSummaryDtos = MapOperationSummaries(workRecord);
+			var operationSummaryDtos = MapOperationSummaries(workRecord).ToList();
 			if (operationSummaryDtos.Any())
 			{
 				fieldSummaryDto.OperationSummaries.AddRange(operationSummaryDtos);
@@ -90,16 +90,20 @@ namespace WorkRecordPlugin.Mappers
 			return fieldSummaryDto;
 		}
 
-		private List<OperationSummaryDto> MapSummaryDatas(WorkRecord workRecord)
+		private IEnumerable<OperationSummaryDto> MapSummaryDatas(WorkRecord workRecord)
 		{
 			List<OperationSummaryDto> summaryDatas = new List<OperationSummaryDto>();
 			SummaryDataMapper summaryDataMapper = new SummaryDataMapper(_dataModel);
-			IEnumerable<Summary> summaries = _dataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
-			//summaryDatas.AddRange(summaryDataMapper.Map(summaries));
+			List<Summary> summaries = _dataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId).ToList();
+			foreach (var summary in summaries)
+			{
+				var summaryDto = summaryDataMapper.Map(summary);
+				summaryDatas.Add(summaryDto);
+			}
 			return summaryDatas;
 		}
 
-		private List<OperationSummaryDto> MapOperationSummaries(WorkRecord workRecord)
+		private IEnumerable<OperationSummaryDto> MapOperationSummaries(WorkRecord workRecord)
 		{
 			List<OperationSummaryDto> operationSummaries = new List<OperationSummaryDto>();
 			OperationSummaryMapper operationSummaryMapper = new OperationSummaryMapper(_dataModel);
@@ -116,7 +120,7 @@ namespace WorkRecordPlugin.Mappers
 			return operationSummaries;
 		}
 
-		private SummaryDto SetGrowerFarmerFieldFieldBoundary(WorkRecord workRecord)
+		private SummaryDto SetGrowerFarmFieldFieldBoundary(WorkRecord workRecord)
 		{
 			int? growerId = workRecord.GrowerId;
 			List<int> farmIds = workRecord.FarmIds ?? new List<int>();
@@ -170,7 +174,7 @@ namespace WorkRecordPlugin.Mappers
 			// Grower
 			GrowerDto growerDto = _mapper.Map<GrowerDto>(grower);
 			growerDto.Guid = UniqueIdMapper.GetUniqueGuid(grower.Id);
-			if (_properties.Anonymized)
+			if (_properties.Anonymise)
 			{
 				growerDto.Name = "Grower " + grower.Id.ReferenceId;
 			}
@@ -183,7 +187,7 @@ namespace WorkRecordPlugin.Mappers
 				// Farm
 				FarmDto farmDto = _mapper.Map<FarmDto>(farm);
 				farmDto.Guid = UniqueIdMapper.GetUniqueGuid(farm.Id);
-				if (_properties.Anonymized)
+				if (_properties.Anonymise)
 				{
 					farmDto.Description = "Farm " + farm.Id.ReferenceId;
 				}
@@ -196,7 +200,7 @@ namespace WorkRecordPlugin.Mappers
 					// Field
 					FieldDto fieldDto = _mapper.Map<FieldDto>(field);
 					fieldDto.Guid = UniqueIdMapper.GetUniqueGuid(field.Id);
-					if (_properties.Anonymized)
+					if (_properties.Anonymise)
 					{
 						fieldDto.Description = "Field " + field.Id.ReferenceId;
 					}
@@ -215,43 +219,49 @@ namespace WorkRecordPlugin.Mappers
 
 		public void Map(WorkRecordDto workRecordDto)
 		{
-			if (workRecordDto.Summary != null)
-			{
-				if (workRecordDto.Summary.Grower != null)
-				{
-					// Grower
-					GrowerDto growerDto = workRecordDto.Summary.Grower;
-					Grower grower = _mapper.Map<GrowerDto, Grower>(growerDto);
-					grower.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(growerDto.Guid, _properties.InfoFile));
-					_dataModel.Catalog.Growers.Add(grower);
+			//if (workRecordDto.Summary != null)
+			//{
+			//	if (workRecordDto.Summary.Grower != null)
+			//	{
+			//		// Grower
+			//		GrowerMapper growerMapper = new GrowerMapper(DataModel, Properties);
+			//		GrowerDto growerDto = workRecordDto.Summary.Grower;
+			//		Grower grower = growerMapper.ImportOrFind(growerDto);
+			//		if (grower == null)
+			//		{
 
-					// Farms
-					foreach (var farmDto in workRecordDto.Summary.Grower.Farms)
-					{
-						Farm farm = _mapper.Map<FarmDto, Farm>(farmDto);
-						farm.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(farmDto.Guid, _properties.InfoFile));
-						farm.GrowerId = grower.Id.ReferenceId;
-						_dataModel.Catalog.Farms.Add(farm);
-						// Field
-						foreach (var fieldDto in farmDto.Fields)
-						{
-							Field field = _mapper.Map<FieldDto, Field>(fieldDto);
-							field.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(fieldDto.Guid, _properties.InfoFile));
-							field.FarmId = field.Id.ReferenceId;
-							_dataModel.Catalog.Fields.Add(field);
+			//		}
+			//		grower = mapper.Map<GrowerDto, Grower>(growerDto);
+			//		grower.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(growerDto.Guid, Properties.InfoFile));
+			//		DataModel.Catalog.Growers.Add(grower);
 
-							// Fieldboundary
-							FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(_properties);
-							foreach (var fieldBoundaryDto in fieldDto.FieldBoundaries)
-							{
-								FieldBoundary fieldBoundary = fieldBoundaryMapper.Map(fieldBoundaryDto);
-								fieldBoundary.FieldId = field.Id.ReferenceId;
-								_dataModel.Catalog.FieldBoundaries.Add(fieldBoundary);
-							}
-						}
-					}
-				}
-			}
+			//		// Farms
+			//		foreach (var farmDto in workRecordDto.Summary.Grower.Farms)
+			//		{
+			//			Farm farm = mapper.Map<FarmDto, Farm>(farmDto);
+			//			farm.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(farmDto.Guid, Properties.InfoFile));
+			//			farm.GrowerId = grower.Id.ReferenceId;
+			//			DataModel.Catalog.Farms.Add(farm);
+			//			// Field
+			//			foreach (var fieldDto in farmDto.Fields)
+			//			{
+			//				Field field = mapper.Map<FieldDto, Field>(fieldDto);
+			//				field.Id.UniqueIds.Add(UniqueIdMapper.GetUniqueId(fieldDto.Guid, Properties.InfoFile));
+			//				field.FarmId = field.Id.ReferenceId;
+			//				DataModel.Catalog.Fields.Add(field);
+
+			//				// Fieldboundary
+			//				FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(DataModel, Properties);
+			//				foreach (var fieldBoundaryDto in fieldDto.FieldBoundaries)
+			//				{
+			//					FieldBoundary fieldBoundary = fieldBoundaryMapper.Map(fieldBoundaryDto);
+			//					fieldBoundary.FieldId = field.Id.ReferenceId;
+			//					DataModel.Catalog.FieldBoundaries.Add(fieldBoundary);
+			//				}
+			//			}
+			//		}
+			//	}
+			//}
 
 			//Persons
 

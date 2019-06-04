@@ -15,6 +15,8 @@ using System.Globalization;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
+using AutoMapper;
+using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 using WorkRecordPlugin.Utils;
@@ -29,8 +31,16 @@ namespace WorkRecordPlugin.Mappers
 
 		public SpatialRecordMapper(PluginProperties exportProperties, SpatialRecordUtils spatialRecordUtil)
 		{
+			var config = new MapperConfiguration(cfg => {
+				cfg.AddProfile<WorkRecordDtoProfile>();
+			});
+
+			config.CreateMapper();
 			_exportProperties = exportProperties;
 			_spatialRecordUtil = spatialRecordUtil;
+
+			// Initialise the representations of Base values of a Spatial Record (TimeStamp, Lat, Long, Elev)
+
 		}
 
 		public Dictionary<int, DataTable> Map(List<SpatialRecord> spatialRecords, Dictionary<int, List<KeyValuePair<WorkingData, WorkingDataDto>>> metersPerDepth, int maximumDepth, SummaryDto summaryDto)
@@ -61,10 +71,9 @@ namespace WorkRecordPlugin.Mappers
 				{
 					dataTable.Columns.Add(workingData.Value.Guid.ToString());
 				}
-				catch (DuplicateNameException e)
+				catch (DuplicateNameException)
 				{
 					// ToDo: Handling DuplicateNameException for vrElevation-ADAPT
-					;
 				}
 			}
 		}
@@ -101,7 +110,7 @@ namespace WorkRecordPlugin.Mappers
 					var longitude = point.X;
 					var elevation = point.Z;
 
-					if (_exportProperties.Anonymized)
+					if (_exportProperties.Anonymise)
 					{
 						// Anonymize spatial records by moving the lat/long coordinates
 						var movedPoint = AnonymizeUtils.MovePoint(point, _exportProperties.RandomDistance, _exportProperties.RandomBearing);
@@ -119,7 +128,8 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			// TimeStamp
-			dataRow[_spatialRecordUtil.TimeStamp.Value.Guid.ToString()] = spatialRecord.Timestamp.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
+			// ToDo: change way how TimeStamp is represented
+			dataRow[_spatialRecordUtil.TimeStamp.Value.Guid.ToString()] = spatialRecord.Timestamp.ToString("O", CultureInfo.InvariantCulture);
 
 			dataTable.Rows.Add(dataRow);
 		}

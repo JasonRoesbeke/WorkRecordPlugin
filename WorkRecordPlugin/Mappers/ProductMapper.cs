@@ -16,11 +16,11 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class ProductMapper
 	{
-		private readonly ApplicationDataModel _dataModel;
+		private readonly ApplicationDataModel DataModel;
 
 		public ProductMapper(ApplicationDataModel dataModel)
 		{
-			_dataModel = dataModel;
+			DataModel = dataModel;
 		}
 
 		public string Map(Product product)

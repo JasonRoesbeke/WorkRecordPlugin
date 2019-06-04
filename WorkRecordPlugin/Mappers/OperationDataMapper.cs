@@ -13,6 +13,8 @@ using System;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
+using AutoMapper;
+using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
 
@@ -26,6 +28,11 @@ namespace WorkRecordPlugin.Mappers
 
 		public OperationDataMapper(ApplicationDataModel dataModel, PluginProperties exportProperties, Utils.SpatialRecordUtils spatialRecordUtil)
 		{
+			var config = new MapperConfiguration(cfg => {
+				cfg.AddProfile<WorkRecordDtoProfile>();
+			});
+
+			config.CreateMapper();
 			_dataModel = dataModel;
 			_exportProperties = exportProperties;
 			_spatialRecordUtil = spatialRecordUtil;

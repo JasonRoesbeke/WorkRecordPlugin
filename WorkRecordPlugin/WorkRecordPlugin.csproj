@@ -2,16 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
-    <Version>3.1.0</Version>
-    <Description>using ADAPT 2.0.2</Description>
+    <Version>3.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AgGatewayADAPTFramework" Version="2.0.2" />
-    <PackageReference Include="AutoMapper" Version="8.0.0" />
-    <PackageReference Include="CoordinateSharp" Version="1.1.5.1" />
+    <PackageReference Include="AutoMapper" Version="8.1.0" />
+    <PackageReference Include="CoordinateSharp" Version="1.1.5.2" />
     <PackageReference Include="GeoJSON.Net" Version="1.1.72" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
   </ItemGroup>
 
 </Project>

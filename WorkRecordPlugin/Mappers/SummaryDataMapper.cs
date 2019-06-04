@@ -16,16 +16,16 @@ using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 
 namespace WorkRecordPlugin.Mappers
 {
-	internal class SummaryDataMapper
+	public class SummaryDataMapper
 	{
-		private readonly ApplicationDataModel _dataModel;
+		private readonly ApplicationDataModel DataModel;
 
 		public SummaryDataMapper(ApplicationDataModel dataModel)
 		{
-			_dataModel = dataModel;
+			DataModel = dataModel;
 		}
 
-		public StampedMeteredValuesDto Map(Summary summary)
+		public OperationSummaryDto Map(Summary summary)
 		{
 			if (summary.SummaryData.Count < 0)
 			{
@@ -41,7 +41,7 @@ namespace WorkRecordPlugin.Mappers
 				}
 			}
 
-			return stampedMeteredValuesDto;
+			return null;
 		}
 	}
 }

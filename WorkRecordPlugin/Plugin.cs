@@ -35,7 +35,6 @@ namespace WorkRecordPlugin
 
 		public Plugin() : this(new InternalJsonSerializer())
 		{
-			Errors = new List<IError>();
 			//ToDo: using ProtoBuf
 			//ToDo: Memory optimisation
 		}
@@ -130,9 +129,6 @@ namespace WorkRecordPlugin
 				return null;
 			}
 
-			
-
-
 			List<ApplicationDataModel> adms = new List<ApplicationDataModel>();
 
 			foreach (string folder in workRecordFolders)
@@ -172,28 +168,27 @@ namespace WorkRecordPlugin
 
 			WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
 			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, CustomProperties);
-			// ToDo: check if dataModel contains workrecords
-			foreach (var workRecord in dataModel.Documents.WorkRecords)
-			{
-				WorkRecordDto fieldWorkRecordDto = null;
-				if (CustomProperties.WorkRecordsToBeExported.Any())
-				{
-					// Export only the requested WorkRecords
-					if (CustomProperties.WorkRecordsToBeExported.Contains(workRecord.Id.ReferenceId))
-					{
-						fieldWorkRecordDto = workRecordsMapper.Map(workRecord);
-					}
-				}
-				else // Export all WorkRecords
-				{
-					fieldWorkRecordDto = workRecordsMapper.Map(workRecord);
-				}
 
-				if (fieldWorkRecordDto != null)
-				{
-					_workRecordExporter.Write(newPath, fieldWorkRecordDto);
-				}
-				fieldWorkRecordDto = null; // Memory optimisation?
+			switch (CustomProperties.ApplyingAnonymiseValuesPer)
+			{
+				case ApplyingAnonymiseValuesEnum.PerField:
+					foreach (var fieldId in dataModel.Catalog.Fields.Select(f => f.Id.ReferenceId))
+					{
+						List<int> workRecordIds =
+							dataModel.Documents.WorkRecords
+								.Where(wr => wr.FieldIds.Contains(fieldId))
+								.Select(wr => wr.Id.ReferenceId)
+								.ToList();
+						_workRecordExporter.Write(newPath, workRecordsMapper.MapAll(workRecordIds));
+					}
+					break;
+				case ApplyingAnonymiseValuesEnum.PerWorkRecord:
+				default:
+					foreach (var workRecord in dataModel.Documents.WorkRecords)
+					{
+						_workRecordExporter.Write(newPath, workRecordsMapper.MapSingle(workRecord));
+					}
+					break;
 			}
 		}
 
@@ -209,7 +204,7 @@ namespace WorkRecordPlugin
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.WorkRecordsToBeExported));
 			if (prop != null)
 			{
-				ParseReferenceIdArray(prop);
+				CustomProperties.WorkRecordsToBeExported.AddRange(ParseReferenceIdArray(prop));
 			}
 			// OperationTypeToBeExported
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.OperationTypeToBeExported));
@@ -224,17 +219,33 @@ namespace WorkRecordPlugin
 			{
 				CustomProperties.Simplified = simplified;
 			}
-			// Anonymized
-			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Anonymized));
+
+			// Anonymise
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Anonymise));
 			if (prop != null && bool.TryParse(prop, out bool anonymized))
 			{
-				CustomProperties.Anonymized = anonymized;
+				CustomProperties.Anonymise = anonymized;
 			}
+
+			// ApplyingAnonymiseValuesPer
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.ApplyingAnonymiseValuesPer));
+			if (prop != null && Enum.TryParse(prop, out ApplyingAnonymiseValuesEnum enumResult))
+			{
+				CustomProperties.ApplyingAnonymiseValuesPer = enumResult;
+			}
+
+			// FieldIdsWithWorkRecordsToBeExported
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.FieldIdsWithWorkRecordsToBeExported));
+			if (prop != null)
+			{
+				CustomProperties.FieldIdsWithWorkRecordsToBeExported.AddRange(ParseReferenceIdArray(prop));
+			}
+
 			// CompressionEnum
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Compression));
-			if (prop != null && Enum.TryParse(prop, out CompressionEnum result))
+			if (prop != null && Enum.TryParse(prop, out CompressionEnum enumResult2))
 			{
-				CustomProperties.Compression = result;
+				CustomProperties.Compression = enumResult2;
 			}
 
 			// OperationDataInCSV
@@ -245,16 +256,19 @@ namespace WorkRecordPlugin
 			}
 		}
 
-		private void ParseReferenceIdArray(string prop)
+		private List<int> ParseReferenceIdArray(string prop)
 		{
+			var IdList = new List<int>();
 			List<string> stringArray = prop.Split(';').ToList();
 			foreach (var propValue in stringArray)
 			{
 				if (int.TryParse(propValue, out int referenceId))
 				{
-					CustomProperties.WorkRecordsToBeExported.Add(referenceId);
+					IdList.Add(referenceId);
 				}
 			}
+
+			return IdList;
 		}
 
 		private void ParseImportProperties(Properties properties, InfoFile infoFile)
@@ -265,11 +279,11 @@ namespace WorkRecordPlugin
 			{
 				CustomProperties.Simplified = simplified;
 			}
-			// Anonymized
-			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Anonymized));
+			// Anonymise
+			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Anonymise));
 			if (prop != null && bool.TryParse(prop, out bool anonymized))
 			{
-				CustomProperties.Anonymized = anonymized;
+				CustomProperties.Anonymise = anonymized;
 			}
 			// CompressionEnum
 			prop = properties.GetProperty(GetPropertyName(() => CustomProperties.Compression));

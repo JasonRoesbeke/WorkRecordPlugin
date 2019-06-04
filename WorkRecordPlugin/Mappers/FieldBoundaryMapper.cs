@@ -13,7 +13,9 @@ using System.Collections.Generic;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
+using AutoMapper;
 using GeoJSON.Net.Feature;
+using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
 
 namespace WorkRecordPlugin.Mappers
@@ -24,6 +26,11 @@ namespace WorkRecordPlugin.Mappers
 
 		public FieldBoundaryMapper(PluginProperties properties)
 		{
+			var config = new MapperConfiguration(cfg => {
+				cfg.AddProfile<WorkRecordDtoProfile>();
+			});
+
+			config.CreateMapper();
 			_properties = properties;
 		}
 
@@ -53,7 +60,7 @@ namespace WorkRecordPlugin.Mappers
 			Dictionary<string, object> properties = new Dictionary<string, object>();
 			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id));
 
-			if (_properties.Anonymized)
+			if (_properties.Anonymise)
 			{
 				properties.Add("Description", "Field boundary " + fieldBoundary.Id.ReferenceId);
 			}

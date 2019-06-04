@@ -43,7 +43,7 @@ namespace WorkRecordPlugin.Mappers
 				foreach (var loggedData in loggedDatas)
 				{
 					var operationDatas = Map(loggedData, summaryDto);
-					if (operationDatas.Any())
+					if (operationDatas.Count > 0)
 					{
 						fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
 					}
@@ -53,11 +53,11 @@ namespace WorkRecordPlugin.Mappers
 			{
 				foreach (var loggedDataId in workRecord.LoggedDataIds)
 				{
-					var loggedData = _dataModel.Documents.LoggedData.Where(ld => ld.Id.ReferenceId == loggedDataId).FirstOrDefault();
+					var loggedData = _dataModel.Documents.LoggedData.FirstOrDefault(ld => ld.Id.ReferenceId == loggedDataId);
 					if (loggedData != null)
 					{
 						var operationDatas = Map(loggedData, summaryDto);
-						if (operationDatas.Any())
+						if (operationDatas.Count > 0)
 						{
 							fieldLoggedDataDto.OperationDatas.AddRange(operationDatas);
 						}

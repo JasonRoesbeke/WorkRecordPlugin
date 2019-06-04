@@ -35,7 +35,7 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.Equipment
 		[JsonProperty(PropertyName = "DeviceElementConfigurationId", Required = Required.Always)]
 		public Guid DeviceElementConfigurationGuid { get; set; }
 
-		public NumericRepresentationValueDto TotalDistanceTraveled { get; set; }
+		public NumericRepresentationValueDto TotalDistanceTravelled { get; set; }
 
 		public NumericRepresentationValueDto TotalElapsedTime { get; set; }
 

@@ -90,7 +90,7 @@ namespace WorkRecordPlugin.Mappers
 			DeviceElementDto deviceElementDto = _mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
 			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id);
 
-			if (_properties.Anonymized)
+			if (_properties.Anonymise)
 			{
 				deviceElementDto.Description = "deviceElement " + deviceElement.Id.ReferenceId;
 			}
@@ -134,7 +134,7 @@ namespace WorkRecordPlugin.Mappers
 					// ParentDevice is a DeviceModel
 					deviceElementDto.IsDeviceElementParent = true;
 					deviceElementDto.DeviceModel = _mapper.Map<DeviceModel, DeviceModelDto>(parentDeviceModel);
-					if (_properties.Anonymized)
+					if (_properties.Anonymise)
 					{
 						deviceElementDto.DeviceModel.Description = "deviceElement " + parentDeviceModel.Id.ReferenceId;
 					}
@@ -158,12 +158,12 @@ namespace WorkRecordPlugin.Mappers
 				deviceModelDto.Brand = brand.Description;
 			}
 
-			// Series
-			var series = _dataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == seriesId);
-			if (series != null)
-			{
-				deviceModelDto.Series = series.Description;
-			}
+			//// Series
+			//var series = DataModel.Catalog.DeviceSeries.FirstOrDefault(b => b.Id.ReferenceId == seriesId);
+			//if (series != null)
+			//{
+			//	deviceElementDto.Series = series.Description;
+			//}
 		}
 
 		private static List<DeviceElementDto> GetAllDeviceElementDtos(List<DeviceElementDto> deviceElements)

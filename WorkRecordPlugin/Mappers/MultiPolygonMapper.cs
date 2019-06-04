@@ -97,7 +97,7 @@ namespace WorkRecordPlugin.Mappers
 			// ToDo: Create PointMapper
 			foreach (var point in adaptLinearRing.Points)
 			{
-				if (_properties.Anonymized)
+				if (_properties.Anonymise)
 				{
 					var movedPoint = AnonymizeUtils.MovePoint(point, _properties.RandomDistance, _properties.RandomBearing);
 					positions.Add(new Position(movedPoint.Y, movedPoint.X, movedPoint.Z));
@@ -172,10 +172,13 @@ namespace WorkRecordPlugin.Mappers
 
 			foreach (var position in lineString.Coordinates)
 			{
-				AgGateway.ADAPT.ApplicationDataModel.Shapes.Point point = new AgGateway.ADAPT.ApplicationDataModel.Shapes.Point();
-				point.Y = position.Latitude;
-				point.X = position.Longitude;
-				point.Z = position.Altitude;
+				AgGateway.ADAPT.ApplicationDataModel.Shapes.Point point =
+					new AgGateway.ADAPT.ApplicationDataModel.Shapes.Point
+					{
+						Y = position.Latitude,
+						X = position.Longitude,
+						Z = position.Altitude
+					};
 				linearRing.Points.Add(point);
 			}
 
