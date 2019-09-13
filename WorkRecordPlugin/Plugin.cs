@@ -192,6 +192,35 @@ namespace WorkRecordPlugin
 			}
 		}
 
+		public List<WorkRecordDto> ExportToWorkRecordDtos(ApplicationDataModel dataModel, Properties properties = null, bool anonymize = false, ApplyingAnonymiseValuesEnum anonymiseMethod = ApplyingAnonymiseValuesEnum.PerWorkRecord)
+		{
+			ParseExportProperties(properties);
+			var workRecordDtos = new List<WorkRecordDto>();
+			WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
+			switch (anonymiseMethod)
+			{
+				case ApplyingAnonymiseValuesEnum.PerField:
+					foreach (var fieldId in dataModel.Catalog.Fields.Select(f => f.Id.ReferenceId))
+					{
+						List<int> workRecordIds =
+							dataModel.Documents.WorkRecords
+								.Where(wr => wr.FieldIds.Contains(fieldId))
+								.Select(wr => wr.Id.ReferenceId)
+								.ToList();
+						workRecordDtos.AddRange(workRecordsMapper.MapAll(workRecordIds));
+					}
+					break;
+				case ApplyingAnonymiseValuesEnum.PerWorkRecord:
+				default:
+					foreach (var workRecord in dataModel.Documents.WorkRecords)
+					{
+						workRecordDtos.Add(workRecordsMapper.MapSingle(workRecord));
+					}
+					break;
+			}
+			return workRecordDtos;
+		}
+
 		private void ParseExportProperties(Properties properties)
 		{
 			// MaximumMappingDepth

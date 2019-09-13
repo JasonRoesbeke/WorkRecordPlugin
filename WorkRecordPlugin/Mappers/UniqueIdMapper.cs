@@ -13,12 +13,15 @@ using AgGateway.ADAPT.ApplicationDataModel.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers
 {
 	static class UniqueIdMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		// ToDo: Create a LinkList file for each workRecord!
 		/* LinkList idea:
 		 * For each GUID: all the uniqueIds + as 'checksum' the ADAPT ReferenceId
@@ -40,6 +43,14 @@ namespace WorkRecordPlugin.Mappers
 				if (GetUniqueIdFromSource(id, preferredSource, out guid))
 				{
 					return guid;
+				}
+
+				if (preferredSource == UniqueIdSourceCNH)
+				{
+					if (GetUniqueIdFromCNHId(id, out guid))
+					{
+						return guid;
+					}
 				}
 			}
 
@@ -76,6 +87,27 @@ namespace WorkRecordPlugin.Mappers
 			// not succesfull, generate new GUID
 			// ToDo: need to save all UniqueIds in the DTO
 			return Guid.NewGuid();
+		}
+
+		private static bool GetUniqueIdFromCNHId(CompoundIdentifier id, out Guid guid)
+		{
+			guid = new Guid();
+			var CnhId = id.UniqueIds.FirstOrDefault(ui => ui.Source == UniqueIdSourceCNH);
+			if (CnhId == null)
+			{
+				return false;
+			}
+			if (CnhId.Id.Length != 8 )
+			{
+				return false;
+			}
+
+			using (MD5 md5 = MD5.Create())
+			{
+				byte[] hash = md5.ComputeHash(Encoding.Default.GetBytes(CnhId.Id));
+				guid = new Guid(hash);
+				return true;
+			}
 		}
 
 		private static bool GetUniqueIdFromSource(CompoundIdentifier id, string preferredSource, out Guid guid)

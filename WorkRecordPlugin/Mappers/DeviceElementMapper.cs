@@ -24,6 +24,8 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class DeviceElementMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
+
 		private readonly IMapper _mapper;
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _properties;
@@ -88,7 +90,7 @@ namespace WorkRecordPlugin.Mappers
 		{
 			// Map
 			DeviceElementDto deviceElementDto = _mapper.Map<DeviceElement, DeviceElementDto>(deviceElement);
-			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id);
+			deviceElementDto.Guid = UniqueIdMapper.GetUniqueGuid(deviceElement.Id, UniqueIdSourceCNH);
 
 			if (_properties.Anonymise)
 			{

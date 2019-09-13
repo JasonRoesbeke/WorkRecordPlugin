@@ -22,6 +22,7 @@ namespace WorkRecordPlugin.Mappers
 {
 	class WorkRecordMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _pluginProperties;
 
@@ -70,7 +71,7 @@ namespace WorkRecordPlugin.Mappers
 			
 			WorkRecordDto fieldWorkRecordDto = new WorkRecordDto();
 
-			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueGuid(workRecord.Id);
+			fieldWorkRecordDto.Guid = UniqueIdMapper.GetUniqueGuid(workRecord.Id, UniqueIdSourceCNH);
 			if (_pluginProperties.Anonymise)
 			{
 				fieldWorkRecordDto.Description = "WorkRecord " + workRecord.Id.ReferenceId;

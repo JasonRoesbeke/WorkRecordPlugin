@@ -26,6 +26,7 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class OperationDataProcessor
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly IMapper _mapper;
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _exportProperties;
@@ -107,7 +108,7 @@ namespace WorkRecordPlugin.Mappers
 						}
 
 						var workingDataDto = _mapper.Map<WorkingData, WorkingDataDto>(workingData);
-						workingDataDto.Guid = UniqueIdMapper.GetUniqueGuid(workingData.Id);
+						workingDataDto.Guid = UniqueIdMapper.GetUniqueGuid(workingData.Id, UniqueIdSourceCNH);
 						workingDataDto.DeviceElementConfigurationGuid = deviceElementConfigurationDto.Guid;
 						allMeters.Add(new KeyValuePair<WorkingData, WorkingDataDto>(workingData, workingDataDto));
 					}

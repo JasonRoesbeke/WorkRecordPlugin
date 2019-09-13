@@ -9,7 +9,9 @@
   * Contributors:
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
@@ -22,6 +24,7 @@ namespace WorkRecordPlugin.Mappers
 {
 	internal class FieldBoundaryMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly PluginProperties _properties;
 
 		public FieldBoundaryMapper(PluginProperties properties)
@@ -58,7 +61,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			Dictionary<string, object> properties = new Dictionary<string, object>();
-			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id));
+			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id, UniqueIdSourceCNH));
 
 			if (_properties.Anonymise)
 			{
@@ -83,7 +86,10 @@ namespace WorkRecordPlugin.Mappers
 			properties.Add("CreationTime", null);
 			if (creationTime != null)
 			{
-				properties["CreationTime"] = (creationTime.TimeStamp1);
+				if (creationTime.TimeStamp1 != null)
+				{
+					properties["CreationTime"] = ((DateTime)creationTime.TimeStamp1).ToString("O", CultureInfo.InvariantCulture);
+				}
 			}
 
 			// Modified time
@@ -91,7 +97,10 @@ namespace WorkRecordPlugin.Mappers
 			properties.Add("ModifiedTime", null);
 			if (modifiedTime != null)
 			{
-				properties["ModifiedTime"] = (modifiedTime.TimeStamp1);
+				if (modifiedTime.TimeStamp1 != null)
+				{
+					properties["ModifiedTime"] = ((DateTime)modifiedTime.TimeStamp1).ToString("O", CultureInfo.InvariantCulture);
+				}
 			}
 
 			Feature fieldBoundaryDto = new Feature(multiPolygon, properties);

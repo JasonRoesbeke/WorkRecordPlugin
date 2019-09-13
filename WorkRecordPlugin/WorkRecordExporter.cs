@@ -119,7 +119,5 @@ namespace WorkRecordPlugin
 			}
 			return newFullPath;
 		}
-
-		
 	}
 }

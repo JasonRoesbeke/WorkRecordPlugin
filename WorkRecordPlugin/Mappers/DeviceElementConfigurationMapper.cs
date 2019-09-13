@@ -22,6 +22,8 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class DeviceElementConfigurationMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
+
 		private readonly IMapper _mapper;
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _exportProperties;
@@ -78,7 +80,7 @@ namespace WorkRecordPlugin.Mappers
 			{
 				return null;
 			}
-			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(config.Id);
+			deviceElementConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(config.Id, UniqueIdSourceCNH);
 
 			if(_exportProperties.Anonymise)
 			{

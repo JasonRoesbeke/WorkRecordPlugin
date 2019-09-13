@@ -26,6 +26,7 @@ namespace WorkRecordPlugin.Mappers
 {
 	class SummaryMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly IMapper _mapper;
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _properties;
@@ -137,7 +138,7 @@ namespace WorkRecordPlugin.Mappers
 					{
 						if (growerId != null)
 						{
-							// Should normally not happen that there are references to different growers in 1 workRecord
+							// ToDo: handle different growers in 1 workRecord
 							throw new ArgumentException();
 						}
 						growerId = (int)summary.GrowerId;
@@ -173,7 +174,7 @@ namespace WorkRecordPlugin.Mappers
 
 			// Grower
 			GrowerDto growerDto = _mapper.Map<GrowerDto>(grower);
-			growerDto.Guid = UniqueIdMapper.GetUniqueGuid(grower.Id);
+			growerDto.Guid = UniqueIdMapper.GetUniqueGuid(grower.Id, UniqueIdSourceCNH);
 			if (_properties.Anonymise)
 			{
 				growerDto.Name = "Grower " + grower.Id.ReferenceId;
@@ -186,7 +187,7 @@ namespace WorkRecordPlugin.Mappers
 			{
 				// Farm
 				FarmDto farmDto = _mapper.Map<FarmDto>(farm);
-				farmDto.Guid = UniqueIdMapper.GetUniqueGuid(farm.Id);
+				farmDto.Guid = UniqueIdMapper.GetUniqueGuid(farm.Id, UniqueIdSourceCNH);
 				if (_properties.Anonymise)
 				{
 					farmDto.Description = "Farm " + farm.Id.ReferenceId;
@@ -199,7 +200,7 @@ namespace WorkRecordPlugin.Mappers
 				{
 					// Field
 					FieldDto fieldDto = _mapper.Map<FieldDto>(field);
-					fieldDto.Guid = UniqueIdMapper.GetUniqueGuid(field.Id);
+					fieldDto.Guid = UniqueIdMapper.GetUniqueGuid(field.Id, UniqueIdSourceCNH);
 					if (_properties.Anonymise)
 					{
 						fieldDto.Description = "Field " + field.Id.ReferenceId;

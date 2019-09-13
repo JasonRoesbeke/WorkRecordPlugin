@@ -22,6 +22,7 @@ namespace WorkRecordPlugin.Mappers
 {
 	public class EquipmentConfigurationMapper
 	{
+		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly IMapper _mapper;
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _exportProperties;
@@ -40,7 +41,7 @@ namespace WorkRecordPlugin.Mappers
 		public EquipmentConfigurationDto Map(EquipmentConfiguration equipmentConfiguration, SummaryDto summaryDto)
 		{
 			var equipmentConfigurationDto = _mapper.Map<EquipmentConfiguration, EquipmentConfigurationDto>(equipmentConfiguration);
-			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(equipmentConfiguration.Id);
+			equipmentConfigurationDto.Guid = UniqueIdMapper.GetUniqueGuid(equipmentConfiguration.Id, UniqueIdSourceCNH);
 			if (_exportProperties.Anonymise)
 			{
 				equipmentConfigurationDto.Description = "EquipmentConfiguration " + equipmentConfiguration.Id.ReferenceId;
