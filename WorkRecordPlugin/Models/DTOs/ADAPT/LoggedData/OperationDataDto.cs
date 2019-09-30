@@ -38,9 +38,6 @@ namespace WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData
 
 		public Dictionary<int, DataTable> SpatialRecords { get; set; }
 
-		//public List<DeviceElementUseDto> DeviceElementUses { get; set; }
-
-		//[JsonIgnore]
 		public List<EquipmentConfigurationDto> EquipmentConfigurations { get; set; }
 
 		public Dictionary<int, List<WorkingDataDto>> WorkingDatas { get; set; }

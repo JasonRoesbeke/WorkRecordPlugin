@@ -16,6 +16,7 @@ using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using AutoMapper;
+using NetTopologySuite.Geometries;
 using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
 using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
@@ -103,9 +104,9 @@ namespace WorkRecordPlugin.Mappers
 				// ToDo: [AgGateway] add vrLatitude|vrLongitude|vrElevation to the Visualizer on public github
 				// ToDo: [AgGateway] deferentiate between GPS values from gps Device on Parent/MotherDevice and GPS values from a gps device on the deviceElementUse itself
 				//Fill in the other cells
-				if (spatialRecord.Geometry is Point)
+				if (spatialRecord.Geometry is AgGateway.ADAPT.ApplicationDataModel.Shapes.Point)
 				{
-					var point = (Point)spatialRecord.Geometry;
+					var point = (AgGateway.ADAPT.ApplicationDataModel.Shapes.Point)spatialRecord.Geometry;
 					var latitude = point.Y;
 					var longitude = point.X;
 					var elevation = point.Z;
@@ -113,7 +114,8 @@ namespace WorkRecordPlugin.Mappers
 					if (_exportProperties.Anonymise)
 					{
 						// Anonymize spatial records by moving the lat/long coordinates
-						var movedPoint = AnonymizeUtils.MovePoint(point, _exportProperties.RandomDistance, _exportProperties.RandomBearing);
+						Coordinate movedPoint = new Coordinate(); ;
+						_exportProperties.AffineTransformation.Transform(new Coordinate(point.X, point.Y), movedPoint);
 						latitude = movedPoint.Y;
 						longitude = movedPoint.X;
 					}

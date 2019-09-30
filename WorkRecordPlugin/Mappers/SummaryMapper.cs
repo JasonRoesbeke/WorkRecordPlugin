@@ -128,7 +128,7 @@ namespace WorkRecordPlugin.Mappers
 			List<int> fieldIds = workRecord.FieldIds ?? new List<int>();
 
 			// [AgGateway] Needed for ISOXML plugin (v2.0.0, ADAPT 1.2.0)
-			// Check also in summaries for receferences to GFF
+			// Check also in summaries for references to GFF
 			var summaries = _dataModel.Documents.Summaries.Where(s => s.WorkRecordId == workRecord.Id.ReferenceId);
 			foreach (var summary in summaries)
 			{
@@ -165,6 +165,7 @@ namespace WorkRecordPlugin.Mappers
 			var fields = _dataModel.Catalog.Fields.Where(f => fieldIds.Contains(f.Id.ReferenceId)).ToList();
 
 			SummaryDto fieldSummaryDto = new SummaryDto();
+			fieldSummaryDto.Guid = UniqueIdMapper.GetUniqueGuid(summaries.FirstOrDefault().Id, UniqueIdSourceCNH);
 
 			if (!fields.Any() || !farms.Any() || grower == null)
 			{

@@ -14,6 +14,7 @@ using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using WorkRecordPlugin.Utils;
+using NetTopologySuite.Geometries;
 using LineString = GeoJSON.Net.Geometry.LineString;
 
 namespace WorkRecordPlugin.Mappers
@@ -30,6 +31,7 @@ namespace WorkRecordPlugin.Mappers
 		#region Export
 		public GeoJSON.Net.Geometry.MultiPolygon Map(AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon spatialData)
 		{
+
 			var polygons = new List<GeoJSON.Net.Geometry.Polygon>();
 			// ToDo: Create PolygonMapper
 			foreach (var adaptPolygon in spatialData.Polygons)
@@ -74,7 +76,7 @@ namespace WorkRecordPlugin.Mappers
 			return new GeoJSON.Net.Geometry.Polygon(lineStrings);
 		}
 
-		private LineString MapLinearRing(LinearRing adaptLinearRing)
+		private LineString MapLinearRing(AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing adaptLinearRing)
 		{
 			var lineString = MapLineString(adaptLinearRing);
 
@@ -91,7 +93,7 @@ namespace WorkRecordPlugin.Mappers
 
 			return lineString;
 		}
-		private LineString MapLineString(LinearRing adaptLinearRing)
+		private LineString MapLineString(AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing adaptLinearRing)
 		{
 			var positions = new List<Position>();
 			// ToDo: Create PointMapper
@@ -99,8 +101,10 @@ namespace WorkRecordPlugin.Mappers
 			{
 				if (_properties.Anonymise)
 				{
-					var movedPoint = AnonymizeUtils.MovePoint(point, _properties.RandomDistance, _properties.RandomBearing);
-					positions.Add(new Position(movedPoint.Y, movedPoint.X, movedPoint.Z));
+					Coordinate movedPoint = new Coordinate(); ;
+					_properties.AffineTransformation.Transform(new Coordinate(point.X, point.Y), movedPoint);
+					//var movedPoint = AnonymizeUtils.MovePoint(point, _properties.RandomDistance, _properties.RandomBearing);
+					positions.Add(new Position(movedPoint.Y, movedPoint.X, point.Z));
 				}
 				else
 				{
@@ -166,9 +170,9 @@ namespace WorkRecordPlugin.Mappers
 			return polygon;
 		}
 
-		private LinearRing MapLinearRing(LineString lineString)
+		private AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing MapLinearRing(LineString lineString)
 		{
-			LinearRing linearRing = new LinearRing();
+			var linearRing = new AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing();
 
 			foreach (var position in lineString.Coordinates)
 			{

@@ -136,7 +136,7 @@ namespace WorkRecordPlugin.Mappers
 			if (_pluginProperties.Anonymise)
 			{
 				// Randomize the Anonymization values
-				AnonymizeUtils.GenerateRandomValues(_pluginProperties);
+				AnonymizeUtils.GenerateRandomAffineTransformation(_pluginProperties);
 			};
 
 			foreach (var workRecordId in workRecordIds)
@@ -156,7 +156,7 @@ namespace WorkRecordPlugin.Mappers
 			if (_pluginProperties.Anonymise)
 			{
 				// Randomize the Anonymization values
-				AnonymizeUtils.GenerateRandomValues(_pluginProperties);
+				AnonymizeUtils.GenerateRandomAffineTransformation(_pluginProperties);
 			};
 
 			// [Check] if there are requested "WorkRecordsToBeExported"

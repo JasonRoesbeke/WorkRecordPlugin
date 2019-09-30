@@ -10,6 +10,7 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.Common;
+using NetTopologySuite.Geometries.Utilities;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -45,6 +46,8 @@ namespace WorkRecordPlugin
 		public int RandomDistance { get; set; }
 		[JsonIgnore]
 		public int RandomBearing { get; set; }
+		[JsonIgnore]
+		public AffineTransformation AffineTransformation { get; set; }
 
 		public enum ApplyingAnonymiseValuesEnum
 		{
