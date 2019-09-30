@@ -16,7 +16,7 @@ using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.ReferenceLayers;
 using Newtonsoft.Json;
 using WorkRecordPlugin.Mappers;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using ADAPT.DTOs.Documents;
 
 namespace WorkRecordPlugin
 {

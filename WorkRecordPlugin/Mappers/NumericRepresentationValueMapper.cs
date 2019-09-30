@@ -13,8 +13,8 @@ using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AutoMapper;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Representations;
+using ADAPT.DTOs.AutoMapperProfiles;
+using ADAPT.DTOs.Representations;
 
 namespace WorkRecordPlugin.Mappers
 {

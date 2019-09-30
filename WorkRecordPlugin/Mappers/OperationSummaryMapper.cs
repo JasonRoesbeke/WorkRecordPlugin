@@ -12,7 +12,7 @@
 using System.Collections.Generic;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using ADAPT.DTOs.Documents;
 
 namespace WorkRecordPlugin.Mappers
 {

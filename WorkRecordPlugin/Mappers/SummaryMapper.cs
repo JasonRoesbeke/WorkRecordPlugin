@@ -18,9 +18,9 @@ using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
 using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using AutoMapper;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
+using ADAPT.DTOs.AutoMapperProfiles;
+using ADAPT.DTOs.Documents;
+using ADAPT.DTOs.Logistics;
 
 namespace WorkRecordPlugin.Mappers
 {

@@ -17,9 +17,9 @@ using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using AutoMapper;
 using NetTopologySuite.Geometries;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
-using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
+using ADAPT.DTOs.AutoMapperProfiles;
+using ADAPT.DTOs.Documents;
+using ADAPT.DTOs.LoggedData;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers

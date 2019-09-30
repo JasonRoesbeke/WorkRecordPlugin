@@ -18,7 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using WorkRecordPlugin.Mappers;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using ADAPT.DTOs.Documents;
 using WorkRecordPlugin.Utils;
 using static WorkRecordPlugin.PluginProperties;
 

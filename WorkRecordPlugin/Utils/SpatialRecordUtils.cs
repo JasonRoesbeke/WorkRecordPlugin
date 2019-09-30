@@ -17,8 +17,8 @@ using AgGateway.ADAPT.Representation.UnitSystem;
 using AutoMapper;
 using System;
 using System.Collections.Generic;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
-using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
+using ADAPT.DTOs.AutoMapperProfiles;
+using ADAPT.DTOs.LoggedData;
 
 namespace WorkRecordPlugin.Utils
 {

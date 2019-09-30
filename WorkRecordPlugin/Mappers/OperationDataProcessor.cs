@@ -16,10 +16,10 @@ using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
 using AutoMapper;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
-using WorkRecordPlugin.Models.DTOs.ADAPT.LoggedData;
+using ADAPT.DTOs.AutoMapperProfiles;
+using ADAPT.DTOs.Documents;
+using ADAPT.DTOs.Equipment;
+using ADAPT.DTOs.LoggedData;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin.Mappers

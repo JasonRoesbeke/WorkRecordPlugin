@@ -11,7 +11,7 @@
   *******************************************************************************/
 using System.Collections.Generic;
 using System.Linq;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Equipment;
+using ADAPT.DTOs.Equipment;
 
 namespace WorkRecordPlugin.Utils
 {

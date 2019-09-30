@@ -15,8 +15,8 @@ using System.Linq;
 using System.Threading;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Documents;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
 using WorkRecordPlugin.Utils;
+using ADAPT.DTOs.Documents;
 
 namespace WorkRecordPlugin.Mappers
 {

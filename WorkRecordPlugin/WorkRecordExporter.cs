@@ -13,7 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Documents;
+using ADAPT.DTOs.Documents;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin

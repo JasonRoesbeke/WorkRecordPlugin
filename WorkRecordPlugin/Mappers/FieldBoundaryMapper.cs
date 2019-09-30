@@ -17,8 +17,8 @@ using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
 using AutoMapper;
 using GeoJSON.Net.Feature;
-using WorkRecordPlugin.Models.DTOs.ADAPT.AutoMapperProfiles;
-using WorkRecordPlugin.Models.DTOs.ADAPT.Logistics;
+using ADAPT.DTOs.AutoMapperProfiles;
+using ADAPT.DTOs.Logistics;
 
 namespace WorkRecordPlugin.Mappers
 {
