@@ -223,6 +223,13 @@ namespace WorkRecordPlugin
 
 		private void ParseExportProperties(Properties properties)
 		{
+			if (properties == null)
+			{
+				CustomProperties.Anonymise = false;
+				CustomProperties.ApplyingAnonymiseValuesPer = ApplyingAnonymiseValuesEnum.PerWorkRecord;
+				return;
+			}
+
 			// MaximumMappingDepth
 			var prop = properties.GetProperty(GetPropertyName(() => CustomProperties.MaximumMappingDepth));
 			if (prop != null && int.TryParse(prop, out int depth))

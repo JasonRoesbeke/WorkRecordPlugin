@@ -29,7 +29,7 @@ namespace WorkRecordPlugin
 
 		public bool WriteInfoFile(string path, string name, string version, string description, PluginProperties exportProperties)
 		{
-			var adaptVersion = Assembly.LoadFrom("AgGateway.ADAPT.ApplicationDataModel.dll").GetName().Version.ToString();
+			var adaptVersion = "2.0.2";
 			return WriteJson(path, new InfoFile(name, version, adaptVersion, description, exportProperties, DateTime.Now), InfoFileConstants.InfoFileName);
 		}
 
