@@ -11,6 +11,7 @@
   *******************************************************************************/
 using Newtonsoft.Json;
 using System.IO;
+using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin
 {
@@ -23,7 +24,6 @@ namespace WorkRecordPlugin
 			NullValueHandling = NullValueHandling.Ignore,
 			DefaultValueHandling = DefaultValueHandling.Ignore,
 			TypeNameHandling = TypeNameHandling.Auto,
-			//ContractResolver = new AdaptContractResolver(),
 			//SerializationBinder = new InternalSerializationBinder()
 		})
 		{
