@@ -21,13 +21,16 @@ using WorkRecordPlugin.Mappers;
 using ADAPT.DTOs.Documents;
 using WorkRecordPlugin.Utils;
 using static WorkRecordPlugin.PluginProperties;
+using GeoJSON.Net.Feature;
 
 namespace WorkRecordPlugin
 {
 	public class Plugin : IPlugin
 	{
-		private readonly WorkRecordExporter _workRecordExporter;
+		private readonly JsonExporter _JsonExporter;
 		private readonly InfoFileReader _infoFileReader;
+
+		private Dictionary<int, string> _adaptIdMap = new Dictionary<int, string>();
 
 		// ToDo: "context": "url...",
 		// ToDo: "version plugin": "x.x.x-pre-alpha"
@@ -42,7 +45,7 @@ namespace WorkRecordPlugin
 		public Plugin(InternalJsonSerializer internalJsonSerializer)
 		{
 			// ToDo _workRecordImporter = new WorkRecordImporter(_internalJsonSerializer);
-			_workRecordExporter = new WorkRecordExporter(internalJsonSerializer);
+			_JsonExporter = new JsonExporter(internalJsonSerializer);
 			CustomProperties = new PluginProperties();
 			_infoFileReader = new InfoFileReader(AssemblyVersion);
 		}
@@ -65,7 +68,7 @@ namespace WorkRecordPlugin
 			}
 		}
 
-		public string Owner { get { return "CNH Industrial"; } }
+		public string Owner { get { return "AgGateway"; } }
 
 		public PluginProperties CustomProperties { get; private set; }
 
@@ -167,7 +170,8 @@ namespace WorkRecordPlugin
 			var newPath = Path.Combine(exportPath, InfoFileConstants.PluginFolderPrefix + "-" + ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
 			WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
-			_workRecordExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, CustomProperties);
+			// ToDo: add more meta data of this export
+			_JsonExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, CustomProperties);
 
 			switch (CustomProperties.ApplyingAnonymiseValuesPer)
 			{
@@ -179,54 +183,152 @@ namespace WorkRecordPlugin
 								.Where(wr => wr.FieldIds.Contains(fieldId))
 								.Select(wr => wr.Id.ReferenceId)
 								.ToList();
-						_workRecordExporter.Write(newPath, workRecordsMapper.MapAll(workRecordIds));
+
+						if (CustomProperties.Anonymise)
+						{
+							// Randomize the Anonymization values
+							AnonymizeUtils.GenerateRandomAffineTransformation(CustomProperties);
+						};
+
+						// OperationDataMapper
+						// ToDo: replace with OperationDataMapper
+						//var workRecordDtos = workRecordsMapper.MapAll(workRecordIds);
+						//_JsonExporter.WriteWorkRecordDtos(newPath, workRecordDtos);
+
+						// FieldBoundaryMapper
+						// ToDo: FieldBoundaryMapper.MapAsSingleFeature([fieldId])
+
+						// GuidanceGroupMapper
+						// ToDo: GuidanceGroupMapper.MapAs...([all GuidanceGroups for fieldId])
+
+						// WorkItemOperationMapper
+						// ToDo: GuidanceGroupMapper.MapAs...([all WorkItemOperations for fieldId])
+
 					}
 					break;
 				case ApplyingAnonymiseValuesEnum.PerWorkRecord:
-				default:
 					foreach (var workRecord in dataModel.Documents.WorkRecords)
 					{
-						_workRecordExporter.Write(newPath, workRecordsMapper.MapSingle(workRecord));
+						if (CustomProperties.Anonymise)
+						{
+							// Randomize the Anonymization values
+							AnonymizeUtils.GenerateRandomAffineTransformation(CustomProperties);
+						};
+
+						// OperationDataMapper
+						// ToDo: replace with OperationDataMapper
+						//WorkRecordDto workRecordDto_mapped = workRecordsMapper.MapSingle(workRecord);
+						//_JsonExporter.WriteWorkRecordDto(newPath, workRecordDto_mapped);
+
+						// FieldBoundaryMapper
+						// ToDo: FieldBoundaryMapper.MapAsMultipleFeatures([all FieldBoundaries for workRecord.Id])
+
+						// GuidanceGroupMapper
+						// ToDo: GuidanceGroupMapper.MapAs...([all GuidanceGroups for workRecord.Id])
+
+						// WorkItemOperationMapper
+						// ToDo: GuidanceGroupMapper.MapAs...([all WorkItemOperations for workRecord.Id])
+
+					}
+					break;
+				default:
+					if (CustomProperties.Anonymise)
+					{
+						// Randomize the Anonymization values
+						AnonymizeUtils.GenerateRandomAffineTransformation(CustomProperties);
+					};
+					foreach (var workRecord in dataModel.Documents.WorkRecords)
+					{
+
+						// OperationDataMapper
+						// ToDo: OperationDataMapper.MapAsFeatureCollection([workRecord])
+
+					}
+					FieldBoundaryMapper fieldBoundaryMapper = new FieldBoundaryMapper(CustomProperties, dataModel);
+					foreach (var fieldBoundary in dataModel.Catalog.FieldBoundaries)
+					{
+
+						// FieldBoundaryMapper
+						Feature fieldBoundaryFeature = fieldBoundaryMapper.MapAsSingleFeature(fieldBoundary);
+						string fileName = FieldBoundaryMapper.GetFieldBoundaryPrefix();
+						if (fieldBoundaryFeature.Properties.ContainsKey("FieldId"))
+						{
+							fileName = fileName + "_for_field_" + fieldBoundaryFeature.Properties["FieldId"];
+						}
+						else if (fieldBoundaryFeature.Properties.ContainsKey("Guid"))
+						{
+							fileName = fileName + "_" + fieldBoundaryFeature.Properties["Guid"];
+						}
+						else
+						{
+							fileName = fileName + "_" + Guid.NewGuid();
+						}
+
+						_JsonExporter.WriteAsGeoJson(newPath, new List<Feature>() { fieldBoundaryFeature }, fileName);
+
+
+					}
+					foreach (var guidanceGroup in dataModel.Catalog.GuidanceGroups)
+					{
+
+						// GuidanceGroupMapper
+						// ToDo: FieldBoundaryMapper.MapAs...([guidanceGroup])
+
+						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns has been mapped
+
+					}
+					foreach (var workItemOperation in dataModel.Documents.WorkItemOperations)
+					{
+						// WorkItemOperationMapper
+						// ToDo: WorkItemOperationMapper.MapAs...([workItemOperation])
+
+						// Todo: [Check] if all dataModel.Catalog.Prescriptions has been mapped
+
 					}
 					break;
 			}
 		}
 
-		public List<WorkRecordDto> ExportToWorkRecordDtos(ApplicationDataModel dataModel, Properties properties = null, bool anonymize = false, ApplyingAnonymiseValuesEnum anonymiseMethod = ApplyingAnonymiseValuesEnum.PerWorkRecord)
-		{
-			ParseExportProperties(properties);
-			var workRecordDtos = new List<WorkRecordDto>();
-			WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
-			switch (anonymiseMethod)
-			{
-				case ApplyingAnonymiseValuesEnum.PerField:
-					foreach (var fieldId in dataModel.Catalog.Fields.Select(f => f.Id.ReferenceId))
-					{
-						List<int> workRecordIds =
-							dataModel.Documents.WorkRecords
-								.Where(wr => wr.FieldIds.Contains(fieldId))
-								.Select(wr => wr.Id.ReferenceId)
-								.ToList();
-						workRecordDtos.AddRange(workRecordsMapper.MapAll(workRecordIds));
-					}
-					break;
-				case ApplyingAnonymiseValuesEnum.PerWorkRecord:
-				default:
-					foreach (var workRecord in dataModel.Documents.WorkRecords)
-					{
-						workRecordDtos.Add(workRecordsMapper.MapSingle(workRecord));
-					}
-					break;
-			}
-			return workRecordDtos;
-		}
+		//public List<WorkRecordDto> ExportToWorkRecordDtos(ApplicationDataModel dataModel, Properties properties = null, bool anonymize = false, ApplyingAnonymiseValuesEnum anonymiseMethod = ApplyingAnonymiseValuesEnum.PerWorkRecord)
+		//{
+		//	ParseExportProperties(properties);
+		//	var workRecordDtos = new List<WorkRecordDto>();
+
+
+		//	WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
+		//	switch (anonymiseMethod)
+		//	{
+		//		case ApplyingAnonymiseValuesEnum.PerField:
+		//			foreach (var fieldId in dataModel.Catalog.Fields.Select(f => f.Id.ReferenceId))
+		//			{
+		//				List<int> workRecordIds =
+		//					dataModel.Documents.WorkRecords
+		//						.Where(wr => wr.FieldIds.Contains(fieldId))
+		//						.Select(wr => wr.Id.ReferenceId)
+		//						.ToList();
+		//				workRecordDtos.AddRange(workRecordsMapper.MapAll(workRecordIds));
+
+						
+		//			}
+		//			break;
+		//		case ApplyingAnonymiseValuesEnum.PerWorkRecord:
+		//		default:
+		//			foreach (var workRecord in dataModel.Documents.WorkRecords)
+		//			{
+		//				WorkRecordDto workRecordDto_mapped = workRecordsMapper.MapSingle(workRecord);
+		//				workRecordDtos.Add(workRecordDto_mapped);						
+		//			}
+		//			break;
+		//	}
+		//	return workRecordDtos;
+		//}
 
 		private void ParseExportProperties(Properties properties)
 		{
 			if (properties == null)
 			{
 				CustomProperties.Anonymise = false;
-				CustomProperties.ApplyingAnonymiseValuesPer = ApplyingAnonymiseValuesEnum.PerWorkRecord;
+				CustomProperties.ApplyingAnonymiseValuesPer = ApplyingAnonymiseValuesEnum.PerAdm; // Default
 				return;
 			}
 

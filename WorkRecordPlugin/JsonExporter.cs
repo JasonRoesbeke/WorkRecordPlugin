@@ -14,35 +14,36 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using ADAPT.DTOs.Documents;
+using GeoJSON.Net.Feature;
 using WorkRecordPlugin.Utils;
 
 namespace WorkRecordPlugin
 {
-	public class WorkRecordExporter
+	public class JsonExporter
 	{
 		private InternalJsonSerializer _internalJsonSerializer;
 
-		public WorkRecordExporter(InternalJsonSerializer internalJsonSerializer)
+		public JsonExporter(InternalJsonSerializer internalJsonSerializer)
 		{
 			_internalJsonSerializer = internalJsonSerializer;
 		}
 
 		public bool WriteInfoFile(string path, string name, string version, string description, PluginProperties exportProperties)
 		{
-			var adaptVersion = "2.0.2";
+			var adaptVersion = "2.0.4";
 			return WriteJson(path, new InfoFile(name, version, adaptVersion, description, exportProperties, DateTime.Now), InfoFileConstants.InfoFileName);
 		}
 
-		public bool Write(string path, List<WorkRecordDto> workRecordDtos)
+		public bool WriteWorkRecordDtos(string path, List<WorkRecordDto> workRecordDtos)
 		{
 			var succes = 0;
 			foreach (var workRecordDto in workRecordDtos)
 			{
-				succes += Write(path, workRecordDto) ? 0 : 1;
+				succes += WriteWorkRecordDto(path, workRecordDto) ? 0 : 1;
 			}
 			return succes == 0;
 		}
-		public bool Write(string path, WorkRecordDto workRecordDto)
+		public bool WriteWorkRecordDto(string path, WorkRecordDto workRecordDto)
 		{
 			if (workRecordDto == null)
 			{
@@ -55,7 +56,13 @@ namespace WorkRecordPlugin
 			return WriteJson(path, workRecordDto, workRecordDto.Description); ;
 		}
 
-		private bool WriteJson<T>(string path, T objectToSerialize, string fileName) where T : class
+		public bool WriteAsGeoJson(string path, List<Feature> features, string fileName)
+		{
+			FeatureCollection featureCollection = new FeatureCollection(features);
+			return WriteJson(path, featureCollection, fileName);
+		}
+
+		public bool WriteJson<T>(string path, T objectToSerialize, string fileName) where T : class
 		{
 			var jsonFormat = Path.GetTempFileName();
 			try

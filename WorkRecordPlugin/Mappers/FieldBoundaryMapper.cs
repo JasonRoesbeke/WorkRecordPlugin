@@ -19,6 +19,8 @@ using AutoMapper;
 using GeoJSON.Net.Feature;
 using ADAPT.DTOs.AutoMapperProfiles;
 using ADAPT.DTOs.Logistics;
+using AgGateway.ADAPT.ApplicationDataModel.ADM;
+using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -26,8 +28,9 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly PluginProperties _properties;
+		private readonly ApplicationDataModel _dataModel;
 
-		public FieldBoundaryMapper(PluginProperties properties)
+		public FieldBoundaryMapper(PluginProperties properties, ApplicationDataModel dataModel = null)
 		{
 			var config = new MapperConfiguration(cfg => {
 				cfg.AddProfile<WorkRecordDtoProfile>();
@@ -35,6 +38,7 @@ namespace WorkRecordPlugin.Mappers
 
 			config.CreateMapper();
 			_properties = properties;
+			_dataModel = dataModel;
 		}
 
 		public List<Feature> Map(IEnumerable<FieldBoundary> fieldBoundaries, FieldDto fieldDto)
@@ -42,7 +46,7 @@ namespace WorkRecordPlugin.Mappers
 			List<Feature> fieldBoundaryDtos = new List<Feature>();
 			foreach (var fieldBoundary in fieldBoundaries)
 			{
-				Feature fieldBoundaryDto = Map(fieldBoundary, fieldDto);
+				Feature fieldBoundaryDto = Map(fieldBoundary);
 				if (fieldBoundaryDto != null)
 				{
 					fieldBoundaryDtos.Add(fieldBoundaryDto);
@@ -51,7 +55,7 @@ namespace WorkRecordPlugin.Mappers
 			return fieldBoundaryDtos;
 		}
 
-		private Feature Map(FieldBoundary fieldBoundary, FieldDto fieldDto)
+		private Feature Map(FieldBoundary fieldBoundary)
 		{
 			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(_properties);
 			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
@@ -61,7 +65,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			Dictionary<string, object> properties = new Dictionary<string, object>();
-			properties.Add("Id", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id, UniqueIdSourceCNH));
+			properties.Add("Guid", UniqueIdMapper.GetUniqueGuid(fieldBoundary.Id, UniqueIdSourceCNH));
 
 			if (_properties.Anonymise)
 			{
@@ -70,8 +74,7 @@ namespace WorkRecordPlugin.Mappers
 			else
 			{
 				properties.Add("Description", fieldBoundary.Description);
-			}
-			//properties.Add("FieldId", fieldDto.Guid);
+			}			
 
 			// GpsSource
 			var gpsSource = fieldBoundary.GpsSource;
@@ -118,6 +121,65 @@ namespace WorkRecordPlugin.Mappers
 			// ToDo: map properties of a fieldBoundary in GeoJson
 
 			return fieldBoundary;
+		}
+
+		public Feature MapAsSingleFeature(FieldBoundary fieldBoundary)
+		{
+			if (_dataModel == null)
+			{
+				return null;
+			}
+
+			Feature fieldBoundaryFeature = Map(fieldBoundary);
+
+			if (fieldBoundaryFeature == null)
+			{
+				return null;
+			}
+
+			Field adaptField = _dataModel.Catalog.Fields.Where(f => f.Id.ReferenceId == fieldBoundary.FieldId).FirstOrDefault();
+
+			if (adaptField != null)
+			{
+				fieldBoundaryFeature.Properties.Add("Field", adaptField.Description);
+
+				Guid fieldguid = UniqueIdMapper.GetUniqueGuid(adaptField.Id, UniqueIdSourceCNH);
+				fieldBoundaryFeature.Properties.Add("FieldId", fieldguid);
+
+				Farm adaptFarm = _dataModel.Catalog.Farms.Where(f => f.Id.ReferenceId == adaptField.FarmId).FirstOrDefault();
+
+				if (adaptFarm != null)
+				{
+					fieldBoundaryFeature.Properties.Add("Farm", adaptFarm.Description);
+
+					Grower adaptGrower = _dataModel.Catalog.Growers.Where(f => f.Id.ReferenceId == adaptFarm.GrowerId).FirstOrDefault();
+
+					if (adaptGrower != null)
+					{
+						fieldBoundaryFeature.Properties.Add("Grower", adaptGrower.Name);
+
+					}
+				}
+
+				if (adaptField.GrowerId != null && !fieldBoundaryFeature.Properties.ContainsKey("Grower"))
+				{
+					Grower adaptGrower = _dataModel.Catalog.Growers.Where(f => f.Id.ReferenceId == adaptFarm.GrowerId).FirstOrDefault();
+
+					if (adaptGrower != null)
+					{
+						fieldBoundaryFeature.Properties.Add("Grower", adaptGrower.Name);
+
+					}
+				}
+
+			}
+
+			return fieldBoundaryFeature;
+		}
+
+		internal static string GetFieldBoundaryPrefix()
+		{
+			return "FieldBoundary";
 		}
 	}
 }

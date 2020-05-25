@@ -92,7 +92,7 @@ namespace WorkRecordPlugin.Mappers
 			fieldWorkRecordDto.Summary = summaryDto;
 
 			LoggedDataMapper fieldOperationDataMapper = new LoggedDataMapper(_dataModel, _pluginProperties);
-			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord, summaryDto);
+			fieldWorkRecordDto.LoggedData = fieldOperationDataMapper.Map(workRecord, summaryDto);			
 
 			return fieldWorkRecordDto;
 		}
@@ -133,12 +133,7 @@ namespace WorkRecordPlugin.Mappers
 		public List<WorkRecordDto> MapAll(List<int> workRecordIds)
 		{
 			var workRecordDtos = new List<WorkRecordDto>();
-			if (_pluginProperties.Anonymise)
-			{
-				// Randomize the Anonymization values
-				AnonymizeUtils.GenerateRandomAffineTransformation(_pluginProperties);
-			};
-
+			
 			foreach (var workRecordId in workRecordIds)
 			{
 				var workRecordDto = Map(_dataModel.Documents.WorkRecords.FirstOrDefault(wr => wr.Id.ReferenceId.Equals(workRecordId)));
@@ -153,12 +148,6 @@ namespace WorkRecordPlugin.Mappers
 
 		public WorkRecordDto MapSingle(WorkRecord workRecord)
 		{
-			if (_pluginProperties.Anonymise)
-			{
-				// Randomize the Anonymization values
-				AnonymizeUtils.GenerateRandomAffineTransformation(_pluginProperties);
-			};
-
 			// [Check] if there are requested "WorkRecordsToBeExported"
 			if (_pluginProperties.WorkRecordsToBeExported.Any())
 			{

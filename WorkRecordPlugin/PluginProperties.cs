@@ -53,7 +53,8 @@ namespace WorkRecordPlugin
 		{
 			PerWorkRecord = 0,
 			PerField = 1,
-			PerParentDeviceElement = 2 // ToDo: add WorkRecordImporter.MapPerParentDeviceElement() method
+			PerParentDeviceElement = 2, // ToDo: add WorkRecordImporter.MapPerParentDeviceElement() method
+			PerAdm = 3
 		}
 
 		// What to Import
