@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AgGatewayADAPTFramework" Version="2.0.2" />
+    <PackageReference Include="AgGatewayADAPTFramework" Version="2.0.4" />
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="GeoJSON.Net" Version="1.1.73" />
     <PackageReference Include="NetTopologySuite" Version="2.0.0" />
@@ -14,8 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="ADAPT.DTOs">
-      <HintPath>lib\ADAPT.DTO\net461\ADAPT.DTOs.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\ADAPT.DTOs\ADAPT.DTOs\ADAPT.DTOs\ADAPT.DTOs.csproj" />
   </ItemGroup>
 </Project>
