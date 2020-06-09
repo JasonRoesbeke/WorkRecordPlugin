@@ -29,7 +29,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 				case GeoJSON.Net.GeoJSONObjectType.Polygon:
 					return PolygonMapper.MapPolygon((GeoJSON.Net.Geometry.Polygon)feature.Geometry, affineTransformation);
 				case GeoJSON.Net.GeoJSONObjectType.MultiPolygon:
-					return MultiPolygonMapper.MapPolygon((GeoJSON.Net.Geometry.MultiPolygon)feature.Geometry, affineTransformation);
+					return MultiPolygonMapper.MapMultiPolygon((GeoJSON.Net.Geometry.MultiPolygon)feature.Geometry, affineTransformation);
 				case GeoJSON.Net.GeoJSONObjectType.GeometryCollection:
 					break;
 				case GeoJSON.Net.GeoJSONObjectType.Feature:

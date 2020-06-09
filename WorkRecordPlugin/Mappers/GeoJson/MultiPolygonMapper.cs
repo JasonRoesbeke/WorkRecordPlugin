@@ -45,7 +45,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 		#endregion
 
 		#region Import
-		public static AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon MapPolygon(GeoJSON.Net.Geometry.MultiPolygon multiPolygonGeoJson, AffineTransformation affineTransformation = null)
+		public static AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon MapMultiPolygon(GeoJSON.Net.Geometry.MultiPolygon multiPolygonGeoJson, AffineTransformation affineTransformation = null)
 		{
 			var multiPolygon = new AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon();
 			foreach (var polygonGeoJson in multiPolygonGeoJson.Coordinates)
