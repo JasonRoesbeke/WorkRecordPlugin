@@ -22,6 +22,8 @@ using ADAPT.DTOs.Documents;
 using WorkRecordPlugin.Utils;
 using static WorkRecordPlugin.PluginProperties;
 using GeoJSON.Net.Feature;
+using NetTopologySuite.Geometries;
+using AgGateway.ADAPT.ApplicationDataModel.Prescriptions;
 
 namespace WorkRecordPlugin
 {
@@ -158,7 +160,6 @@ namespace WorkRecordPlugin
 		}
 
 		
-
 		public void Export(ApplicationDataModel dataModel, string exportPath, Properties properties = null)
 		{
 			ParseExportProperties(properties);
@@ -202,7 +203,7 @@ namespace WorkRecordPlugin
 						// ToDo: GuidanceGroupMapper.MapAs...([all GuidanceGroups for fieldId])
 
 						// WorkItemOperationMapper
-						// ToDo: GuidanceGroupMapper.MapAs...([all WorkItemOperations for fieldId])
+						// ToDo: WorkItemOperationMapper.MapAs...([all WorkItemOperations for fieldId])
 
 					}
 					break;
@@ -250,21 +251,21 @@ namespace WorkRecordPlugin
 
 						// FieldBoundaryMapper
 						Feature fieldBoundaryFeature = fieldBoundaryMapper.MapAsSingleFeature(fieldBoundary);
-						string fileName = FieldBoundaryMapper.GetFieldBoundaryPrefix();
+						string fileNamePrescriptions = FieldBoundaryMapper.GetFieldBoundaryPrefix();
 						if (fieldBoundaryFeature.Properties.ContainsKey("FieldId"))
 						{
-							fileName = fileName + "_for_field_" + fieldBoundaryFeature.Properties["FieldId"];
+							fileNamePrescriptions = fileNamePrescriptions + "_for_field_" + fieldBoundaryFeature.Properties["FieldId"];
 						}
 						else if (fieldBoundaryFeature.Properties.ContainsKey("Guid"))
 						{
-							fileName = fileName + "_" + fieldBoundaryFeature.Properties["Guid"];
+							fileNamePrescriptions = fileNamePrescriptions + "_" + fieldBoundaryFeature.Properties["Guid"];
 						}
 						else
 						{
-							fileName = fileName + "_" + Guid.NewGuid();
+							fileNamePrescriptions = fileNamePrescriptions + "_" + Guid.NewGuid();
 						}
 
-						_JsonExporter.WriteAsGeoJson(newPath, new List<Feature>() { fieldBoundaryFeature }, fileName);
+						_JsonExporter.WriteAsGeoJson(newPath, new List<Feature>() { fieldBoundaryFeature }, fileNamePrescriptions);
 
 
 					}
@@ -277,14 +278,41 @@ namespace WorkRecordPlugin
 						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns has been mapped
 
 					}
-					foreach (var workItemOperation in dataModel.Documents.WorkItemOperations)
+					List<Feature> prescriptionFeatures = new List<Feature>();
+					//Prescriptions
+					int gridType = 1;
+					if (properties != null)
 					{
+						Int32.TryParse(properties.GetProperty("GridType"), out gridType);
+						if (gridType != 1 && gridType != 2)
+						{
+							Console.WriteLine($"Invalid Grid Type {gridType}.");
+						}
+					}
+					PrescriptionMapper prescriptionMapper = new PrescriptionMapper(CustomProperties, dataModel);
+					foreach (var workItemOperation in dataModel.Documents.WorkItemOperations)
+                    {
+						Console.WriteLine("WorkItemOperation: " + workItemOperation.Description + " OperationType " + workItemOperation.OperationType + " gridType " + gridType);
+						//workItemOperationFeature.Properties.Add("Description", workItemOperation.Description);
+						//workItemOperationFeature.Properties.Add("OperationType", workItemOperation.OperationType);
+						//workItemOperationFeature.Properties.Add("ID", workItemOperation.Id);
+						//workItemOperationFeature.Properties.Add("PrescriptionId", workItemOperation.PrescriptionId);
+
+						Prescription adaptPrescription = dataModel.Catalog.Prescriptions.Where(f => f.Id.ReferenceId == workItemOperation.PrescriptionId).FirstOrDefault();
+
+						if (adaptPrescription != null)
+						{
+							prescriptionFeatures.AddRange(prescriptionMapper.MapAsFeatures(adaptPrescription, gridType));
+						}
 						// WorkItemOperationMapper
 						// ToDo: WorkItemOperationMapper.MapAs...([workItemOperation])
 
 						// Todo: [Check] if all dataModel.Catalog.Prescriptions has been mapped
 
 					}
+					string fileName = PrescriptionMapper.GetWorkItemOperationPrefix();
+					fileName = fileName + "_prescriptions_" + Guid.NewGuid();
+					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeatures, fileName);
 					break;
 			}
 		}

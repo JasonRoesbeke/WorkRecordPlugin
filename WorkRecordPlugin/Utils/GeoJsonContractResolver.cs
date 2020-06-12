@@ -10,7 +10,7 @@ namespace WorkRecordPlugin.Utils
 {
 	public class GeoJsonContractResolver : DefaultContractResolver
 	{
-		public new static readonly GeoJsonContractResolver Instance = new GeoJsonContractResolver();
+		//public new static readonly GeoJsonContractResolver Instance = new GeoJsonContractResolver();
 
 		protected override JsonContract CreateContract(Type objectType)
 		{
