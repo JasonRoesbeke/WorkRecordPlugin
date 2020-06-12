@@ -41,6 +41,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 
 			return new GeoJSON.Net.Geometry.Polygon(lineStrings);
 		}
+
 		public static GeoJSON.Net.Geometry.Polygon MapBoundingBox(AgGateway.ADAPT.ApplicationDataModel.Shapes.BoundingBox adaptBBox, AffineTransformation affineTransformation = null)
 		{
 			var points = new List<AgGateway.ADAPT.ApplicationDataModel.Shapes.Point>();
