@@ -76,33 +76,27 @@ namespace WorkRecordPlugin.Mappers
 		private Feature Map(VectorPrescription prescription)
 		{
 			Feature feature = null;
-			try
-			{
-				GeoJSON.Net.Geometry.Polygon polygon = null;
-				Dictionary<string, object> properties = new Dictionary<string, object>();
-				if (prescription.BoundingBox != null)
-				{ 
-					polygon = PolygonMapper.MapBoundingBox(prescription.BoundingBox);
-					properties.Add("BoundingBox", prescription.BoundingBox);            // MinX, MinY, MaxX, MaxY
-				}
-				// ShapeType Enum: Point, MultiPoint, LineString, MultiLineString, LinearRing, Polygon, MultiPolygon
-				properties.Add("RxShapeLookups", prescription.RxShapeLookups);      // Shape (MultiPolygon), Rates (1)
-				properties.Add("RxProductLookups", prescription.RxProductLookups);  // Id, ProductId, Representation, UnitOfMeasure
-																					// SpatialPrescription 
-				if (prescription.OutOfFieldRate != null)
-					properties.Add("OutOfFieldRate", prescription.OutOfFieldRate.Value.Value);
-				if (prescription.LossOfGpsRate != null)
-					properties.Add("LossOfGpsRate", prescription.LossOfGpsRate.Value.Value);
-
-				feature = new Feature(polygon, properties);
+			GeoJSON.Net.Geometry.Polygon polygon = null;
+			Dictionary<string, object> properties = new Dictionary<string, object>();
+			if (prescription.BoundingBox != null)
+			{ 
+				polygon = PolygonMapper.MapBoundingBox(prescription.BoundingBox);
+				properties.Add("BoundingBox", prescription.BoundingBox);            // MinX, MinY, MaxX, MaxY
 			}
-			catch (Exception)
-			{
-				// ToDo: handle JsonReaderExceptions!
-			}
+			// ShapeType Enum: Point, MultiPoint, LineString, MultiLineString, LinearRing, Polygon, MultiPolygon
+			properties.Add("RxShapeLookups", prescription.RxShapeLookups);      // Shape (MultiPolygon), Rates (1)
+			properties.Add("RxProductLookups", prescription.RxProductLookups);  // Id, ProductId, Representation, UnitOfMeasure
+																				// SpatialPrescription 
+			if (prescription.OutOfFieldRate != null)
+				properties.Add("OutOfFieldRate", prescription.OutOfFieldRate.Value.Value);
+			if (prescription.LossOfGpsRate != null)
+				properties.Add("LossOfGpsRate", prescription.LossOfGpsRate.Value.Value);
 
+			feature = new Feature(polygon, properties);
+			
 			return feature;
 		}
+
 		private Feature Map(RasterGridPrescription prescription, int gridType)
 		{
 			Feature feature = null;
