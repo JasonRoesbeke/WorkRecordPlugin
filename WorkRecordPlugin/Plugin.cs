@@ -22,6 +22,7 @@ using ADAPT.DTOs.Documents;
 using WorkRecordPlugin.Utils;
 using static WorkRecordPlugin.PluginProperties;
 using GeoJSON.Net.Feature;
+using AgGateway.ADAPT.ApplicationDataModel.Prescriptions;
 
 namespace WorkRecordPlugin
 {
@@ -277,14 +278,49 @@ namespace WorkRecordPlugin
 						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns has been mapped
 
 					}
+					// @ToDo where is gridType?
+					int gridType = 1;
+					if (properties != null)
+					{
+						Int32.TryParse(properties.GetProperty("GridType"), out gridType);
+						if (gridType != 1 && gridType != 2)
+						{
+							Console.WriteLine($"Invalid Grid Type {gridType}.");
+						}
+					}
+					//Prescriptions
+					List<Feature> prescriptionFeatures = new List<Feature>();
+					List<Feature> prescriptionFeaturesSingle = new List<Feature>();
+					PrescriptionMapper prescriptionMapper = new PrescriptionMapper(CustomProperties, dataModel);
 					foreach (var workItemOperation in dataModel.Documents.WorkItemOperations)
 					{
-						// WorkItemOperationMapper
-						// ToDo: WorkItemOperationMapper.MapAs...([workItemOperation])
+						Console.WriteLine("WorkItemOperation: " + workItemOperation.Description + " OperationType " + workItemOperation.OperationType + " gridType " + gridType);
+						//workItemOperationFeature.Properties.Add("Description", workItemOperation.Description);
+						//workItemOperationFeature.Properties.Add("OperationType", workItemOperation.OperationType);
+						//workItemOperationFeature.Properties.Add("ID", workItemOperation.Id);
+						//workItemOperationFeature.Properties.Add("PrescriptionId", workItemOperation.PrescriptionId);
+
+						Prescription adaptPrescription = dataModel.Catalog.Prescriptions.Where(f => f.Id.ReferenceId == workItemOperation.PrescriptionId).FirstOrDefault();
+
+						if (adaptPrescription != null)
+						{
+							prescriptionFeaturesSingle.Add(prescriptionMapper.MapAsSingleFeature(adaptPrescription, gridType));
+
+							prescriptionFeatures.AddRange(prescriptionMapper.MapAsMultipleFeatures(adaptPrescription, gridType));
+						}
 
 						// Todo: [Check] if all dataModel.Catalog.Prescriptions has been mapped
-
 					}
+
+					string fileNameP;
+					// @ToDo only when count > 0?
+					fileNameP = PrescriptionMapper.GetWorkItemOperationPrefix();
+					fileNameP = fileNameP + "_prescriptions_single_" + Guid.NewGuid();
+					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeaturesSingle, fileNameP);
+
+					fileNameP = PrescriptionMapper.GetWorkItemOperationPrefix();
+					fileNameP = fileNameP + "_prescriptions_" + Guid.NewGuid();
+					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeatures, fileNameP);
 					break;
 			}
 		}

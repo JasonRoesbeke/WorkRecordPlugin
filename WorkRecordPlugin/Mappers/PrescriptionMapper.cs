@@ -20,6 +20,7 @@ using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.Prescriptions;
 using Newtonsoft.Json;
 using WorkRecordPlugin.Mappers.GeoJson;
+using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -96,6 +97,29 @@ namespace WorkRecordPlugin.Mappers
 			
 			return feature;
 		}
+		private List<Feature> MapMultiple(VectorPrescription prescription)
+		{
+			List<Feature> features = new List<Feature>();
+
+			foreach (var shaperate in prescription.RxShapeLookups)
+            {
+				//prescription.RxProductLookups
+				int index = 0;
+				if (shaperate.Shape != null && shaperate.Shape.Polygons.Count > 0)
+				{
+					foreach (var adaptPolygon in shaperate.Shape.Polygons)
+					{
+						Dictionary<string, object> properties = new Dictionary<string, object>();
+						properties.Add("product", shaperate.Rates[index].RxProductLookupId);
+						properties.Add("rate", shaperate.Rates[index++].Rate);
+						
+						features.Add(new Feature(PolygonMapper.MapPolygon(adaptPolygon), properties));
+					}
+				}
+			}
+
+			return features;
+		}
 
 		private Feature Map(RasterGridPrescription prescription, int gridType)
 		{
@@ -135,7 +159,7 @@ namespace WorkRecordPlugin.Mappers
 
 			return feature;
 		}
-		public List<Feature> MapAsFeatures(Prescription adaptPrescription, int gridType)
+		public Feature MapAsSingleFeature(Prescription adaptPrescription, int gridType)
 		{
 			Feature prescriptionFeature = null;
 
@@ -180,7 +204,59 @@ namespace WorkRecordPlugin.Mappers
 				}
 			}
 
-			return new List<Feature>() { prescriptionFeature };
+			return prescriptionFeature;
+		}
+		public List<Feature> MapAsMultipleFeatures(Prescription adaptPrescription, int gridType)
+		{
+			Feature prescriptionFeature = null;
+			List<Feature> prescriptionFeatures = new List<Feature>();
+
+			// Prescription, types
+			if (adaptPrescription is RasterGridPrescription)
+			{
+				// @ToDo
+				prescriptionFeature = Map(adaptPrescription as RasterGridPrescription, gridType);
+			}
+			else if (adaptPrescription is VectorPrescription)
+			{
+				prescriptionFeatures = MapMultiple(adaptPrescription as VectorPrescription);
+			}
+			else if (adaptPrescription is ManualPrescription)
+			{
+				// @ToDo
+				prescriptionFeature = Map(adaptPrescription as ManualPrescription);
+			}
+			else
+			{
+				// @ToDo
+				prescriptionFeature = Map(adaptPrescription);
+			}
+
+			if (prescriptionFeature != null)
+			{
+				prescriptionFeature.Properties.Add("Guid", UniqueIdMapper.GetUniqueGuid(adaptPrescription.Id, UniqueIdSourceCNH));
+				prescriptionFeature.Properties.Add("FieldId", adaptPrescription.FieldId);
+
+				if (_properties.Anonymise)
+				{
+					prescriptionFeature.Properties.Add("Description", "Prescription " + adaptPrescription.Id.ReferenceId);
+				}
+				else
+				{
+					prescriptionFeature.Properties.Add("Description", adaptPrescription.Description);
+				}
+
+				if (adaptPrescription.CropZoneId != null)
+				{
+					prescriptionFeature.Properties.Add("CropZoneId", adaptPrescription.CropZoneId);
+
+					//adaptPrescription.CropZoneId
+					//Prescription adaptPrescription = _dataModel.Catalog.Prescriptions.Where(f => f.Id.ReferenceId == workItemOperation.PrescriptionId).FirstOrDefault();
+				}
+			}
+
+			prescriptionFeatures.Add(prescriptionFeature);
+			return prescriptionFeatures;
 		}
 
 		internal static string GetWorkItemOperationPrefix()
