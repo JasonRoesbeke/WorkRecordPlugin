@@ -149,8 +149,8 @@ namespace WorkRecordPlugin.Mappers
 			
 			// Based on Open.Topology.TestRunner.Functions/CreateShapeFunctions.Grid
 			var grid = new List<BoundingBox>();
-			int nCellsOnSideX = (int)prescription.RowCount;
-			int nCellsOnSideY = (int)prescription.ColumnCount;
+			int nCellsOnSideX = (int)prescription.ColumnCount;
+			int nCellsOnSideY = (int)prescription.RowCount;
 			double cellSizeX = prescription.CellWidth.Value.Value;
 			double cellSizeY = prescription.CellHeight.Value.Value;
 
@@ -168,9 +168,9 @@ namespace WorkRecordPlugin.Mappers
 				//env.MaxX = new NumericRepresentationValue(RepresentationInstanceList.vrLongitude.ToModelRepresentation(), new NumericValue(UnitSystemManager.GetUnitOfMeasure("arcdeg"), prescription.Origin.X + nCellsOnSideX * cellSizeX));
 			}
 
-			for (int i = 0; i < nCellsOnSideX; i++)
+			for (int j = 0; j < nCellsOnSideY; j++)
 			{
-				for (int j = 0; j < nCellsOnSideY; j++)
+				for (int i = 0; i < nCellsOnSideX; i++)
 				{
 					double x1 = env.MinX.Value.Value + i * cellSizeX;
 					double y1 = env.MinY.Value.Value + j * cellSizeY;
