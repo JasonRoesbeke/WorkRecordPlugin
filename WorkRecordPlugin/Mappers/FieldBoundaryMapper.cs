@@ -21,6 +21,7 @@ using ADAPT.DTOs.AutoMapperProfiles;
 using ADAPT.DTOs.Logistics;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Logistics;
+using WorkRecordPlugin.Mappers.GeoJson;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -41,6 +42,7 @@ namespace WorkRecordPlugin.Mappers
 			_dataModel = dataModel;
 		}
 
+		#region Export_old
 		public List<Feature> Map(IEnumerable<FieldBoundary> fieldBoundaries, FieldDto fieldDto)
 		{
 			List<Feature> fieldBoundaryDtos = new List<Feature>();
@@ -54,11 +56,12 @@ namespace WorkRecordPlugin.Mappers
 			}
 			return fieldBoundaryDtos;
 		}
+		#endregion
 
+		#region Export
 		private Feature Map(FieldBoundary fieldBoundary)
 		{
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(_properties);
-			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = multiPolygonMapper.Map(fieldBoundary.SpatialData);
+			GeoJSON.Net.Geometry.MultiPolygon multiPolygon = MultiPolygonMapper.Map(fieldBoundary.SpatialData, _properties.AffineTransformation);
 			if (multiPolygon == null)
 			{
 				return null;
@@ -74,7 +77,7 @@ namespace WorkRecordPlugin.Mappers
 			else
 			{
 				properties.Add("Description", fieldBoundary.Description);
-			}			
+			}
 
 			// GpsSource
 			var gpsSource = fieldBoundary.GpsSource;
@@ -109,18 +112,6 @@ namespace WorkRecordPlugin.Mappers
 			Feature fieldBoundaryDto = new Feature(multiPolygon, properties);
 
 			return fieldBoundaryDto;
-		}
-
-		public FieldBoundary Map(Feature fieldBoundaryGeoJson)
-		{
-			FieldBoundary fieldBoundary = new FieldBoundary();
-
-			MultiPolygonMapper multiPolygonMapper = new MultiPolygonMapper(_properties);
-			fieldBoundary.SpatialData = multiPolygonMapper.Map(fieldBoundaryGeoJson);
-
-			// ToDo: map properties of a fieldBoundary in GeoJson
-
-			return fieldBoundary;
 		}
 
 		public Feature MapAsSingleFeature(FieldBoundary fieldBoundary)
@@ -181,5 +172,23 @@ namespace WorkRecordPlugin.Mappers
 		{
 			return "FieldBoundary";
 		}
+		#endregion
+
+
+		#region Import
+		public FieldBoundary Map(Feature fieldBoundaryGeoJson)
+		{
+			FieldBoundary fieldBoundary = new FieldBoundary();
+			var adaptShape = FeatureMapper.Map(fieldBoundaryGeoJson);
+			if (adaptShape.GetType() == typeof(AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon))
+			{
+				fieldBoundary.SpatialData = (AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon)adaptShape;
+			}
+
+			// ToDo: map properties of a fieldBoundary in GeoJson
+
+			return fieldBoundary;
+		}
+		#endregion
 	}
 }
