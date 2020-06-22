@@ -278,53 +278,54 @@ namespace WorkRecordPlugin
 						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns has been mapped
 
 					}
-					// @ToDo where is gridType?
-					int gridType = 1;
-					if (properties != null)
-					{
-						Int32.TryParse(properties.GetProperty("GridType"), out gridType);
-						if (gridType != 1 && gridType != 2)
-						{
-							Console.WriteLine($"Invalid Grid Type {gridType}.");
-						}
-					}
-					//Prescriptions
+					
+					//Prescriptions (without gridType)
 					List<Feature> prescriptionFeatures = new List<Feature>();
 					List<Feature> prescriptionFeaturesSingle = new List<Feature>();
 					PrescriptionMapper prescriptionMapper = new PrescriptionMapper(CustomProperties, dataModel);
 					foreach (var workItemOperation in dataModel.Documents.WorkItemOperations)
                     {
-                        Console.WriteLine("WorkItemOperation: " + workItemOperation.Description + " OperationType " + workItemOperation.OperationType + " gridType " + gridType);
+                        Console.WriteLine("WorkItemOperation: " + workItemOperation.Description + " OperationType " + workItemOperation.OperationType);
 
                         Prescription adaptPrescription = dataModel.Catalog.Prescriptions.Where(f => f.Id.ReferenceId == workItemOperation.PrescriptionId).FirstOrDefault();
                         if (adaptPrescription != null)
                         {
-                            Feature prescriptionFeature = prescriptionMapper.MapAsSingleFeature(adaptPrescription, gridType);
-                            prescriptionFeature.Properties.Add("OperationType", Enum.GetName(typeof(OperationTypeEnum), workItemOperation.OperationType));	// Enum: 
-                            //workItemOperationFeature.Properties.Add("Description", workItemOperation.Description);
-                            //workItemOperationFeature.Properties.Add("ID", workItemOperation.Id);
-                            prescriptionFeaturesSingle.Add(prescriptionFeature);
+							// single
+							var prescriptionFeature = prescriptionMapper.MapAsSingleFeature(adaptPrescription);
+							if (prescriptionFeature != null)
+                            {
+								prescriptionFeature.Properties.Add("OperationType", Enum.GetName(typeof(OperationTypeEnum), workItemOperation.OperationType));  // Enum: 
+								//workItemOperationFeature.Properties.Add("Description", workItemOperation.Description);
+								//workItemOperationFeature.Properties.Add("ID", workItemOperation.Id);
+								prescriptionFeaturesSingle.Add(prescriptionFeature);
+							}
+							else Console.WriteLine("prescriptionFeature single null for: " + workItemOperation.PrescriptionId);
 
-                            prescriptionFeatures.AddRange(prescriptionMapper.MapAsMultipleFeatures(adaptPrescription, gridType));
-                        }
-
-                        // Todo: [Check] if all dataModel.Catalog.Prescriptions has been mapped
-                        if (dataModel.Catalog.Prescriptions.Count() != prescriptionFeaturesSingle.Count)
-                        {
-							Console.WriteLine("Count prescriptions and features (single) differ: " + dataModel.Catalog.Prescriptions.Count() +" "+ prescriptionFeaturesSingle.Count);
+							// multiple
+							var features = prescriptionMapper.MapAsMultipleFeatures(adaptPrescription);
+							if (features != null && features.Count > 0)
+								prescriptionFeatures.AddRange(features);
+							else Console.WriteLine("prescriptionFeatures null or empty for: " + workItemOperation.PrescriptionId);
 						}
-                        
-                    }
+						else Console.WriteLine("adaptPrescription not found : " + workItemOperation.PrescriptionId);
+					}
 
-                    string fileNameP;
+					// Todo: [Check] if all dataModel.Catalog.Prescriptions has been mapped
+					if (dataModel.Catalog.Prescriptions.Count() != dataModel.Documents.WorkItemOperations.Count())
+						Console.WriteLine("Count prescriptions and WorkItemOperations differ: " + dataModel.Catalog.Prescriptions.Count() + " " + dataModel.Documents.WorkItemOperations.Count());
+					//else 
+					//	Console.WriteLine("Count prescriptions and WorkItemOperations same: " + dataModel.Catalog.Prescriptions.Count() + " " + dataModel.Documents.WorkItemOperations.Count());
+
+					string fileNamePs;
 					// @ToDo only when count > 0?
-					fileNameP = PrescriptionMapper.GetWorkItemOperationPrefix();
-					fileNameP = fileNameP + "_prescriptions_single_" + Guid.NewGuid();
-					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeaturesSingle, fileNameP);
+					fileNamePs = PrescriptionMapper.GetWorkItemOperationPrefix();
+					fileNamePs = fileNamePs + "_single_" + Guid.NewGuid();
+					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeaturesSingle, fileNamePs);
 
-					fileNameP = PrescriptionMapper.GetWorkItemOperationPrefix();
-					fileNameP = fileNameP + "_prescriptions_" + Guid.NewGuid();
-					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeatures, fileNameP);
+					string fileNamePm;
+					fileNamePm = PrescriptionMapper.GetWorkItemOperationPrefix();
+					fileNamePm = fileNamePm + "_" + Guid.NewGuid();
+					_JsonExporter.WriteAsGeoJson(newPath, prescriptionFeatures, fileNamePm);
 					break;
 			}
 		}

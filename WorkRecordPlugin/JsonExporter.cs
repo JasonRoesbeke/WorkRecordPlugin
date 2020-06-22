@@ -72,6 +72,7 @@ namespace WorkRecordPlugin
 
 				_internalJsonSerializer.Serialize(objectToSerialize, jsonFormat);
 				var safeFileName = ZipUtils.GetSafeName(fileName);
+				// ToDo: The specified path, file name, or both are too long. The fully qualified file name must be less than 260 characters, and the directory name must be less than 248 characters.
 				// ToDo: add option to zip, using ZipUtil => +-8% of original size
 				//ZipUtil.Zip(Path.Combine(path, fileName + ".zip"), jsonFormat);
 
@@ -93,8 +94,9 @@ namespace WorkRecordPlugin
 
 				File.Copy(jsonFormat, exportFileName, true);
 			}
-			catch (Exception)
+			catch (Exception e)
 			{
+				Console.WriteLine("Exception: " + e.Message);
 				return false;
 			}
 			finally

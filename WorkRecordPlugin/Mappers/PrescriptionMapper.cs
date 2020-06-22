@@ -48,19 +48,18 @@ namespace WorkRecordPlugin.Mappers
 
 		private Feature Map(Prescription prescription)
 		{
-			Feature feature = null;
 			// @ToDo or not to do?
-			feature = JsonConvert.DeserializeObject<Feature>("{ \"type\": \"Feature\", \"properties\": {}, \"geometry\": null }");
+			Feature feature = JsonConvert.DeserializeObject<Feature>("{ \"type\": \"Feature\", \"properties\": {}, \"geometry\": null }");
+			//feature.Properties.Add("Something", prescription.);
 
 			return feature;
 		}
 
 		private Feature Map(ManualPrescription prescription)
 		{
-			Feature feature = null;
 			// @ToDo or not to do? use field boundary?
-			feature = JsonConvert.DeserializeObject<Feature>("{ \"type\": \"Feature\", \"properties\": {}, \"geometry\": null }");
-			feature.Properties.Add("ApplicationStrategy", prescription.ApplicationStrategy);    // Enum: RatePerArea, RatePerTank, TotalProduct
+			Feature feature = JsonConvert.DeserializeObject<Feature>("{ \"type\": \"Feature\", \"properties\": {}, \"geometry\": null }");
+			feature.Properties.Add("ApplicationStrategy", prescription.ApplicationStrategy.ToString());    // Enum: RatePerArea, RatePerTank, TotalProduct
 			feature.Properties.Add("ProductUses", prescription.ProductUses);					// ProductId, Rate, AppliedArea , ProductTotal
 			feature.Properties.Add("TankAmount", prescription.TankAmount);
 			feature.Properties.Add("TotalArea", prescription.TotalArea);
@@ -73,11 +72,32 @@ namespace WorkRecordPlugin.Mappers
 		{
 			Feature feature = null;
 			Dictionary<string, object> properties = new Dictionary<string, object>();
-			// SpatialPrescription 
+
+			// SpatialPrescription: not sure these rates mean anything for the geojson output
+			double outOfFieldRate = -1.0;   // something save to compare with
 			if (prescription.OutOfFieldRate != null)
+			{
 				properties.Add("OutOfFieldRate", prescription.OutOfFieldRate.Value.Value);
+				outOfFieldRate = prescription.OutOfFieldRate.Value.Value;
+			}
 			if (prescription.LossOfGpsRate != null)
 				properties.Add("LossOfGpsRate", prescription.LossOfGpsRate.Value.Value);
+
+			double minRate = double.MaxValue;
+			double maxRate = -1;
+			foreach (var shaperate in prescription.RxShapeLookups)
+			{
+				foreach (var rate in shaperate.Rates)
+				{
+					if (rate.Rate != outOfFieldRate)
+					{
+						minRate = Math.Min(minRate, rate.Rate);
+						maxRate = Math.Max(maxRate, rate.Rate);
+					}
+				}
+			}
+			properties.Add("MinRate", minRate);
+			properties.Add("MaxRate", maxRate);
 
 			if (prescription.BoundingBox != null)
 			{
@@ -86,7 +106,9 @@ namespace WorkRecordPlugin.Mappers
 			}
 			else
 			{
-				// multipolygon?
+				// @ToDo dissolve multipolygon or Envelope?
+				// NetTopologySuite.Operation.Union.CascadedPolygonUnion
+				// NetTopologySuite.Algorithm.MinimumDiameter.GetMinimumRectangle
 				var polygons = new List<GeoJSON.Net.Geometry.Polygon>();
 				foreach (var shaperate in prescription.RxShapeLookups)
 				{
@@ -104,6 +126,7 @@ namespace WorkRecordPlugin.Mappers
 				}
 				feature = new Feature(new GeoJSON.Net.Geometry.MultiPolygon(polygons), properties);
 			}
+
 			//properties.Add("RxProductLookups", prescription.RxProductLookups);  // Id, ProductId, Representation, UnitOfMeasure
 
 			return feature;
@@ -112,6 +135,10 @@ namespace WorkRecordPlugin.Mappers
 		{
 			List<Feature> features = new List<Feature>();
 
+			double outOfFieldRate = -1.0;   // something save to compare with
+			if (prescription.OutOfFieldRate != null)
+				outOfFieldRate = prescription.OutOfFieldRate.Value.Value;
+			
 			foreach (var shaperate in prescription.RxShapeLookups)
             {
 				int index = 0;
@@ -147,9 +174,8 @@ namespace WorkRecordPlugin.Mappers
 			return features;
 		}
 
-		private Feature Map(RasterGridPrescription prescription, int gridType)
+		private Feature Map(RasterGridPrescription prescription)
 		{
-			Feature feature = null;
 			GeoJSON.Net.Geometry.IGeometryObject geometry = null;
 			Dictionary<string, object> properties = new Dictionary<string, object>();
 			if (prescription.BoundingBox != null)
@@ -160,24 +186,39 @@ namespace WorkRecordPlugin.Mappers
 			{
 				geometry = PointMapper.MapPoint2Point(prescription.Origin, _properties.AffineTransformation);
 			}
-			properties.Add("gridType", gridType);
+
 			properties.Add("RowCount", prescription.RowCount);
 			properties.Add("ColumnCount", prescription.ColumnCount);
 			properties.Add("CellWidth", prescription.CellWidth.Value.Value);
 			properties.Add("CellHeight", prescription.CellHeight.Value.Value);
-			//properties.Add("Rates", prescription.Rates);
 			//properties.Add("RxProductLookups", prescription.RxProductLookups);  // Id, ProductId, Representation, UnitOfMeasure
-			// SpatialPrescription 
+
+			// SpatialPrescription: not sure these rates mean anything for the geojson output
+			double outOfFieldRate = -1.0;   // something save to compare with
 			if (prescription.OutOfFieldRate != null)
+			{
 				properties.Add("OutOfFieldRate", prescription.OutOfFieldRate.Value.Value);
+				outOfFieldRate = prescription.OutOfFieldRate.Value.Value;
+			}
 			if (prescription.LossOfGpsRate != null)
 				properties.Add("LossOfGpsRate", prescription.LossOfGpsRate.Value.Value);
 
-			feature = new Feature(geometry, properties);
+			double minRate = double.MaxValue;
+			double maxRate = -1.0;
+			foreach (var rate in prescription.Rates)
+			{
+				if (rate.RxRates[0].Rate != outOfFieldRate)
+				{
+					minRate = Math.Min(minRate, rate.RxRates[0].Rate);
+					maxRate = Math.Max(maxRate, rate.RxRates[0].Rate);
+				}
+			}
+			properties.Add("MinRate", minRate);
+			properties.Add("MaxRate", maxRate);
 
-			return feature;
+			return new Feature(geometry, properties);
 		}
-		private List<Feature> MapMultiple(RasterGridPrescription prescription, int gridType)
+		private List<Feature> MapMultiple(RasterGridPrescription prescription)
 		{
 			List<Feature> features = new List<Feature>();
 			
@@ -219,7 +260,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 
 			int index = 0;
-			double outOfFieldRate = -1.0;
+			double outOfFieldRate = -1.0;	// something save to compare with
 			if (prescription.OutOfFieldRate != null)
 				outOfFieldRate = prescription.OutOfFieldRate.Value.Value;
 
@@ -240,7 +281,7 @@ namespace WorkRecordPlugin.Mappers
 						if (adaptProduct != null)
 						{
 							properties.Add("productDescription", adaptProduct.Description);
-							properties.Add("productType", adaptProduct.ProductType.ToString());
+							properties.Add("productType", adaptProduct.ProductType.ToString());	// or via GetName?
 						}
 						properties.Add("productCode", product.Representation.Code);
 						properties.Add("productUom", product.UnitOfMeasure.Code);
@@ -259,14 +300,14 @@ namespace WorkRecordPlugin.Mappers
 			return features;
 		}
 
-		public Feature MapAsSingleFeature(Prescription adaptPrescription, int gridType)
+		public Feature MapAsSingleFeature(Prescription adaptPrescription)
 		{
 			Feature prescriptionFeature = null;
 
 			// Prescription, types
 			if (adaptPrescription is RasterGridPrescription)
 			{
-				prescriptionFeature = Map(adaptPrescription as RasterGridPrescription, gridType);
+				prescriptionFeature = Map(adaptPrescription as RasterGridPrescription);
 			}
 			else if (adaptPrescription is VectorPrescription)
 			{
@@ -318,7 +359,7 @@ namespace WorkRecordPlugin.Mappers
 
 			return prescriptionFeature;
 		}
-		public List<Feature> MapAsMultipleFeatures(Prescription adaptPrescription, int gridType)
+		public List<Feature> MapAsMultipleFeatures(Prescription adaptPrescription)
 		{
 			Feature prescriptionFeature = null;
 			List<Feature> prescriptionFeatures = new List<Feature>();
@@ -326,7 +367,7 @@ namespace WorkRecordPlugin.Mappers
 			// Prescription, types
 			if (adaptPrescription is RasterGridPrescription)
 			{
-				prescriptionFeatures = MapMultiple(adaptPrescription as RasterGridPrescription, gridType);
+				prescriptionFeatures = MapMultiple(adaptPrescription as RasterGridPrescription);
 			}
 			else if (adaptPrescription is VectorPrescription)
 			{
