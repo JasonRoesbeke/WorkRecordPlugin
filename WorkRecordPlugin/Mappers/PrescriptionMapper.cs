@@ -87,14 +87,23 @@ namespace WorkRecordPlugin.Mappers
 			double maxRate = -1;
 			foreach (var shaperate in prescription.RxShapeLookups)
 			{
-				foreach (var rate in shaperate.Rates)
+				if (shaperate.Shape != null && shaperate.Shape.Polygons.Count > 0)
 				{
-					if (rate.Rate != outOfFieldRate)
+					foreach (var rate in shaperate.Rates)
 					{
-						minRate = Math.Min(minRate, rate.Rate);
-						maxRate = Math.Max(maxRate, rate.Rate);
+						if (rate.Rate != outOfFieldRate)
+						{
+							minRate = Math.Min(minRate, rate.Rate);
+							maxRate = Math.Max(maxRate, rate.Rate);
+						}
 					}
 				}
+				else // outoffield
+					foreach (var rate in shaperate.Rates)
+					{
+						RxProductLookup product = prescription.RxProductLookups.Where(r => r.Id.ReferenceId == rate.RxProductLookupId).FirstOrDefault();
+						Console.WriteLine("outoffield? " + rate.Rate + " " + rate.RxProductLookupId + " " + product);
+					}
 			}
 			properties.Add("MinRate", minRate);
 			properties.Add("MaxRate", maxRate);
