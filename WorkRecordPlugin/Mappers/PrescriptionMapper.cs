@@ -102,7 +102,10 @@ namespace WorkRecordPlugin.Mappers
 					foreach (var rate in shaperate.Rates)
 					{
 						RxProductLookup product = prescription.RxProductLookups.Where(r => r.Id.ReferenceId == rate.RxProductLookupId).FirstOrDefault();
-						Console.WriteLine("outoffield? " + rate.Rate + " " + rate.RxProductLookupId + " " + product);
+						if (product == null)
+							Console.WriteLine("outoffield rate? " + rate.Rate + " " + rate.RxProductLookupId);
+						else
+							Console.WriteLine("outoffield rate? " + rate.Rate + " " + rate.RxProductLookupId + " " + product.Representation.Code);
 					}
 			}
 			properties.Add("MinRate", minRate);
