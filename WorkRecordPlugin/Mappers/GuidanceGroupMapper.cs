@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace WorkRecordPlugin
+namespace WorkRecordPlugin.Mappers
 {
     internal class GuidanceGroupMapper
     {
@@ -46,7 +46,17 @@ namespace WorkRecordPlugin
                 switch (guidancePatternAdapt.GuidancePatternType)
                 {
                     case GuidancePatternTypeEnum.APlus:
-                        Console.WriteLine("Dealing with a case of \"APlus:\"");
+                        if (guidancePatternAdapt.GetType() != typeof(APlus))
+                        {
+                            Console.WriteLine("Error if (guidancePatternAdapt.GetType() != typeof(APlus))");
+                            break;
+                        }
+                        APlusMapper aPlusMapper = new APlusMapper(_properties, _dataModel);
+                        Feature aPlusFeature = aPlusMapper.MapAsSingleFeature((APlus)guidancePatternAdapt);
+                        if (aPlusFeature != null)
+                        {
+                            featureCollection.Add(aPlusFeature);
+                        }
                         break;
                     case GuidancePatternTypeEnum.AbLine:
                         if (guidancePatternAdapt.GetType() != typeof(AbLine))
@@ -62,7 +72,9 @@ namespace WorkRecordPlugin
                         }
                         break;
                     case GuidancePatternTypeEnum.AbCurve:
-                        // Todo: AbCurve is in fact a List<ADAPT...LineString>, so somehow this should be a MapAsMultipleFeatures instead of a MapAsSingleFeature, even though the List has only 1 item
+                        // Note: AbCurve is in fact a List<ADAPT...LineString>, so somehow this should be a MapAsMultipleFeatures
+                        //       instead of a MapAsSingleFeature, even though the List has only 1 item.
+                        //       For now, the List<LineString> has been mapped as a MultiLineString single Feature.
                         if (guidancePatternAdapt.GetType() != typeof(AbCurve))
                         {
                             Console.WriteLine("Error if (guidancePatternAdapt.GetType() != typeof(AbCurve))");
@@ -76,10 +88,30 @@ namespace WorkRecordPlugin
                         }
                         break;
                     case GuidancePatternTypeEnum.CenterPivot:
-                        Console.WriteLine("Dealing with a case of \"CenterPivot:\"");
+                        if (guidancePatternAdapt.GetType() != typeof(PivotGuidancePattern))
+                        {
+                            Console.WriteLine("Error if (guidancePatternAdapt.GetType() != typeof(CenterPivot))");
+                            break;
+                        }
+                        CenterPivotMapper centerPivotMapper = new CenterPivotMapper(_properties, _dataModel);
+                        Feature centerPivotFeature = centerPivotMapper.MapAsSingleFeature((PivotGuidancePattern)guidancePatternAdapt);
+                        if (centerPivotFeature != null)
+                        {
+                            featureCollection.Add(centerPivotFeature);
+                        }
                         break;
                     case GuidancePatternTypeEnum.Spiral:
-                        Console.WriteLine("Dealing with a case of \"Spiral:\"");
+                        if (guidancePatternAdapt.GetType() != typeof(Spiral))
+                        {
+                            Console.WriteLine("Error if (guidancePatternAdapt.GetType() != typeof(Spiral))");
+                            break;
+                        }
+                        SpiralMapper spiralMapper = new SpiralMapper(_properties, _dataModel);
+                        Feature spiralFeature = spiralMapper.MapAsSingleFeature((Spiral)guidancePatternAdapt);
+                        if (spiralFeature != null)
+                        {
+                            featureCollection.Add(spiralFeature);
+                        }
                         break;
                     default:
                         break;

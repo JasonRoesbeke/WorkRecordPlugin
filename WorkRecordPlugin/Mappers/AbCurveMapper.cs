@@ -18,7 +18,7 @@ using System;
 using System.Collections.Generic;
 using WorkRecordPlugin.Mappers.GeoJson;
 
-namespace WorkRecordPlugin
+namespace WorkRecordPlugin.Mappers
 {
     internal class AbCurveMapper
     {
@@ -33,11 +33,11 @@ namespace WorkRecordPlugin
 
         public Feature MapAsSingleFeature(AbCurve guidancePatternAdapt)
         {
-            if (guidancePatternAdapt.Shape.Count != 1)
-            {
-                Console.WriteLine("[Check] why guidancePatternAdapt.Shape contains {0} LineString's", guidancePatternAdapt.Shape.Count);
-                return null;
-            }
+            //if (guidancePatternAdapt.Shape.Count != 1)
+            //{
+            //    Console.WriteLine("[Check] why guidancePatternAdapt.Shape contains {0} LineString's", guidancePatternAdapt.Shape.Count);
+            //    return null;
+            //}
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
 
@@ -52,7 +52,14 @@ namespace WorkRecordPlugin
 
             properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
 
-            return new Feature(LineStringMapper.MapLineString(guidancePatternAdapt.Shape[0], _properties.AffineTransformation), properties);
+            //return new Feature(LineStringMapper.MapLineString(guidancePatternAdapt.Shape[0], _properties.AffineTransformation), properties);
+
+            var lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
+            foreach (var adaptLineString in guidancePatternAdapt.Shape)
+            {
+                lineStrings.Add(LineStringMapper.MapLineString(adaptLineString, _properties.AffineTransformation));
+            }
+            return new Feature(MultiLineStringMapper.MapMultiLineString(lineStrings), properties);
         }
     }
 }

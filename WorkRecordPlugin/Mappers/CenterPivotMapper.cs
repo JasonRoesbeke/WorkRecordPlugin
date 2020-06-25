@@ -11,7 +11,6 @@
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using GeoJSON.Net.Feature;
 using System;
 using System.Collections.Generic;
@@ -19,21 +18,19 @@ using WorkRecordPlugin.Mappers.GeoJson;
 
 namespace WorkRecordPlugin.Mappers
 {
-    internal class AbLineMapper
+    internal class CenterPivotMapper
     {
-        private ApplicationDataModel _dataModel;
         private PluginProperties _properties;
+        private ApplicationDataModel _dataModel;
 
-        public AbLineMapper(PluginProperties properties, ApplicationDataModel dataModel)
+        public CenterPivotMapper(PluginProperties properties, ApplicationDataModel dataModel)
         {
             _properties = properties;
             _dataModel = dataModel;
         }
 
-        public Feature MapAsSingleFeature(AbLine guidancePatternAdapt)
+        public Feature MapAsSingleFeature(PivotGuidancePattern guidancePatternAdapt)
         {
-            GeoJSON.Net.Geometry.LineString lineString = LineStringMapper.MapLineString(guidancePatternAdapt.A, guidancePatternAdapt.B, _properties.AffineTransformation);
-
             Dictionary<string, object> properties = new Dictionary<string, object>();
 
             if (_properties.Anonymise)
@@ -47,7 +44,19 @@ namespace WorkRecordPlugin.Mappers
 
             properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
 
-            return new Feature(lineString, properties);
+            return new Feature(MultiLineStringMapper.MapMultiLineString(new List<GeoJSON.Net.Geometry.LineString>
+            {
+                LineStringMapper.MapLineString(guidancePatternAdapt.StartPoint, guidancePatternAdapt.Center, _properties.AffineTransformation),
+                LineStringMapper.MapLineString(guidancePatternAdapt.EndPoint, guidancePatternAdapt.Center, _properties.AffineTransformation)
+            }), properties);
+
+            //var lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
+            //GeoJSON.Net.Geometry.LineString lineStringA = LineStringMapper.MapLineString(guidancePatternAdapt.StartPoint, guidancePatternAdapt.Center, _properties.AffineTransformation);
+            //GeoJSON.Net.Geometry.LineString lineStringB = LineStringMapper.MapLineString(guidancePatternAdapt.EndPoint, guidancePatternAdapt.Center, _properties.AffineTransformation);
+            //lineStrings.Add(lineStringA);
+            //lineStrings.Add(lineStringB);
+            //return new Feature(new GeoJSON.Net.Geometry.MultiLineString(lineStrings), properties);
+            //return new Feature(MultiLineStringMapper.MapMultiLineString(lineStrings), properties);
         }
     }
 }

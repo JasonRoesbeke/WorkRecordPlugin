@@ -11,7 +11,6 @@
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using GeoJSON.Net.Feature;
 using System;
 using System.Collections.Generic;
@@ -19,20 +18,20 @@ using WorkRecordPlugin.Mappers.GeoJson;
 
 namespace WorkRecordPlugin.Mappers
 {
-    internal class AbLineMapper
+    internal class SpiralMapper
     {
-        private ApplicationDataModel _dataModel;
         private PluginProperties _properties;
+        private ApplicationDataModel _dataModel;
 
-        public AbLineMapper(PluginProperties properties, ApplicationDataModel dataModel)
+        public SpiralMapper(PluginProperties properties, ApplicationDataModel dataModel)
         {
             _properties = properties;
             _dataModel = dataModel;
         }
 
-        public Feature MapAsSingleFeature(AbLine guidancePatternAdapt)
+        public Feature MapAsSingleFeature(Spiral guidancePatternAdapt)
         {
-            GeoJSON.Net.Geometry.LineString lineString = LineStringMapper.MapLineString(guidancePatternAdapt.A, guidancePatternAdapt.B, _properties.AffineTransformation);
+            GeoJSON.Net.Geometry.LineString lineString = LineStringMapper.MapLineString(guidancePatternAdapt.Shape, _properties.AffineTransformation);
 
             Dictionary<string, object> properties = new Dictionary<string, object>();
 
