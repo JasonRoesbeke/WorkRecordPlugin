@@ -43,13 +43,27 @@ namespace WorkRecordPlugin.Mappers
             }
 
             properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
+            properties.Add("DefinitionMethod", guidancePatternAdapt.DefinitionMethod.ToString());
+            //properties.Add("Radius", guidancePatternAdapt.Radius.ToString());
 
-            return new Feature(MultiLineStringMapper.MapMultiLineString(new List<GeoJSON.Net.Geometry.LineString>
+            GeoJSON.Net.Geometry.Point startPoint = PointMapper.MapPoint2Point(guidancePatternAdapt.StartPoint, _properties.AffineTransformation);
+            GeoJSON.Net.Geometry.Point centerPoint = PointMapper.MapPoint2Point(guidancePatternAdapt.Center, _properties.AffineTransformation);
+            GeoJSON.Net.Geometry.Point endPoint = PointMapper.MapPoint2Point(guidancePatternAdapt.EndPoint, _properties.AffineTransformation);
+            return new Feature(new GeoJSON.Net.Geometry.MultiPoint(new List<GeoJSON.Net.Geometry.Point>
             {
-                LineStringMapper.MapLineString(guidancePatternAdapt.StartPoint, guidancePatternAdapt.Center, _properties.AffineTransformation),
-                LineStringMapper.MapLineString(guidancePatternAdapt.EndPoint, guidancePatternAdapt.Center, _properties.AffineTransformation)
+                startPoint,
+                centerPoint,
+                endPoint
             }), properties);
 
+            // Version 2
+            //return new Feature(MultiLineStringMapper.MapMultiLineString(new List<GeoJSON.Net.Geometry.LineString>
+            //{
+            //    LineStringMapper.MapLineString(guidancePatternAdapt.StartPoint, guidancePatternAdapt.Center, _properties.AffineTransformation),
+            //    LineStringMapper.MapLineString(guidancePatternAdapt.EndPoint, guidancePatternAdapt.Center, _properties.AffineTransformation)
+            //}), properties);
+
+            // Version 1
             //var lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
             //GeoJSON.Net.Geometry.LineString lineStringA = LineStringMapper.MapLineString(guidancePatternAdapt.StartPoint, guidancePatternAdapt.Center, _properties.AffineTransformation);
             //GeoJSON.Net.Geometry.LineString lineStringB = LineStringMapper.MapLineString(guidancePatternAdapt.EndPoint, guidancePatternAdapt.Center, _properties.AffineTransformation);
