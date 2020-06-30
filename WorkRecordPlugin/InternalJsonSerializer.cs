@@ -8,6 +8,7 @@
   *
   * Contributors:
   *    Jason Roesbeke - Initial version.
+  *    Inge La Riviere - Use default TypeNameHandling (->None)
   *******************************************************************************/
 using Newtonsoft.Json;
 using System.IO;
