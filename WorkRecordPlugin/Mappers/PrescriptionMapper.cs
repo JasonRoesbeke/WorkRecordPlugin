@@ -26,6 +26,7 @@ using AgGateway.ADAPT.Representation.RepresentationSystem;
 using AgGateway.ADAPT.Representation.UnitSystem;
 using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using AgGateway.ADAPT.ApplicationDataModel.Products;
+using System.Collections;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -110,6 +111,25 @@ namespace WorkRecordPlugin.Mappers
 			}
 			properties.Add("MinRate", minRate);
 			properties.Add("MaxRate", maxRate);
+			List<Dictionary<string, object>> products = new List<Dictionary<string, object>> { };
+			foreach (var rxproduct in prescription.RxProductLookups)
+			{
+				if (products.Where(p => p.ContainsKey("productId") && (int)p["productId"] == rxproduct.ProductId).FirstOrDefault() == null)
+				{
+					Dictionary<string, object> product = new Dictionary<string, object>();
+					product.Add("productId", rxproduct.ProductId);
+					product.Add("productCode", rxproduct.Representation.Code);
+					product.Add("productUom", rxproduct.UnitOfMeasure.Code);
+					Product adaptProduct = _dataModel.Catalog.Products.Where(p => p.Id.ReferenceId == rxproduct.ProductId).FirstOrDefault();
+					if (adaptProduct != null)
+					{
+						product.Add("productDescription", adaptProduct.Description);
+						product.Add("productType", adaptProduct.ProductType.ToString()); // or via GetName?
+					}
+					products.Add(product);
+				}
+			}
+			properties.Add("Products", products.ToArray());
 
 			if (prescription.BoundingBox != null)
 			{
@@ -118,7 +138,7 @@ namespace WorkRecordPlugin.Mappers
 			}
 			else
 			{
-				// @ToDo dissolve multipolygon or Envelope?
+				// @ToDo dissolve multipolygon or use Envelope?
 				// NetTopologySuite.Operation.Union.CascadedPolygonUnion
 				// NetTopologySuite.Algorithm.MinimumDiameter.GetMinimumRectangle
 				var polygons = new List<GeoJSON.Net.Geometry.Polygon>();
@@ -138,8 +158,6 @@ namespace WorkRecordPlugin.Mappers
 				}
 				feature = new Feature(new GeoJSON.Net.Geometry.MultiPolygon(polygons), properties);
 			}
-
-			//properties.Add("RxProductLookups", prescription.RxProductLookups);  // Id, ProductId, Representation, UnitOfMeasure
 
 			return feature;
 		}
@@ -228,6 +246,27 @@ namespace WorkRecordPlugin.Mappers
 			properties.Add("MinRate", minRate);
 			properties.Add("MaxRate", maxRate);
 
+			List<Dictionary<string, object>> products = new List<Dictionary<string, object>>{};
+			foreach (var rxproduct in prescription.RxProductLookups)
+			{
+				if (products.Where(p => p.ContainsKey("productId") && (int)p["productId"] == rxproduct.ProductId).FirstOrDefault() == null)
+				{
+					Dictionary<string, object> product = new Dictionary<string, object>();
+					product.Add("productId", rxproduct.ProductId);
+					product.Add("productCode", rxproduct.Representation.Code);
+					product.Add("productUom", rxproduct.UnitOfMeasure.Code);
+					Product adaptProduct = _dataModel.Catalog.Products.Where(p => p.Id.ReferenceId == rxproduct.ProductId).FirstOrDefault();
+					if (adaptProduct != null)
+					{
+						product.Add("productDescription", adaptProduct.Description);
+						product.Add("productType", adaptProduct.ProductType.ToString()); // or via GetName?
+					}
+					products.Add(product);
+				}
+			}
+			//Array Values = products.Select(x => (Object)x).ToArray(); ;
+			properties.Add("Products", products.ToArray());
+
 			return new Feature(geometry, properties);
 		}
 		private List<Feature> MapMultiple(RasterGridPrescription prescription)
@@ -278,6 +317,7 @@ namespace WorkRecordPlugin.Mappers
 
 			Console.WriteLine($"PrescriptionMapper outOfFieldRate: {outOfFieldRate}, grids {grid.Count}");
 
+			// @ToDo merge adjacent grid boxes with same property values?
 			foreach (var bbox in grid)
 			{
 				// skip outOfField grids

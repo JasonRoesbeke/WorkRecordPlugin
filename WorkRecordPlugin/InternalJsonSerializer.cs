@@ -23,7 +23,7 @@ namespace WorkRecordPlugin
 		{
 			NullValueHandling = NullValueHandling.Ignore,
 			DefaultValueHandling = DefaultValueHandling.Ignore,
-			TypeNameHandling = TypeNameHandling.Auto,
+			//TypeNameHandling = TypeNameHandling.Auto,
 			//SerializationBinder = new InternalSerializationBinder()
 		})
 		{
