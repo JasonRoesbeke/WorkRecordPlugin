@@ -11,6 +11,7 @@
   *******************************************************************************/
 using GeoJSON.Net.Geometry;
 using NetTopologySuite.Geometries.Utilities;
+using System;
 using System.Collections.Generic;
 
 namespace WorkRecordPlugin.Mappers.GeoJson
@@ -18,7 +19,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 	public class LineStringMapper
 	{
 		#region Export
-		public static LineString MapLinearRing(AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing adaptLinearRing, AffineTransformation affineTransformation = null)
+		public static GeoJSON.Net.Geometry.LineString MapLinearRing(AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing adaptLinearRing, AffineTransformation affineTransformation = null)
 		{
 			var lineString = MapLineString(adaptLinearRing, affineTransformation);
 
@@ -36,7 +37,30 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 			return lineString;
 		}
 
-		public static LineString MapLineString(AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing adaptLinearRing, AffineTransformation affineTransformation = null)
+        public static GeoJSON.Net.Geometry.LineString MapLineString(AgGateway.ADAPT.ApplicationDataModel.Shapes.Point a, AgGateway.ADAPT.ApplicationDataModel.Shapes.Point b, AffineTransformation affineTransformation = null)
+        {
+			var positions = new List<Position>();
+			var positionA = PointMapper.MapPoint(a, affineTransformation);
+			var positionB = PointMapper.MapPoint(b, affineTransformation);
+			positions.Add(positionA);
+			positions.Add(positionB);
+
+			return new GeoJSON.Net.Geometry.LineString(positions);
+		}
+
+        public static GeoJSON.Net.Geometry.LineString MapLineString(AgGateway.ADAPT.ApplicationDataModel.Shapes.LineString adaptLineString, AffineTransformation affineTransformation = null)
+        {
+			var positions = new List<Position>();
+            foreach (var point in adaptLineString.Points)
+            {
+				var position = PointMapper.MapPoint(point, affineTransformation);
+				positions.Add(position);
+            }
+
+			return new GeoJSON.Net.Geometry.LineString(positions);
+        }
+
+        public static GeoJSON.Net.Geometry.LineString MapLineString(AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing adaptLinearRing, AffineTransformation affineTransformation = null)
 		{
 			var positions = new List<Position>();
 			foreach (var point in adaptLinearRing.Points)
@@ -45,10 +69,10 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 				positions.Add(position);
 			}
 
-			return new LineString(positions);
+			return new GeoJSON.Net.Geometry.LineString(positions);
 		}
 
-		public static LineString MakeClosedLinearRing(LineString lineString)
+		public static GeoJSON.Net.Geometry.LineString MakeClosedLinearRing(GeoJSON.Net.Geometry.LineString lineString)
 		{
 			if (!lineString.IsClosed())
 			{
@@ -59,7 +83,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 				}
 				// Add first position also as last position
 				positions.Add((Position)lineString.Coordinates[0]);
-				lineString = new LineString(positions);
+				lineString = new GeoJSON.Net.Geometry.LineString(positions);
 			}
 
 			return lineString;
@@ -67,7 +91,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 		#endregion
 
 		#region Import
-		public static AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing MapLineString(LineString lineString, AffineTransformation affineTransformation = null)
+		public static AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing MapLineString(GeoJSON.Net.Geometry.LineString lineString, AffineTransformation affineTransformation = null)
 		{
 			// ToDo: [Check] if the LineString is actually a LinearRing
 			var linearRing = new AgGateway.ADAPT.ApplicationDataModel.Shapes.LinearRing();

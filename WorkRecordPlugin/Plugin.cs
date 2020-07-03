@@ -269,13 +269,19 @@ namespace WorkRecordPlugin
 
 
 					}
+					GuidanceGroupMapper guidanceGroupMapper = new GuidanceGroupMapper(CustomProperties, dataModel);
 					foreach (var guidanceGroup in dataModel.Catalog.GuidanceGroups)
 					{
 
 						// GuidanceGroupMapper
-						// ToDo: FieldBoundaryMapper.MapAs...([guidanceGroup])
+						List<Feature> guidanceGroupFeatures = guidanceGroupMapper.MapAsMultipleFeatures(guidanceGroup);
+						string fileNameGuidanceGroup = GuidanceGroupMapper.GetPrefix();
+						// Todo: expand filename
 
-						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns has been mapped
+                        // GuidanceGroupMapper.MapAs...([guidanceGroup])
+
+                        _JsonExporter.WriteAsGeoJson(newPath, guidanceGroupFeatures, fileNameGuidanceGroup);
+						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns have been mapped
 
 					}
 					List<Feature> prescriptionFeatures = new List<Feature>();
