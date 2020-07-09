@@ -10,17 +10,11 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using System.Collections.Generic;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
-using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
-using WorkRecordPlugin.Utils;
-using NetTopologySuite.Geometries;
-using LineString = GeoJSON.Net.Geometry.LineString;
 using NetTopologySuite.Geometries.Utilities;
 
 namespace WorkRecordPlugin.Mappers.GeoJson
 {
-	public class MultiPolygonMapper
+    public class MultiPolygonMapper
 	{
 		#region Export
 		public static GeoJSON.Net.Geometry.MultiPolygon Map(AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon multiPolygon, AffineTransformation affineTransformation = null)

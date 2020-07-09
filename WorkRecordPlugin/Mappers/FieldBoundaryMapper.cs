@@ -77,7 +77,7 @@ namespace WorkRecordPlugin.Mappers
 			else
 			{
 				properties.Add("Description", fieldBoundary.Description);
-			}			
+			}
 
 			// GpsSource
 			var gpsSource = fieldBoundary.GpsSource;

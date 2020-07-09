@@ -11,8 +11,6 @@
   *******************************************************************************/
 
 using System;
-using System.CodeDom.Compiler;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using GeoJSON.Net.Geometry;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Utilities;
@@ -20,7 +18,7 @@ using NetTopologySuite.Utilities;
 
 namespace WorkRecordPlugin.Utils
 {
-	public static class AnonymizeUtils
+    public static class AnonymizeUtils
 	{
 		// ToDo: [IoF2020-WP6] Is a distance between 30 & 80 km enough to be anonymized?
 		// ToDo: tip: move it to the sea

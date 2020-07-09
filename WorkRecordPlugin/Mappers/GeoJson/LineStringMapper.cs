@@ -11,7 +11,6 @@
   *******************************************************************************/
 using GeoJSON.Net.Geometry;
 using NetTopologySuite.Geometries.Utilities;
-using System;
 using System.Collections.Generic;
 
 namespace WorkRecordPlugin.Mappers.GeoJson
@@ -37,6 +36,7 @@ namespace WorkRecordPlugin.Mappers.GeoJson
 			return lineString;
 		}
 
+//<<<<<<< HEAD
         public static GeoJSON.Net.Geometry.LineString MapLineString(AgGateway.ADAPT.ApplicationDataModel.Shapes.Point a, AgGateway.ADAPT.ApplicationDataModel.Shapes.Point b, AffineTransformation affineTransformation = null)
         {
 			var positions = new List<Position>();

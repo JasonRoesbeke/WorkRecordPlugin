@@ -8,6 +8,7 @@
   *
   * Contributors:
   *    Jason Roesbeke - Initial version.
+  *    Inge La Riviere - Use default TypeNameHandling (->None)
   *******************************************************************************/
 using Newtonsoft.Json;
 using System.IO;
@@ -23,7 +24,7 @@ namespace WorkRecordPlugin
 		{
 			NullValueHandling = NullValueHandling.Ignore,
 			DefaultValueHandling = DefaultValueHandling.Ignore,
-			TypeNameHandling = TypeNameHandling.Auto,
+			//TypeNameHandling = TypeNameHandling.Auto,
 			//SerializationBinder = new InternalSerializationBinder()
 		})
 		{
