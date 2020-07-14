@@ -275,11 +275,30 @@ namespace WorkRecordPlugin
 						// GuidanceGroupMapper
 						List<Feature> guidanceGroupFeatures = guidanceGroupMapper.MapAsMultipleFeatures(guidanceGroup);
 						string fileNameGuidanceGroup = GuidanceGroupMapper.GetPrefix();
-						// Todo: expand filename
+						if (guidanceGroupFeatures[0] != null)
+						{
+							//test
+                            if (guidanceGroupFeatures[0].Properties.ContainsKey("GuidancePatternType"))
+                            {
+                                fileNameGuidanceGroup = fileNameGuidanceGroup + "_type_" + guidanceGroupFeatures[0].Properties["GuidancePatternType"];
+                            }
+                            if (guidanceGroupFeatures[0].Properties.ContainsKey("FieldId"))
+                            {
+                            	fileNameGuidanceGroup = fileNameGuidanceGroup + "_for_field_" + guidanceGroupFeatures[0].Properties["FieldId"];
+                            }
+                            else if (guidanceGroupFeatures[0].Properties.ContainsKey("Guid"))
+                            {
+                            	fileNameGuidanceGroup = fileNameGuidanceGroup + "_" + guidanceGroupFeatures[0].Properties["Guid"];
+                            }
+                            else
+                            {
+                            	fileNameGuidanceGroup = fileNameGuidanceGroup + "_" + Guid.NewGuid();
+                            }
+						}
 
-                        // GuidanceGroupMapper.MapAs...([guidanceGroup])
+						// GuidanceGroupMapper.MapAs...([guidanceGroup])
 
-                        _JsonExporter.WriteAsGeoJson(newPath, guidanceGroupFeatures, fileNameGuidanceGroup);
+						_JsonExporter.WriteAsGeoJson(newPath, guidanceGroupFeatures, fileNameGuidanceGroup);
 						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns have been mapped
 
 					}

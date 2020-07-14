@@ -10,7 +10,9 @@
   *    Jason Roesbeke - Initial version.
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
+using AgGateway.ADAPT.ApplicationDataModel.Documents;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
+using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using GeoJSON.Net.Feature;
 using System;
 using System.Collections.Generic;
@@ -20,6 +22,7 @@ namespace WorkRecordPlugin.Mappers
 {
     internal class GuidanceGroupMapper
     {
+        private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
         private PluginProperties _properties;
         private ApplicationDataModel _dataModel;
 
@@ -116,13 +119,57 @@ namespace WorkRecordPlugin.Mappers
                     default:
                         break;
                 }
+                //Field adaptField = _dataModel.Catalog.Fields.Where(f => f.Id.ReferenceId == fieldBoundary.FieldId).FirstOrDefault();
+                // Note: I didn't get to the corresponding Field with a "Where" like in the example code above.
+                Field adaptField = null;
+                GuidanceGroup adaptGuidanceGroup = null;
+                var continueLooking = true;
+                int i1 = 0;
+                while (i1 < _dataModel.Catalog.GuidanceGroups.Count && continueLooking)
+                {
+                    int i2 = 0;
+                    while (i2 < _dataModel.Catalog.GuidanceGroups[i1].GuidancePatternIds.Count && continueLooking)
+                    {
+                        if (_dataModel.Catalog.GuidanceGroups[i1].GuidancePatternIds[i2] == guidancePatternAdapt.Id.ReferenceId)
+                        {
+                            int i3 = 0;
+                            while (i3 < _dataModel.Catalog.Fields.Count && continueLooking)
+                            {
+                                int i4 = 0;
+                                while (i4 < _dataModel.Catalog.Fields[i3].GuidanceGroupIds.Count && continueLooking)
+                                {
+                                    if (_dataModel.Catalog.GuidanceGroups[i1].Id.ReferenceId == _dataModel.Catalog.Fields[i3].GuidanceGroupIds[i4])
+                                    {
+                                        adaptField = _dataModel.Catalog.Fields[i3];
+                                        adaptGuidanceGroup = _dataModel.Catalog.GuidanceGroups[i1];
+                                        continueLooking = false;
+                                    }
+                                    i4++;
+                                }
+                                i3++;
+                            }
+                        }
+                        i2++;
+                    }
+                    i1++;
+                }
+                if (!continueLooking && featureCollection[0] != null)
+                {
+                    // Note: The fieldguid is not consistent. Each GuidancePattern file lists a different FieldId, even though the object contains the same one.
+                    Guid fieldguid = UniqueIdMapper.GetUniqueGuid(adaptField.Id, UniqueIdSourceCNH);
+                    featureCollection[0].Properties.Add("FieldId", fieldguid);
+                    featureCollection[0].Properties.Add("FieldDescripton", adaptField.Description);
+                    Guid guidancegroupguid = UniqueIdMapper.GetUniqueGuid(adaptGuidanceGroup.Id, UniqueIdSourceCNH);
+                    featureCollection[0].Properties.Add("GuidanceGroupId", guidancegroupguid);
+                    if (adaptGuidanceGroup.Description != null) { featureCollection[0].Properties.Add("GuidanceGroupDescription", adaptGuidanceGroup.Description); }
+                }
             }
             return featureCollection;
         }
 
         internal static string GetPrefix()
         {
-            return "GuidanceGroup"; // Used to be "guidance-group-test"
+            return "GuidancePattern"; // Used to be "guidance-group-test"
         }
     }
 }
