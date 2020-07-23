@@ -277,7 +277,6 @@ namespace WorkRecordPlugin
 						string fileNameGuidanceGroup = GuidanceGroupMapper.GetPrefix();
 						if (guidanceGroupFeatures[0] != null)
 						{
-							//test
                             if (guidanceGroupFeatures[0].Properties.ContainsKey("GuidancePatternType"))
                             {
                                 fileNameGuidanceGroup = fileNameGuidanceGroup + "_type_" + guidanceGroupFeatures[0].Properties["GuidancePatternType"];
@@ -296,10 +295,7 @@ namespace WorkRecordPlugin
                             }
 						}
 
-						// GuidanceGroupMapper.MapAs...([guidanceGroup])
-
 						_JsonExporter.WriteAsGeoJson(newPath, guidanceGroupFeatures, fileNameGuidanceGroup);
-						// Todo: [Check] if all dataModel.Catalog.GuidancePatterns have been mapped
 
 					}
 					

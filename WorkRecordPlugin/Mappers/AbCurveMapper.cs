@@ -11,10 +11,7 @@
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
-using System;
 using System.Collections.Generic;
 using WorkRecordPlugin.Mappers.GeoJson;
 
@@ -24,42 +21,23 @@ namespace WorkRecordPlugin.Mappers
     {
         private PluginProperties _properties;
         private ApplicationDataModel _dataModel;
+        private Dictionary<string, object> _featProps;
 
-        public AbCurveMapper(PluginProperties properties, ApplicationDataModel dataModel)
+        public AbCurveMapper(PluginProperties properties, ApplicationDataModel dataModel, Dictionary<string, object> featProps)
         {
-            _properties = properties;
-            _dataModel = dataModel;
+            this._properties = properties;
+            this._dataModel = dataModel;
+            this._featProps = featProps;
         }
 
         public Feature MapAsSingleFeature(AbCurve guidancePatternAdapt)
         {
-            //if (guidancePatternAdapt.Shape.Count != 1)
-            //{
-            //    Console.WriteLine("[Check] why guidancePatternAdapt.Shape contains {0} LineString's", guidancePatternAdapt.Shape.Count);
-            //    return null;
-            //}
-
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-
-            if (_properties.Anonymise)
-            {
-                properties.Add("Description", "Guidance Pattern " + guidancePatternAdapt.Id.ReferenceId);
-            }
-            else
-            {
-                properties.Add("Description", guidancePatternAdapt.Description);
-            }
-
-            properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
-
-            //return new Feature(LineStringMapper.MapLineString(guidancePatternAdapt.Shape[0], _properties.AffineTransformation), properties);
-
             var lineStrings = new List<GeoJSON.Net.Geometry.LineString>();
             foreach (var adaptLineString in guidancePatternAdapt.Shape)
             {
                 lineStrings.Add(LineStringMapper.MapLineString(adaptLineString, _properties.AffineTransformation));
             }
-            return new Feature(MultiLineStringMapper.MapMultiLineString(lineStrings), properties);
+            return new Feature(MultiLineStringMapper.MapMultiLineString(lineStrings), _featProps);
         }
     }
 }

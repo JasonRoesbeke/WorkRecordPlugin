@@ -12,8 +12,10 @@
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
 using GeoJSON.Net.Feature;
+using GeoJSON.Net.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WorkRecordPlugin.Mappers.GeoJson;
 
 namespace WorkRecordPlugin.Mappers
@@ -22,39 +24,49 @@ namespace WorkRecordPlugin.Mappers
     {
         private PluginProperties _properties;
         private ApplicationDataModel _dataModel;
+        private Dictionary<string, object> _featProps;
 
-        public CenterPivotMapper(PluginProperties properties, ApplicationDataModel dataModel)
+        public CenterPivotMapper(PluginProperties properties, ApplicationDataModel dataModel, Dictionary<string, object> featProps)
         {
-            _properties = properties;
-            _dataModel = dataModel;
+            this._properties = properties;
+            this._dataModel = dataModel;
+            this._featProps = featProps;
         }
 
-        public Feature MapAsSingleFeature(PivotGuidancePattern guidancePatternAdapt)
+        public List<Feature> MapAsMultipleFeatures(PivotGuidancePattern guidancePatternAdapt)
         {
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-
-            if (_properties.Anonymise)
-            {
-                properties.Add("Description", "Guidance Pattern " + guidancePatternAdapt.Id.ReferenceId);
-            }
-            else
-            {
-                properties.Add("Description", guidancePatternAdapt.Description);
-            }
-
-            properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
-            properties.Add("DefinitionMethod", guidancePatternAdapt.DefinitionMethod.ToString());
+            //properties.Add("DefinitionMethod", guidancePatternAdapt.DefinitionMethod.ToString());
             //properties.Add("Radius", guidancePatternAdapt.Radius.ToString());
+            
+            _featProps.Add("DefinitionMethod", guidancePatternAdapt.DefinitionMethod.ToString());
 
-            GeoJSON.Net.Geometry.Point startPoint = PointMapper.MapPoint2Point(guidancePatternAdapt.StartPoint, _properties.AffineTransformation);
-            GeoJSON.Net.Geometry.Point centerPoint = PointMapper.MapPoint2Point(guidancePatternAdapt.Center, _properties.AffineTransformation);
-            GeoJSON.Net.Geometry.Point endPoint = PointMapper.MapPoint2Point(guidancePatternAdapt.EndPoint, _properties.AffineTransformation);
-            return new Feature(new GeoJSON.Net.Geometry.MultiPoint(new List<GeoJSON.Net.Geometry.Point>
+            List<Feature> centerPivotFeatures = new List<Feature>();
+            const string labelPT = "PointType";
+            while (_featProps.ContainsKey(labelPT))
             {
-                startPoint,
-                centerPoint,
-                endPoint
-            }), properties);
+                _featProps.Remove(labelPT);
+            }
+            Dictionary<string, object> featProps2 = new Dictionary<string, object>(_featProps);
+            Dictionary<string, object> featProps3 = new Dictionary<string, object>(_featProps);
+            switch (guidancePatternAdapt.DefinitionMethod)
+            {
+                case PivotGuidanceDefinitionEnum.PivotGuidancePatternStartEndCenter:
+                    break;
+                case PivotGuidanceDefinitionEnum.PivotGuidancePatternCenterRadius:
+                    break;
+                case PivotGuidanceDefinitionEnum.PivotGuidancePatternThreePoints:
+                    break;
+                default:
+                    break;
+            }
+            _featProps.Add(labelPT, "StartPoint");
+            centerPivotFeatures.Add(new Feature(PointMapper.MapPoint2Point(guidancePatternAdapt.StartPoint, _properties.AffineTransformation), _featProps));
+            featProps2.Add(labelPT, "Center");
+            centerPivotFeatures.Add(new Feature(PointMapper.MapPoint2Point(guidancePatternAdapt.Center, _properties.AffineTransformation), featProps2));
+            featProps3.Add(labelPT, "EndPoint");
+            centerPivotFeatures.Add(new Feature(PointMapper.MapPoint2Point(guidancePatternAdapt.EndPoint, _properties.AffineTransformation), featProps3));
+
+            return centerPivotFeatures;
 
             // Version 2
             //return new Feature(MultiLineStringMapper.MapMultiLineString(new List<GeoJSON.Net.Geometry.LineString>

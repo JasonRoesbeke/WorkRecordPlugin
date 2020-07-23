@@ -11,9 +11,7 @@
   *******************************************************************************/
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
-using AgGateway.ADAPT.ApplicationDataModel.Shapes;
 using GeoJSON.Net.Feature;
-using System;
 using System.Collections.Generic;
 using WorkRecordPlugin.Mappers.GeoJson;
 
@@ -23,31 +21,19 @@ namespace WorkRecordPlugin.Mappers
     {
         private ApplicationDataModel _dataModel;
         private PluginProperties _properties;
+        private Dictionary<string, object> _featProps;
 
-        public AbLineMapper(PluginProperties properties, ApplicationDataModel dataModel)
+        public AbLineMapper(PluginProperties properties, ApplicationDataModel dataModel, Dictionary<string, object> featProps)
         {
-            _properties = properties;
-            _dataModel = dataModel;
+            this._properties = properties;
+            this._dataModel = dataModel;
+            this._featProps = featProps;
         }
 
         public Feature MapAsSingleFeature(AbLine guidancePatternAdapt)
         {
             GeoJSON.Net.Geometry.LineString lineString = LineStringMapper.MapLineString(guidancePatternAdapt.A, guidancePatternAdapt.B, _properties.AffineTransformation);
-
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-
-            if (_properties.Anonymise)
-            {
-                properties.Add("Description", "Guidance Pattern " + guidancePatternAdapt.Id.ReferenceId);
-            }
-            else
-            {
-                properties.Add("Description", guidancePatternAdapt.Description);
-            }
-
-            properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
-
-            return new Feature(lineString, properties);
+            return new Feature(lineString, _featProps);
         }
     }
 }

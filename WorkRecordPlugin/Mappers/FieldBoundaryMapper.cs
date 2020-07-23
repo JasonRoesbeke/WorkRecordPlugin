@@ -134,8 +134,9 @@ namespace WorkRecordPlugin.Mappers
 			{
 				fieldBoundaryFeature.Properties.Add("Field", adaptField.Description);
 
-				Guid fieldguid = UniqueIdMapper.GetUniqueGuid(adaptField.Id, UniqueIdSourceCNH);
-				fieldBoundaryFeature.Properties.Add("FieldId", fieldguid);
+				//Guid fieldguid = UniqueIdMapper.GetUniqueGuid(adaptField.Id, UniqueIdSourceCNH);
+				//fieldBoundaryFeature.Properties.Add("FieldId", fieldguid);
+				fieldBoundaryFeature.Properties.Add("FieldId", adaptField.Id.ReferenceId);
 
 				Farm adaptFarm = _dataModel.Catalog.Farms.Where(f => f.Id.ReferenceId == adaptField.FarmId).FirstOrDefault();
 
