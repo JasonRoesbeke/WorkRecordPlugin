@@ -119,12 +119,6 @@ namespace WorkRecordPlugin.Mappers
                         {
                             featureCollection.Add(item);
                         }
-                        /* CenterPivotMapper centerPivotMapper = new CenterPivotMapper(_properties, _dataModel);
-                        Feature centerPivotFeature = centerPivotMapper.MapAsSingleFeature((PivotGuidancePattern)guidancePatternAdapt);
-                        if (centerPivotFeature != null)
-                        {
-                            featureCollection.Add(centerPivotFeature);
-                        } */
                         break;
                     case GuidancePatternTypeEnum.Spiral:
                         if (guidancePatternAdapt.GetType() != typeof(Spiral))
