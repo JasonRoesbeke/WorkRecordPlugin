@@ -13,7 +13,6 @@ using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Guidance;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
-using System;
 using System.Collections.Generic;
 using WorkRecordPlugin.Mappers.GeoJson;
 
@@ -23,32 +22,20 @@ namespace WorkRecordPlugin.Mappers
     {
         private PluginProperties _properties;
         private ApplicationDataModel _dataModel;
+        private Dictionary<string, object> _featProps;
 
-        public APlusMapper(PluginProperties properties, ApplicationDataModel dataModel)
+        public APlusMapper(PluginProperties properties, ApplicationDataModel dataModel, Dictionary<string, object> featProps)
         {
             this._properties = properties;
             this._dataModel = dataModel;
+            this._featProps = featProps;
         }
 
         public Feature MapAsSingleFeature(APlus guidancePatternAdapt)
         {
-            GeoJSON.Net.Geometry.Point point = PointMapper.MapPoint2Point(guidancePatternAdapt.Point, _properties.AffineTransformation);
-
-            Dictionary<string, object> properties = new Dictionary<string, object>();
-
-            if (_properties.Anonymise)
-            {
-                properties.Add("Description", "Guidance Pattern " + guidancePatternAdapt.Id.ReferenceId);
-            }
-            else
-            {
-                properties.Add("Description", guidancePatternAdapt.Description);
-            }
-
-            properties.Add("GuidancePatternType", guidancePatternAdapt.GuidancePatternType.ToString());
-            properties.Add("Heading", guidancePatternAdapt.Heading.ToString());
-
-            return new Feature(point, properties);
+            Point point = PointMapper.MapPoint2Point(guidancePatternAdapt.Point, _properties.AffineTransformation);
+            _featProps.Add("Heading", guidancePatternAdapt.Heading.ToString());
+            return new Feature(point, _featProps);
         }
     }
 }
