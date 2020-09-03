@@ -23,6 +23,7 @@ using WorkRecordPlugin.Utils;
 using static WorkRecordPlugin.PluginProperties;
 using GeoJSON.Net.Feature;
 using AgGateway.ADAPT.ApplicationDataModel.Prescriptions;
+using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
 
 namespace WorkRecordPlugin
 {
@@ -266,6 +267,25 @@ namespace WorkRecordPlugin
 
 						_JsonExporter.WriteAsGeoJson(newPath, new List<Feature>() { fieldBoundaryFeature }, fileNamePrescriptions);
 
+
+                        // DrivenHeadlandMapper
+                        foreach (Headland headland in fieldBoundary.Headlands)
+                        {
+                            if (headland is DrivenHeadland)
+                            {
+                                DrivenHeadlandMapper drivenHeadlandMapper = new DrivenHeadlandMapper(CustomProperties, dataModel);
+                                Feature drivenHeadlandFeature = drivenHeadlandMapper.MapAsSingleFeature(headland as DrivenHeadland, fieldBoundaryFeature);
+                                if (drivenHeadlandFeature == null)
+                                    drivenHeadlandMapper = null;
+                                else
+                                {
+                                    string drivenHeadlandFileName = DrivenHeadlandMapper.GetPrefix();
+                                    if (drivenHeadlandFeature.Properties.ContainsKey("FieldId"))
+                                        drivenHeadlandFileName += "_for_field_" + drivenHeadlandFeature.Properties["FieldId"];
+                                    _JsonExporter.WriteAsGeoJson(newPath, new List<Feature>() { drivenHeadlandFeature }, drivenHeadlandFileName);
+                                }
+                            }
+                        }
 
 					}
 					GuidanceGroupMapper guidanceGroupMapper = new GuidanceGroupMapper(CustomProperties, dataModel);
