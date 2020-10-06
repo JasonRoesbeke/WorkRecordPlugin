@@ -1,4 +1,4 @@
-﻿/*******************************************************************************
+/*******************************************************************************
   * Copyright (C) 2019 AgGateway and ADAPT Contributors
   * Copyright (C) 2019 CNH Industrial N.V.
   * All rights reserved. This program and the accompanying materials
@@ -18,6 +18,7 @@ using GeoJSON.Net.Feature;
 using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using WorkRecordPlugin.Mappers.GeoJson;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
+using AgGateway.ADAPT.Representation.RepresentationSystem;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -25,6 +26,12 @@ namespace WorkRecordPlugin.Mappers
 	{
 		private readonly ApplicationDataModel _dataModel;
 		private readonly PluginProperties _properties;
+		//ILaR: temporary fix, should come from ddiExport.txt
+		private Dictionary<int, string> _missingDDI = new Dictionary<int, string>   { {67, "Actual Working Width" }
+																					, {72, "Actual Volume Content" }
+																					, {75, "Actual Mass Content" }
+																					, {390, "Actual Revolutions Per Time" }
+																					};
 
 		public OperationTimelogMapper(PluginProperties properties, ApplicationDataModel dataModel = null)
 		{
@@ -89,11 +96,6 @@ namespace WorkRecordPlugin.Mappers
 					foreach (WorkingData workingData in workingDatasWithValues)		//.Where(d => _dlvOrdersByWorkingDataID.ContainsKey(d.Id.ReferenceId)))
 					{
 						string key = workingData.Representation.Code;
-						// DDI: hex2int
-						if (workingData.Representation.CodeSource == RepresentationCodeSourceEnum.ISO11783_DDI)
-                        {
-							key = "DDI_" + int.Parse(key, System.Globalization.NumberStyles.HexNumber).ToString();
-						}
 						object value = null;
 						string uom = null;
 
@@ -114,6 +116,24 @@ namespace WorkRecordPlugin.Mappers
 								NumericRepresentationValue numValue = spatialRecord.GetMeterValue(numericMeter) as NumericRepresentationValue;
 								value = numValue.Value.Value;
 								uom = numValue.Value.UnitOfMeasure.Code;
+
+								// better key for DDI (hex2int)
+								if (workingData.Representation.CodeSource == RepresentationCodeSourceEnum.ISO11783_DDI)
+								{
+									if (numValue.Designator != null && numValue.Designator != "")
+										key = numValue.Designator;
+									else if (workingData.Representation.Description != null && workingData.Representation.Description != "")
+										key = workingData.Representation.Description;
+                                    else
+                                    {
+										// ILaR cause: key missing in representation system
+										int intKey = int.Parse(key, System.Globalization.NumberStyles.HexNumber);
+										if (_missingDDI.ContainsKey(intKey))
+											key = _missingDDI[intKey];
+										else
+											key = "DDI_" + intKey.ToString();
+									}
+								}
 							}
 						}
                         else // needed ?
@@ -121,7 +141,7 @@ namespace WorkRecordPlugin.Mappers
 							value = spatialRecord.GetMeterValue(workingData);
 						}
 
-						if (value != null)
+						if (value != null && key != null)
 						{
 							properties.Add(key, value);
 
