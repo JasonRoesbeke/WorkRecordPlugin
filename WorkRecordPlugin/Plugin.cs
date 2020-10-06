@@ -25,6 +25,7 @@ using static WorkRecordPlugin.PluginProperties;
 using GeoJSON.Net.Feature;
 using AgGateway.ADAPT.ApplicationDataModel.Prescriptions;
 using AgGateway.ADAPT.ApplicationDataModel.LoggedData;
+using AgGateway.ADAPT.Representation.RepresentationSystem;
 
 namespace WorkRecordPlugin
 {
@@ -352,69 +353,33 @@ namespace WorkRecordPlugin
 
 					// LoggedData
 					OperationTimelogMapper operationTimelogMapper = new OperationTimelogMapper(CustomProperties, dataModel);
-					Console.WriteLine("OperationTimelog...");
+
 					// starting from workRecords
 					/* 
 					foreach (var workRecord in dataModel.Documents.WorkRecords)
 					{
-						Console.WriteLine("OperationTimelog - workRecord (1): " + workRecord.Id.ReferenceId);
-
-						//var loggedDatas = dataModel.Documents.LoggedData.Where(ld => ld.WorkRecordId == workRecord.Id.ReferenceId).ToList();	// no results
 						var loggedDatas = dataModel.Documents.LoggedData.Where(ld => workRecord.LoggedDataIds.Contains(ld.Id.ReferenceId)).ToList();
 						if (loggedDatas.Any())
 						{
-							//foreach (var loggedData in workRecord.LoggedDataIds)
 							foreach (var loggedData in loggedDatas)
 							{
-								Console.WriteLine("OperationTimelog - loggedData (1): " + loggedData.Id.ReferenceId + " " + loggedData.WorkRecordId);
-
-								foreach (OperationData operation in loggedData.OperationData)
-								{
-									Console.WriteLine("OperationTimelog - operationData (1): " + operation.ToString());
-
-									IEnumerable<SpatialRecord> spatialRecords = operation.GetSpatialRecords != null ? operation.GetSpatialRecords() : null;
-									if (spatialRecords != null && spatialRecords.Any()) //No need to export a timelog if no data
-									{
-										var operationTimelogFeatures = operationTimelogMapper.MapMultiple(operation, spatialRecords);
-
-										string fileNameL;
-										fileNameL = OperationTimelogMapper.GetPrefix();
-										fileNameL = fileNameL + "_" + Guid.NewGuid();
-										_JsonExporter.WriteAsGeoJson(newPath, operationTimelogFeatures, fileNameL);
-									}
-								}	
 							}
 						}
 					}
-					*/
-
+					*/					
 					// starting from LoggedData
 					foreach (var loggedData in dataModel.Documents.LoggedData)
 					{
-						Console.WriteLine("OperationTimelog - loggedData (2): " + loggedData.Id.ReferenceId + " " + loggedData.WorkRecordId);
-
 						foreach (OperationData operation in loggedData.OperationData)
 						{
-							Console.WriteLine("OperationTimelog - operationData (2): " + operation.Id.ReferenceId + "_" + operation.GetType() + "_" + operation.MaxDepth);
+							Console.WriteLine("OperationTimelog - operationData: " + operation.Id.ReferenceId + " " + operation.OperationType + " maxDepth " + operation.MaxDepth);
+
 							IEnumerable<SpatialRecord> spatialRecords = operation.GetSpatialRecords != null ? operation.GetSpatialRecords() : null;
 							if (spatialRecords != null && spatialRecords.Any()) //No need to export a timelog if no data
 							{
 								var operationTimelogFeatures = operationTimelogMapper.MapMultiple(operation, spatialRecords);
 
-								foreach (var uId in operation.Id.UniqueIds)
-                                {
-									Console.WriteLine("OperationTimelog - uId (2): " + uId.Id + " " + uId.Source + " " + uId.IdType);
-								}
-								var isoids = operation.Id.UniqueIds.Where(id => id.Id != null &&
-								id.Source == "http://dictionary.isobus.net/isobus/" &&      // UniqueIdMapper.IsoSource &&
-								id.IdType == IdTypeEnum.String).ToList();
-								var isoId = isoids.FirstOrDefault();        // s => IsoIdPattern.IsMatch(s.Id) && (prefixFilter == null || s.Id.StartsWith(prefixFilter)));
-
-								Console.WriteLine("OperationTimelog - isoId (2): " + isoids.Count + " " + (isoId != null ? isoId.Id : ""));
-
-								string fileNameL;
-								fileNameL = OperationTimelogMapper.GetPrefix() + "_" + operation.OperationType;
-								fileNameL = fileNameL + "_" + (isoId != null ? isoId.Id : "" + Guid.NewGuid());
+								string fileNameL = OperationTimelogMapper.GetPrefix() + "_" + operation.OperationType + "_" + Guid.NewGuid();
 								_JsonExporter.WriteAsGeoJson(newPath, operationTimelogFeatures, fileNameL);
 							}
 						}
