@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WpfAppImportGPX"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="219.401" Width="608">
+        Title="GPX for agriculture" Height="219.401" Width="608">
     <Grid>
         <Label Content="Component to include from GPX file:" HorizontalAlignment="Left" Margin="85,10,0,0" VerticalAlignment="Top"/>
         <Label Content="Component type:" HorizontalAlignment="Left" Margin="470,10,0,0" VerticalAlignment="Top"/>
@@ -17,10 +18,10 @@
         <TextBox x:Name="Component2TextBox" HorizontalAlignment="Left" Height="23" Margin="85,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380"/>
         <TextBox x:Name="Component3TextBox" HorizontalAlignment="Left" Height="23" Margin="85,97,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380"/>
         <TextBox x:Name="Component4TextBox" HorizontalAlignment="Left" Height="23" Margin="85,125,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="380"/>
-        <ComboBox x:Name="Component1Combo" HorizontalAlignment="Left" Margin="470,41,0,0" VerticalAlignment="Top" Width="120" Height="23"/>
-        <ComboBox x:Name="Component2Combo" HorizontalAlignment="Left" Margin="470,69,0,0" VerticalAlignment="Top" Width="120" Height="23"/>
-        <ComboBox x:Name="Component3Combo" HorizontalAlignment="Left" Margin="470,97,0,0" VerticalAlignment="Top" Width="120" Height="23"/>
-        <ComboBox x:Name="Component4Combo" HorizontalAlignment="Left" Margin="470,125,0,0" VerticalAlignment="Top" Width="120" Height="23"/>
+        <ComboBox x:Name="Component1Combo" HorizontalAlignment="Left" Margin="470,41,0,0" VerticalAlignment="Top" Width="120" Height="23" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:ComponentType}}}"/>
+        <ComboBox x:Name="Component2Combo" HorizontalAlignment="Left" Margin="470,69,0,0" VerticalAlignment="Top" Width="120" Height="23" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:ComponentType}}}"/>
+        <ComboBox x:Name="Component3Combo" HorizontalAlignment="Left" Margin="470,97,0,0" VerticalAlignment="Top" Width="120" Height="23" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:ComponentType}}}"/>
+        <ComboBox x:Name="Component4Combo" HorizontalAlignment="Left" Margin="470,125,0,0" VerticalAlignment="Top" Width="120" Height="23" ItemsSource="{Binding Source={local:EnumBindingSource {x:Type local:ComponentType}}}"/>
         <Button x:Name="ProcessButton" Content="Process" HorizontalAlignment="Left" Margin="10,153,0,0" VerticalAlignment="Top" Width="70" Height="23" Click="ProcessButton_Click"/>
 
     </Grid>

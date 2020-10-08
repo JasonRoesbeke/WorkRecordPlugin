@@ -4,42 +4,21 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
+using WpfAppImportGPX.Resources;
 
 namespace WpfAppImportGPX
 {
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
     internal enum ComponentType
     {
-        [Description("Field Boundary")] FieldBoundary,
-        [Description("Driven Headland")] DrivenHeadland,
-        [Description("AB Line")] ABLine,
-        [Description("AB Curve")] ABCurve
+        [LocalizedDescription("Do Not Include", typeof(EnumResources))] ExceptionValue,
+        [LocalizedDescription("Field Boundary", typeof(EnumResources))] FieldBoundary,
+        [LocalizedDescription("Driven Headland", typeof(EnumResources))] DrivenHeadland,
+        [LocalizedDescription("AB Line", typeof(EnumResources))] ABLine,
+        [LocalizedDescription("AB Curve", typeof(EnumResources))] ABCurve
     }
 
-    internal static class ComponentTypeExtensions
-    {
-        public static string GetDescription<T>(this T enumerationValue)
-            where T : struct
-        {
-            Type type = enumerationValue.GetType();
-            if (type.IsEnum == false)
-                throw new ArgumentException("EnumerationValue must be of Enum type", "enumerationValue");
-
-            //Tries to find a DescriptionAttribute for a potential friendly name
-            //for the enum
-            MemberInfo[] memberInfo = type.GetMember(enumerationValue.ToString());
-            if (memberInfo != null && memberInfo.Length > 0)
-            {
-                object[] attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-
-                if (attrs != null && attrs.Length > 0)
-                {
-                    //Pull out the description value
-                    return ((DescriptionAttribute)attrs[0]).Description;
-                }
-            }
-            //If we have no description attribute, just return the ToString of the enum
-            return enumerationValue.ToString();
-        }
-    }
 }
