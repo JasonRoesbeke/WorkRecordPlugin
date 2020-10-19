@@ -14,10 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ADAPT.DTOs\ADAPT.DTOs\ADAPT.DTOs\ADAPT.DTOs.csproj" />
+    <Folder Include="Models\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\ADAPT.DTOs\ADAPT.DTOs.csproj" />
   </ItemGroup>
 </Project>

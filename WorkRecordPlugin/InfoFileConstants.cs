@@ -1,5 +1,4 @@
-﻿
-namespace WorkRecordPlugin
+﻿namespace WorkRecordPlugin
 {
 	public static class InfoFileConstants
 	{
