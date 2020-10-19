@@ -7,7 +7,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using WorkRecordPlugin.Mappers;
-using ADAPT.DTOs.Documents;
 using WorkRecordPlugin.Utils;
 using static WorkRecordPlugin.PluginProperties;
 using GeoJSON.Net.Feature;
@@ -120,38 +119,9 @@ namespace WorkRecordPlugin
 
 		public IList<ApplicationDataModel> Import(string dataPath, Properties properties = null)
 		{
-			List<string> workRecordFolders = GetListOfWorkRecordFolders(dataPath);
-			if (!workRecordFolders.Any())
-			{
-				return null;
-			}
-
-			List<ApplicationDataModel> adms = new List<ApplicationDataModel>();
-
-			foreach (string folder in workRecordFolders)
-			{
-				var infoFile = _infoFileReader.ReadVersionInfoModel(folder);
-				if (infoFile == null)
-				{
-					continue;
-				}
-				ParseImportProperties(properties, infoFile);
-
-				WorkRecordImporter workRecordImporter = new WorkRecordImporter(CustomProperties);
-				//Deserialize each workRecord.json
-				List<WorkRecordDto> workRecordDtos = WorkRecordImporter.ReadFolder(folder);
-				//Map each WorkRecordDto to a seperated adm
-				var dataModels = workRecordImporter.Import(workRecordDtos);
-				if (dataModels != null)
-				{
-					adms.AddRange(dataModels);
-				}
-			}
-
-			return adms;
+			throw new NotImplementedException();
 		}
 
-		
 		public void Export(ApplicationDataModel dataModel, string exportPath, Properties properties = null)
 		{
 			ParseExportProperties(properties);
@@ -162,7 +132,6 @@ namespace WorkRecordPlugin
 			// Path of exportfolder: "PluginFolder - [Name of Catalog]"
 			var newPath = Path.Combine(exportPath, InfoFileConstants.PluginFolderPrefix + "-" + ZipUtils.GetSafeName(dataModel.Catalog.Description));
 
-			WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
 			// ToDo: add more meta data of this export
 			_JsonExporter.WriteInfoFile(newPath, Name, Version, dataModel.Catalog.Description, CustomProperties);
 
@@ -363,7 +332,7 @@ namespace WorkRecordPlugin
 					// LoggedData
 					OperationTimelogMapper operationTimelogMapper = new OperationTimelogMapper(CustomProperties, dataModel);
 
-					// starting from workRecords
+					// starting from workRecords --> Not doing this as some loggedData may have not been referenced in a workrecord; we want to catch all logged data in the adm
 					/* 
 					foreach (var workRecord in dataModel.Documents.WorkRecords)
 					{
@@ -397,40 +366,6 @@ namespace WorkRecordPlugin
 					break;
 			}
 		}
-
-		//public List<WorkRecordDto> ExportToWorkRecordDtos(ApplicationDataModel dataModel, Properties properties = null, bool anonymize = false, ApplyingAnonymiseValuesEnum anonymiseMethod = ApplyingAnonymiseValuesEnum.PerWorkRecord)
-		//{
-		//	ParseExportProperties(properties);
-		//	var workRecordDtos = new List<WorkRecordDto>();
-
-
-		//	WorkRecordMapper workRecordsMapper = new WorkRecordMapper(dataModel, CustomProperties);
-		//	switch (anonymiseMethod)
-		//	{
-		//		case ApplyingAnonymiseValuesEnum.PerField:
-		//			foreach (var fieldId in dataModel.Catalog.Fields.Select(f => f.Id.ReferenceId))
-		//			{
-		//				List<int> workRecordIds =
-		//					dataModel.Documents.WorkRecords
-		//						.Where(wr => wr.FieldIds.Contains(fieldId))
-		//						.Select(wr => wr.Id.ReferenceId)
-		//						.ToList();
-		//				workRecordDtos.AddRange(workRecordsMapper.MapAll(workRecordIds));
-
-						
-		//			}
-		//			break;
-		//		case ApplyingAnonymiseValuesEnum.PerWorkRecord:
-		//		default:
-		//			foreach (var workRecord in dataModel.Documents.WorkRecords)
-		//			{
-		//				WorkRecordDto workRecordDto_mapped = workRecordsMapper.MapSingle(workRecord);
-		//				workRecordDtos.Add(workRecordDto_mapped);						
-		//			}
-		//			break;
-		//	}
-		//	return workRecordDtos;
-		//}
 
 		private void ParseExportProperties(Properties properties)
 		{

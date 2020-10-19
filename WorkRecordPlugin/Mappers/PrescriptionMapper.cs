@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using AutoMapper;
 using GeoJSON.Net.Feature;
-using ADAPT.DTOs.AutoMapperProfiles;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Prescriptions;
 using Newtonsoft.Json;
@@ -21,17 +19,11 @@ namespace WorkRecordPlugin.Mappers
 {
     internal class PrescriptionMapper
 	{
-		private static readonly string UniqueIdSourceCNH = "http://www.cnhindustrial.com";
 		private readonly PluginProperties _properties;
 		private readonly ApplicationDataModel _dataModel;
 
 		public PrescriptionMapper(PluginProperties properties, ApplicationDataModel dataModel = null)
 		{
-			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<WorkRecordDtoProfile>();
-			});
-
-			config.CreateMapper();
 			_properties = properties;
 			_dataModel = dataModel;
 		}
@@ -366,11 +358,11 @@ namespace WorkRecordPlugin.Mappers
 
 			if (prescriptionFeature != null)
 			{
-				prescriptionFeature.Properties.Add("Guid", UniqueIdMapper.GetUniqueGuid(adaptPrescription.Id, UniqueIdSourceCNH));
+				prescriptionFeature.Properties.Add("Guid", UniqueIdMapper.GetUniqueGuid(adaptPrescription.Id));
 				Field adaptField = _dataModel.Catalog.Fields.Where(f => f.Id.ReferenceId == adaptPrescription.FieldId).FirstOrDefault();
 				if (adaptField != null)
 				{
-					Guid fieldguid = UniqueIdMapper.GetUniqueGuid(adaptField.Id, UniqueIdSourceCNH);
+					Guid fieldguid = UniqueIdMapper.GetUniqueGuid(adaptField.Id);
 					prescriptionFeature.Properties.Add("FieldId", fieldguid);
 
 				}

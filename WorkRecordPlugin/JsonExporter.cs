@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using ADAPT.DTOs.Documents;
 using GeoJSON.Net.Feature;
 using WorkRecordPlugin.Utils;
 
@@ -21,28 +20,6 @@ namespace WorkRecordPlugin
 		{
 			var adaptVersion = "2.0.4";
 			return WriteJson(path, new InfoFile(name, version, adaptVersion, description, exportProperties, DateTime.Now), InfoFileConstants.InfoFileName);
-		}
-
-		public bool WriteWorkRecordDtos(string path, List<WorkRecordDto> workRecordDtos)
-		{
-			var succes = 0;
-			foreach (var workRecordDto in workRecordDtos)
-			{
-				succes += WriteWorkRecordDto(path, workRecordDto) ? 0 : 1;
-			}
-			return succes == 0;
-		}
-		public bool WriteWorkRecordDto(string path, WorkRecordDto workRecordDto)
-		{
-			if (workRecordDto == null)
-			{
-				return false;
-			}
-			if (workRecordDto.Description == null)
-			{
-				workRecordDto.Description = workRecordDto.Guid.ToString();
-			}
-			return WriteJson(path, workRecordDto, workRecordDto.Description); ;
 		}
 
 		public bool WriteAsGeoJson(string path, List<Feature> features, string fileName)

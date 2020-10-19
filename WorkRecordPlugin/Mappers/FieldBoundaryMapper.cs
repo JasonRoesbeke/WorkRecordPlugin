@@ -4,10 +4,7 @@ using System.Globalization;
 using System.Linq;
 using AgGateway.ADAPT.ApplicationDataModel.Common;
 using AgGateway.ADAPT.ApplicationDataModel.FieldBoundaries;
-using AutoMapper;
 using GeoJSON.Net.Feature;
-using ADAPT.DTOs.AutoMapperProfiles;
-using ADAPT.DTOs.Logistics;
 using AgGateway.ADAPT.ApplicationDataModel.ADM;
 using AgGateway.ADAPT.ApplicationDataModel.Logistics;
 using WorkRecordPlugin.Mappers.GeoJson;
@@ -22,30 +19,9 @@ namespace WorkRecordPlugin.Mappers
 
 		public FieldBoundaryMapper(PluginProperties properties, ApplicationDataModel dataModel = null)
 		{
-			var config = new MapperConfiguration(cfg => {
-				cfg.AddProfile<WorkRecordDtoProfile>();
-			});
-
-			config.CreateMapper();
 			_properties = properties;
 			_dataModel = dataModel;
 		}
-
-		#region Export_old
-		public List<Feature> Map(IEnumerable<FieldBoundary> fieldBoundaries, FieldDto fieldDto)
-		{
-			List<Feature> fieldBoundaryDtos = new List<Feature>();
-			foreach (var fieldBoundary in fieldBoundaries)
-			{
-				Feature fieldBoundaryDto = Map(fieldBoundary);
-				if (fieldBoundaryDto != null)
-				{
-					fieldBoundaryDtos.Add(fieldBoundaryDto);
-				}
-			}
-			return fieldBoundaryDtos;
-		}
-		#endregion
 
 		#region Export
 		private Feature Map(FieldBoundary fieldBoundary)
@@ -164,21 +140,7 @@ namespace WorkRecordPlugin.Mappers
 		}
 		#endregion
 
-
 		#region Import
-		public FieldBoundary Map(Feature fieldBoundaryGeoJson)
-		{
-			FieldBoundary fieldBoundary = new FieldBoundary();
-			var adaptShape = FeatureMapper.Map(fieldBoundaryGeoJson);
-			if (adaptShape.GetType() == typeof(AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon))
-			{
-				fieldBoundary.SpatialData = (AgGateway.ADAPT.ApplicationDataModel.Shapes.MultiPolygon)adaptShape;
-			}
-
-			// ToDo: map properties of a fieldBoundary in GeoJson
-
-			return fieldBoundary;
-		}
 		#endregion
 	}
 }
