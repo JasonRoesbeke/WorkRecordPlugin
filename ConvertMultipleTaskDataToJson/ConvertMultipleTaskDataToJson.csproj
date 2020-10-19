@@ -60,10 +60,6 @@
     <Reference Include="AgGateway.ADAPT.Representation, Version=2.0.4.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AgGatewayADAPTFramework.2.0.4\lib\net451\AgGateway.ADAPT.Representation.dll</HintPath>
     </Reference>
-    <Reference Include="GeoJSON.Net, Version=1.1.73.0, Culture=neutral, PublicKeyToken=42c00ea87f5f14d4, processorArchitecture=MSIL">
-      <HintPath>..\packages\GeoJSON.Net.1.1.73\lib\net45\GeoJSON.Net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -129,6 +125,16 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ISOv4Plugin\ISOv4Plugin\ISOv4Plugin.csproj">
+      <Project>{29cbe37d-82ba-4278-bd83-e19787c0434d}</Project>
+      <Name>ISOv4Plugin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WorkRecordPlugin\WorkRecordPlugin.csproj">
+      <Project>{fe90da14-c110-4b19-a4d3-145d29feda16}</Project>
+      <Name>WorkRecordPlugin</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\AgGatewayADAPTFramework.2.0.4\build\AgGatewayADAPTFramework.targets" Condition="Exists('..\packages\AgGatewayADAPTFramework.2.0.4\build\AgGatewayADAPTFramework.targets')" />

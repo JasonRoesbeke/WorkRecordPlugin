@@ -135,7 +135,9 @@ namespace WorkRecordPlugin.Mappers
 							properties.Add(key, value);
 
 							if (uom != null)
+							{
 								properties.Add(key + "_Uom", uom);
+							}							
 						}
 					}
 					// add to FC

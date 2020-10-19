@@ -117,6 +117,40 @@ namespace ConvertMultipleTaskDataToJson.Conversion
 			IsInitialised = true;
 		}
 
+		public static bool Convert(IPlugin importPlugin, IPlugin exportPlugin, string importDataPath, string exportDataPath)
+		{
+			List<ApplicationDataModel> adms = new List<ApplicationDataModel>();
+
+			// Import
+			Console.WriteLine("Starting ADAPT import");
+			DateTime startTime = DateTime.Now;
+			// Check if Plugin supports the data
+			if (importPlugin.IsDataCardSupported(importDataPath))
+			{
+				adms.AddRange(importPlugin.Import(importDataPath));
+			}
+			else
+			{
+				Console.WriteLine($"ImportPlugin cannot read the data, stopping!");
+				return false;
+			}
+			TimeSpan conversionTime = DateTime.Now.Subtract(startTime);
+			Console.WriteLine($"Completed ADAPT import in {conversionTime}, imported {adms.Count} ApplicationDataModels");
+
+			// Export
+			Console.WriteLine("Starting ADAPT export");
+			startTime = DateTime.Now;
+			for (int i = 0; i < adms.Count; i++)
+			{
+				// Export for each ApplicationDataModel created
+				exportPlugin.Export(adms[i], exportDataPath);
+				Console.WriteLine($"Exported adm {i + 1} of the total {adms.Count} adms");
+			}
+			conversionTime = DateTime.Now.Subtract(startTime);
+			Console.WriteLine($"Completed ADAPT export in {conversionTime}, exported {adms.Count} ApplicationDataModel(s)");
+			return true;
+		}
+
 		public bool Convert()
 		{
 			if (!IsInitialised)

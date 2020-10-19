@@ -333,18 +333,6 @@ namespace WorkRecordPlugin
 					OperationTimelogMapper operationTimelogMapper = new OperationTimelogMapper(CustomProperties, dataModel);
 
 					// starting from workRecords --> Not doing this as some loggedData may have not been referenced in a workrecord; we want to catch all logged data in the adm
-					/* 
-					foreach (var workRecord in dataModel.Documents.WorkRecords)
-					{
-						var loggedDatas = dataModel.Documents.LoggedData.Where(ld => workRecord.LoggedDataIds.Contains(ld.Id.ReferenceId)).ToList();
-						if (loggedDatas.Any())
-						{
-							foreach (var loggedData in loggedDatas)
-							{
-							}
-						}
-					}
-					*/					
 					// starting from LoggedData
 					foreach (var loggedData in dataModel.Documents.LoggedData)
 					{

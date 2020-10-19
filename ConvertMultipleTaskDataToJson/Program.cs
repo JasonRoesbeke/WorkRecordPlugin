@@ -33,33 +33,52 @@ namespace ConvertMultipleTaskDataToJson
 
 			int count = 0;
 			int totalFolders = rootFolders.Count();
-			AdaptConverter converter;
 			foreach (var folder in rootFolders)
 			{
 				count++;
 				Console.WriteLine($"Starting ADAPT conversion for folder {Path.GetFileName(folder)} ({count}/{totalFolders})");
-				// Only ImportDataPath and ExportDataPath needed
-				var consoleParameters = new ConsoleParameters();
-				var root = Directory.GetCurrentDirectory();
-				consoleParameters.PluginsFolderPath = Path.Combine(root, "Resources\\adapt2.0.4plugins");
-				consoleParameters.ImportDataPath = folder;
-				consoleParameters.ImportPluginName = "ISOv4Plugin";
-				consoleParameters.ExportPluginName = "WorkRecordPlugin";
-				consoleParameters.ExportDataPath = exportDataPath;
-				converter = new AdaptConverter(consoleParameters);
+
+				// Selecting the plugins from the project instead of the compiled libraries to be able to debug
+				var isoxmlPlugin = new AgGateway.ADAPT.ISOv4Plugin.Plugin();
+				var geoJsonPlugin = new WorkRecordPlugin.Plugin();
 
 				try
 				{
-					if (converter.Convert())
+					if (AdaptConverter.Convert(isoxmlPlugin, geoJsonPlugin, folder, exportDataPath))
 					{
-						Console.WriteLine("Successfull ADAPT conversion");
+						Console.WriteLine($"Successfull ADAPT conversion for folder {folder}");
 						continue;
 					}
 				}
 				catch (Exception e)
 				{
-					Console.WriteLine("Exception: " + e.Message + " InnerException: " + e.InnerException?.Message);
+					Console.WriteLine($"Exception: {e.Message} InnerException: {e.InnerException?.Message}");
 				}
+
+
+
+				//// Only ImportDataPath and ExportDataPath needed
+				//var consoleParameters = new ConsoleParameters();
+				//var root = Directory.GetCurrentDirectory();
+				//consoleParameters.PluginsFolderPath = Path.Combine(root, "Resources\\adapt2.0.4plugins");
+				//consoleParameters.ImportDataPath = folder;
+				//consoleParameters.ImportPluginName = "ISOv4Plugin";
+				//consoleParameters.ExportPluginName = "WorkRecordPlugin";
+				//consoleParameters.ExportDataPath = exportDataPath;
+				//AdaptConverter converter = new AdaptConverter(consoleParameters);
+
+				//try
+				//{
+				//	if (converter.Convert())
+				//	{
+				//		Console.WriteLine("Successfull ADAPT conversion");
+				//		continue;
+				//	}
+				//}
+				//catch (Exception e)
+				//{
+				//	Console.WriteLine("Exception: " + e.Message + " InnerException: " + e.InnerException?.Message);
+				//}
 
 
 				Console.WriteLine($"ADAPT conversion unsuccesfull for folder {Path.GetFileName(folder)}");
