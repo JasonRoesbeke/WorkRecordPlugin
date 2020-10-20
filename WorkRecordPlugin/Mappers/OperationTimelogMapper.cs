@@ -8,6 +8,7 @@ using AgGateway.ADAPT.ApplicationDataModel.Equipment;
 using WorkRecordPlugin.Mappers.GeoJson;
 using AgGateway.ADAPT.ApplicationDataModel.Representations;
 using AgGateway.ADAPT.Representation.RepresentationSystem;
+using System;
 
 namespace WorkRecordPlugin.Mappers
 {
@@ -19,8 +20,9 @@ namespace WorkRecordPlugin.Mappers
 		private Dictionary<int, string> _missingDDI = new Dictionary<int, string>   { {67, "Actual Working Width" }
 																					, {72, "Actual Volume Content" }
 																					, {75, "Actual Mass Content" }
+																					, {87, "Wet Mass Per Time Yield" }
 																					, {390, "Actual Revolutions Per Time" }
-																					};
+		};
 
 		public OperationTimelogMapper(PluginProperties properties, ApplicationDataModel dataModel = null)
 		{
@@ -57,6 +59,14 @@ namespace WorkRecordPlugin.Mappers
 		{
 			List<DeviceElementUse> deviceElementUses = GetAllSections(operation);
 			List<WorkingData> workingDatas = deviceElementUses.SelectMany(x => x.GetWorkingDatas()).ToList();   // meters
+
+			// Display representaitons for debug
+			Console.WriteLine($"Contains the following representations: ");
+			foreach (var workingData in workingDatas)
+			{
+				Console.WriteLine($"{workingData.Representation.CodeSource}: {workingData.Representation.Code}");
+			}
+			Console.WriteLine($"");
 
 			// inspired by ISOv4Plugin/Mappers/TimeLogMapper
 			List<Feature> features = new List<Feature>();

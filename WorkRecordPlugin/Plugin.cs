@@ -345,13 +345,15 @@ namespace WorkRecordPlugin
 							{
 								var operationTimelogFeatures = operationTimelogMapper.MapMultiple(operation, spatialRecords);
 
+
+
 								string fileNameL = OperationTimelogMapper.GetPrefix() + "_" + operation.OperationType + "_" + Guid.NewGuid();
 								_JsonExporter.WriteAsGeoJson(newPath, operationTimelogFeatures, fileNameL);
 							}
 						}
 					}
 
-					break;
+					break; // Default ApplyingAnonymiseValuesPer switch
 			}
 		}
 

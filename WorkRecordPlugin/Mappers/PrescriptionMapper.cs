@@ -339,15 +339,18 @@ namespace WorkRecordPlugin.Mappers
 			// Prescription, types
 			if (adaptPrescription is RasterGridPrescription)
 			{
+				Console.WriteLine($"Mapping RasterGridPrescription");
 				prescriptionFeature = Map(adaptPrescription as RasterGridPrescription);
 			}
 			else if (adaptPrescription is VectorPrescription)
 			{
+				Console.WriteLine($"Mapping VectorPrescription");
 				prescriptionFeature = Map(adaptPrescription as VectorPrescription);
 			}
 			else if (adaptPrescription is ManualPrescription)
 			{
 				// @ToDo or not to do? just log?
+				Console.WriteLine($"Mapping ManualPrescription");
 				prescriptionFeature = Map(adaptPrescription as ManualPrescription);
 			}
 			else
