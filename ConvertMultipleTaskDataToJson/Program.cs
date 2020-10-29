@@ -52,36 +52,10 @@ namespace ConvertMultipleTaskDataToJson
 				}
 				catch (Exception e)
 				{
+					Console.WriteLine($"ADAPT conversion unsuccesfull for folder {Path.GetFileName(folder)}");
 					Console.WriteLine($"Exception: {e.Message} InnerException: {e.InnerException?.Message}");
 				}
 
-
-
-				//// Only ImportDataPath and ExportDataPath needed
-				//var consoleParameters = new ConsoleParameters();
-				//var root = Directory.GetCurrentDirectory();
-				//consoleParameters.PluginsFolderPath = Path.Combine(root, "Resources\\adapt2.0.4plugins");
-				//consoleParameters.ImportDataPath = folder;
-				//consoleParameters.ImportPluginName = "ISOv4Plugin";
-				//consoleParameters.ExportPluginName = "WorkRecordPlugin";
-				//consoleParameters.ExportDataPath = exportDataPath;
-				//AdaptConverter converter = new AdaptConverter(consoleParameters);
-
-				//try
-				//{
-				//	if (converter.Convert())
-				//	{
-				//		Console.WriteLine("Successfull ADAPT conversion");
-				//		continue;
-				//	}
-				//}
-				//catch (Exception e)
-				//{
-				//	Console.WriteLine("Exception: " + e.Message + " InnerException: " + e.InnerException?.Message);
-				//}
-
-
-				Console.WriteLine($"ADAPT conversion unsuccesfull for folder {Path.GetFileName(folder)}");
 			}
 			Console.WriteLine($"ADAPT conversion succesfull for folders in {importDataPath}");
 			WaitForUserInputThenExit();
