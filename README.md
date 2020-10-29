@@ -1,24 +1,23 @@
-# ADAPT plugin that exports all possible geospatial data into GeoJson
+# GeoJSON ADAPT plugin that writes Geospatial data into a JSON file and structered as GeoJSON
 
 - Exporting the following geospatial data:
 - [X] Field Boundaries
-- [ ] Headlands
-- [ ] Guidance Pattern AB line
+- [X] Headlands
+- [X] Guidance Pattern AB line
 - [ ] Guidance Pattern Multi AB line
-- [ ] Guidance Pattern A heading / A Plus
-- [ ] Guidance Pattern AB curve
-- [ ] Vector Prescriptions
-- [ ] Grid Prescriptions
-- [ ] Logged Data
+- [X] Guidance Pattern A heading / A Plus
+- [X] Guidance Pattern AB curve
+- [X] Vector Prescriptions
+- [X] Grid Prescriptions
+- [X] Logged Data
 
 - Features
-- [x] Data anonymization option
-  - Currently Data is NOT truly anonymised, e.g.: 
-    - Timestamps are not changed
-    - Distance of moving coordinates of spatial records is randomly chosen between 30 km and 80 km but this may not be enough!
+- [ ] Data anonymization option
+- [X] Working with ISOv4Plugin
+
 
 To Do:
-- [ ] Fully ISOv4Plugin Support
+
 - [ ] Import!
 
   
